@@ -260,7 +260,7 @@ export default function CareerCommandCenterV9() {
   }, [filteredData, selectedCountry]);
 
   return (
-    <div className="flex w-full min-h-screen md:h-screen bg-slate-950 text-slate-200 font-sans md:overflow-hidden flex-col md:flex-row relative">
+    <div className="w-full h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden flex flex-col md:flex-row relative">
       
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none z-0"></div>
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_800px_at_50%_-200px,#1e293b,transparent)] z-0 pointer-events-none"></div>
@@ -270,7 +270,7 @@ export default function CareerCommandCenterV9() {
       
       <div className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/80 backdrop-blur-xl border-r border-white/10 transition-transform duration-300 md:relative md:translate-x-0 shrink-0
-        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl md:h-full
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl
       `}>
         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-gradient-to-r from-slate-900 to-slate-800 shrink-0">
           <div className="flex items-center gap-2 text-cyan-400 font-bold tracking-wider">
@@ -345,7 +345,7 @@ export default function CareerCommandCenterV9() {
       </div>
 
       {/* --- ANA İÇERİK --- */}
-      <div className="flex-1 flex flex-col min-w-0 md:h-full z-10 relative">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden z-10 relative">
         
         {/* Header - Sabit */}
         <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
@@ -373,11 +373,11 @@ export default function CareerCommandCenterV9() {
         </header>
 
         {/* İçerik Gövdesi - Kaydırılabilir Alanlar Burası */}
-        <main className="flex-1 flex md:overflow-hidden relative flex-col md:flex-row">
+        <main className="flex-1 flex overflow-hidden relative">
           
           {/* 1. SÜTUN: LİSTE (Kaydırılabilir) */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth min-w-0 border-r border-white/5 pb-20">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth min-w-0 border-r border-white/5">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 pb-20">
               {filteredData.map(country => (
                 <div 
                   key={country.id}
@@ -425,7 +425,8 @@ export default function CareerCommandCenterV9() {
           
           {/* 2. SÜTUN: ORTA PANEL (Kaydırılabilir) */}
           {selectedCountry && (
-             <div className="hidden 2xl:flex w-[320px] flex-col p-4 bg-slate-900/30 backdrop-blur-sm border-l border-white/5 shrink-0 overflow-y-auto pb-20">
+             <div className="hidden 2xl:flex w-[320px] flex-col bg-slate-900/30 backdrop-blur-sm border-l border-white/5 shrink-0 overflow-hidden">
+               <div className="overflow-y-auto p-4 h-full">
                <h3 className="text-xs font-bold text-white mb-4 flex items-center gap-2 border-b border-white/10 pb-2 uppercase tracking-wider sticky top-0 bg-slate-900/90 z-10 py-2 -mt-2">
                  <Activity className="text-yellow-400" size={14} />
                  Taktiksel Destek
@@ -482,8 +483,6 @@ export default function CareerCommandCenterV9() {
                </div>
              </div>
           )}
-
-          {/* 3. SÜTUN: SAĞ DETAY (Kaydırılabilir) */}
           {selectedCountry && (
             <div className="fixed inset-0 z-40 md:static md:z-auto md:w-[480px] md:border-l md:border-white/10 bg-slate-900/95 backdrop-blur-xl flex flex-col transition-all duration-300 shrink-0 shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
               
@@ -700,4 +699,4 @@ export default function CareerCommandCenterV9() {
       </div>
     </div>
   );
-}
+          }
