@@ -10,7 +10,7 @@ import {
 
 // --- FIREBASE ENTEGRASYONU ---
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore"; // updateDoc kaldırıldı, yerine setDoc kullanılacak
+import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 
 // Kullanıcı tarafından sağlanan sabit Firebase yapılandırması
@@ -403,10 +403,10 @@ export default function CareerCommandCenterV18() {
     await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Uygulama Ekleme Hatası:", e));
   };
 
-  const updateApplicationStatus = async (appId, newStatus) => {
+  const updateApplicationStatus = async (applicationId, newStatus) => {
     if (!user) return;
     const updatedApps = userApplications.map(app => 
-      (app.id === appId || app.id.toString() === appId) ? { ...app, status: newStatus } : app
+      (app.id === applicationId || app.id.toString() === applicationId) ? { ...app, status: newStatus } : app
     );
     setUserApplications(updatedApps);
     
@@ -415,9 +415,9 @@ export default function CareerCommandCenterV18() {
     await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Durum Güncelleme Hatası:", e));
   };
 
-  const deleteApplication = async (appId) => {
+  const deleteApplication = async (applicationId) => {
     if (!user) return;
-    const updatedApps = userApplications.filter(app => app.id !== appId);
+    const updatedApps = userApplications.filter(app => app.id !== applicationId);
     setUserApplications(updatedApps);
     
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
