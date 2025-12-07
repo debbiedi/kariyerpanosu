@@ -8,7 +8,7 @@ import {
   Linkedin, Cloud, Check, Loader2, Edit3
 } from 'lucide-react';
 
-// --- FIREBASE BAĞLANTISI ---
+// --- FIREBASE ENTEGRASYONU ---
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, signInAnonymously } from "firebase/auth";
@@ -131,7 +131,7 @@ const allCountries = [
   {
     id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik'], salary: '¥4M+', desc: 'Teknoloji devi.', strategy: 'MEXT bursu.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat', postGrad: 'İş bulana kadar', topUnis: ['Tokyo Tech'], note: 'Özel izin.' }
   },
-  {
+   {
     id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7', tags: ['Samsung'], salary: '₩40M+', desc: 'Samsung, LG.', strategy: 'GKS bursu.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20 Saat', postGrad: '2 Yıl', topUnis: ['KAIST'], note: '6 aydan sonra.' }
   }
 ];
@@ -146,8 +146,8 @@ const engineerRoles = [
 ];
 
 const skillFocusData = [
-    { icon: Cpu, title: 'Embedded C', detail: 'STM32, ESP32, Bare Metal sürücü yazımı.' },
-    { icon: Code, title: 'RTOS', detail: 'FreeRTOS, Task, Queue, Semaphore kullanımı.' },
+    { icon: Cpu, title: 'Embedded C', detail: 'STM32, ESP32, Bare Metal sürücü.' },
+    { icon: Code, title: 'RTOS', detail: 'FreeRTOS, Task, Queue yönetimi.' },
     { icon: Activity, title: 'Protokoller', detail: 'CAN, I2C, SPI, UART, MQTT.' },
     { icon: AlertTriangle, title: 'Bonus', detail: 'Python (analiz) veya React (arayüz).' },
 ];
@@ -179,9 +179,9 @@ const projectIdeas = {
   ]
 };
 
-export default function CareerCommandCenterV12() {
+export default function CareerCommandCenterV13() {
   const [activeTab, setActiveTab] = useState('All');
-  const [selectedCountry, setSelectedCountry] = useState(null); 
+  const [selectedCountry, setSelectedCountry] = useState(allCountries[0]); // BAŞLANGIÇTA SEÇİLİ (Boş ekran yok)
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('career');
   const [selectedRole, setSelectedRole] = useState(engineerRoles[0].title); 
@@ -246,27 +246,18 @@ export default function CareerCommandCenterV12() {
       return matchTab && matchSearch;
     });
   }, [activeTab, searchTerm]);
-  
-  // OTO-SEÇİM: Boşluk sorununu çözen kısım
-  useEffect(() => {
-      if (filteredData.length > 0 && (!selectedCountry || !filteredData.find(c => c.id === selectedCountry.id))) {
-          setSelectedCountry(filteredData[0]);
-      } else if (filteredData.length === 0) {
-          setSelectedCountry(null);
-      }
-  }, [filteredData, selectedCountry]);
 
   return (
     <div className="flex w-full h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden flex-col md:flex-row relative">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none z-0"></div>
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_800px_at_50%_-200px,#1e293b,transparent)] z-0 pointer-events-none"></div>
 
-      {/* SIDEBAR */}
+      {/* 1. SÜTUN: SIDEBAR (SABİT GENİŞLİK) */}
       {mobileMenuOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/80 backdrop-blur-xl border-r border-white/10 transition-transform duration-300 md:relative md:translate-x-0 shrink-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl h-full`}>
         <div className="p-4 border-b border-white/10 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2 text-cyan-400 font-bold tracking-wider">
-            <Zap size={20} fill="currentColor" /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">KARİYER-V12</span>
+            <Zap size={20} fill="currentColor" /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">KARİYER-V13</span>
           </div>
           <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-slate-400"><X size={20} /></button>
         </div>
@@ -294,7 +285,7 @@ export default function CareerCommandCenterV12() {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* 2. & 3. SÜTUNLAR: İÇERİK ALANI */}
       <div className="flex-1 flex flex-col min-w-0 h-full z-10 relative">
         <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-3 w-full max-w-md">
@@ -308,176 +299,150 @@ export default function CareerCommandCenterV12() {
         </header>
 
         <main className="flex-1 flex overflow-hidden relative">
-          {/* LIST */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth min-w-0 border-r border-white/5 pb-20">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          {/* 2. SÜTUN: LİSTE (SABİT GENİŞLİK) */}
+          <div className="w-[380px] border-r border-white/5 flex flex-col shrink-0 bg-slate-900/30">
+             <div className="p-4 border-b border-white/5 text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between">
+                <span>Sonuçlar ({filteredData.length})</span>
+             </div>
+             <div className="flex-1 overflow-y-auto p-4 scroll-smooth space-y-3">
               {filteredData.map(country => (
-                <div key={country.id} onClick={() => setSelectedCountry(country)} className={`group relative p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${selectedCountry?.id === country.id ? 'bg-slate-800/80 border-cyan-500/50 shadow-[0_0_30px_-10px_rgba(6,182,212,0.3)]' : 'bg-slate-900/40 border-white/5 hover:border-cyan-500/30'}`}>
+                <div key={country.id} onClick={() => setSelectedCountry(country)} className={`group relative p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedCountry?.id === country.id ? 'bg-slate-800 border-cyan-500/50 shadow-lg' : 'bg-slate-900/40 border-white/5 hover:bg-slate-800/60'}`}>
                   <div className="flex justify-between items-start mb-2">
-                    <div><h3 className={`text-base font-bold transition-colors ${selectedCountry?.id === country.id ? 'text-cyan-400' : 'text-slate-200 group-hover:text-white'}`}>{country.name}</h3><div className="text-xs text-slate-500 flex items-center gap-1.5 mt-1"><MapPin size={12} className={selectedCountry?.id === country.id ? 'text-cyan-500' : ''} /> {country.region}</div></div>
-                    <div className="flex gap-1 mt-1">{[1,2,3,4,5].map(bar => (<div key={bar} className={`w-1 h-3 rounded-full transition-all duration-500 ${(country.difficulty / 20) >= bar ? (country.difficulty > 70 ? 'bg-red-500' : country.difficulty > 40 ? 'bg-yellow-500' : 'bg-emerald-500') : 'bg-slate-800'}`}/>))}</div>
+                    <div><h3 className={`text-sm font-bold ${selectedCountry?.id === country.id ? 'text-cyan-400' : 'text-slate-200'}`}>{country.name}</h3><div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5"><MapPin size={10} /> {country.region}</div></div>
+                    <div className="flex gap-0.5">{[1,2,3,4,5].map(bar => (<div key={bar} className={`w-1 h-2.5 rounded-full ${(country.difficulty / 20) >= bar ? (country.difficulty > 70 ? 'bg-red-500' : 'bg-emerald-500') : 'bg-slate-800'}`}/>))}</div>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-950/50 border border-white/10 text-slate-300">{country.visa}</span>
-                    {country.education.workRights.includes('Limitsiz') && (<span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1"><CheckCircle2 size={10} /> Full-Work</span>)}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-slate-950/50 border border-white/10 text-slate-400">{country.visa}</span>
+                    {country.education.workRights.includes('Limitsiz') && (<span className="px-2 py-0.5 rounded text-[10px] bg-emerald-900/30 text-emerald-400 border border-emerald-500/20 flex items-center gap-1"><CheckCircle2 size={10} /> Full-Work</span>)}
                   </div>
-                  {userNotes[country.id] && (<div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.8)] animate-pulse" />)}
+                  {userNotes[country.id] && (<div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />)}
                 </div>
               ))}
-            </div>
+             </div>
           </div>
-          
-          {/* MIDDLE - RESPONSIVE HIDDEN ON SMALL SCREENS */}
-          {selectedCountry && (
-             <div className="hidden 2xl:flex w-[320px] flex-col p-4 bg-slate-900/30 backdrop-blur-sm border-l border-white/5 shrink-0 overflow-y-auto">
-               <h3 className="text-xs font-bold text-white mb-4 flex items-center gap-2 border-b border-white/10 pb-2 uppercase tracking-wider sticky top-0 bg-slate-900/90 z-10 py-2 -mt-2"><Activity className="text-yellow-400" size={14} /> Taktiksel Destek</h3>
-               <div className="mb-6">
-                 <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-2"><Users size={10} /> Network</h4>
-                 <div className="space-y-2">
-                   <button onClick={() => performNetworkSearch('alumni', selectedCountry)} className="w-full bg-slate-800 hover:bg-slate-700 border border-white/10 p-2.5 rounded-xl flex items-center gap-3 transition-all group text-left">
-                     <div className="p-1.5 bg-blue-900/30 text-blue-400 rounded-lg group-hover:text-white transition-colors"><Linkedin size={14}/></div>
-                     <div><div className="text-xs font-bold text-slate-200 group-hover:text-white">Türk Mühendisleri</div><div className="text-[9px] text-slate-500">{selectedCountry.name}</div></div>
-                   </button>
-                   <button onClick={() => performNetworkSearch('recruiter', selectedCountry)} className="w-full bg-slate-800 hover:bg-slate-700 border border-white/10 p-2.5 rounded-xl flex items-center gap-3 transition-all group text-left">
-                     <div className="p-1.5 bg-purple-900/30 text-purple-400 rounded-lg group-hover:text-white transition-colors"><Search size={14}/></div>
-                     <div><div className="text-xs font-bold text-slate-200 group-hover:text-white">İşe Alımcılar</div><div className="text-[9px] text-slate-500">Recruiters</div></div>
-                   </button>
-                 </div>
-               </div>
-               <div>
-                 <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-2 flex items-center gap-2"><Lightbulb size={10} /> Projeler</h4>
-                 <div className="bg-slate-950/50 rounded-xl border border-white/10 p-3">
-                    <div className="text-[9px] text-cyan-500 font-bold mb-2 uppercase tracking-wide border-b border-white/5 pb-1 truncate">{selectedRole}</div>
-                    <div className="space-y-3">
-                      {(projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"]).map((idea, i) => (
-                        <div key={i} className="flex gap-2 items-start">
-                           <div className="mt-0.5 p-1 bg-yellow-500/10 rounded text-yellow-500 shrink-0"><Code size={10}/></div>
-                           <div><div className="text-[11px] font-bold text-slate-200 leading-tight">{idea.title}</div><div className="text-[10px] text-slate-500 leading-relaxed mt-0.5">{idea.desc}</div></div>
-                        </div>
-                      ))}
-                    </div>
-                 </div>
-               </div>
-             </div>
-          )}
 
-          {/* DETAIL - RESPONSIVE WIDTH */}
-          {selectedCountry && (
-            <div className="fixed inset-0 z-40 md:static md:z-auto w-full md:w-[450px] lg:w-[450px] xl:w-[500px] md:border-l md:border-white/10 bg-slate-900/95 backdrop-blur-xl flex flex-col transition-all duration-300 shrink-0 shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
-              <div className="relative h-48 shrink-0 overflow-hidden group">
-                <div className={`absolute inset-0 bg-gradient-to-br ${selectedCountry.tier === 'Tier 1' ? 'from-emerald-900/40 via-slate-900 to-slate-900' : selectedCountry.tier === 'Tier 2' ? 'from-blue-900/40 via-slate-900 to-slate-900' : 'from-red-900/40 via-slate-900 to-slate-900'} z-0`}></div>
-                <div className="absolute -right-10 -top-10 w-64 h-64 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-colors duration-700"></div>
-                <button onClick={() => setSelectedCountry(null)} className="absolute top-6 left-6 z-20 md:hidden bg-black/50 p-2 rounded-full text-white backdrop-blur-md"><ArrowRight size={20} className="rotate-180" /></button>
-                <div className="absolute bottom-6 left-8 z-20 right-8">
-                  <div className="flex items-center gap-3 mb-2">
-                      <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${selectedCountry.tier === 'Tier 1' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : selectedCountry.tier === 'Tier 2' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30'}`}>{selectedCountry.tier}</div>
-                  </div>
-                  <h2 className="text-3xl font-bold text-white mb-4 tracking-tight drop-shadow-lg">{selectedCountry.name}</h2>
-                  <div className="flex p-1 bg-slate-950/50 backdrop-blur-md rounded-xl border border-white/10">
-                    <button onClick={() => setViewMode('career')} className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'career' ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}><Briefcase size={12} /> Profesyonel</button>
-                    <button onClick={() => setViewMode('education')} className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all duration-300 ${viewMode === 'education' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}><GraduationCap size={12} /> Akademik</button>
-                  </div>
+          {/* 3. SÜTUN: DETAY (ESNEK - KALAN ALANI DOLDURUR) */}
+          {selectedCountry ? (
+            <div className="flex-1 flex flex-col min-w-0 bg-slate-900/50 overflow-y-auto">
+              {/* Header */}
+              <div className="h-40 relative shrink-0 overflow-hidden">
+                <div className={`absolute inset-0 bg-gradient-to-br ${selectedCountry.tier === 'Tier 1' ? 'from-emerald-900/30' : 'from-blue-900/30'} to-slate-900 z-0`}></div>
+                <div className="absolute bottom-6 left-8 z-20 right-8 flex justify-between items-end">
+                   <div>
+                      <div className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-white/5 border-white/10 inline-block mb-2 text-slate-300">{selectedCountry.tier}</div>
+                      <h2 className="text-3xl font-bold text-white tracking-tight">{selectedCountry.name}</h2>
+                   </div>
+                   <div className="flex bg-slate-950/50 rounded-lg p-1 border border-white/10">
+                      <button onClick={() => setViewMode('career')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'career' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'}`}>Profesyonel</button>
+                      <button onClick={() => setViewMode('education')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'education' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>Akademik</button>
+                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-900/50 pb-20 min-h-0">
-                {viewMode === 'career' && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-2 opacity-10"><Coins size={32}/></div>
-                        <div className="text-[10px] text-slate-500 mb-1 font-bold uppercase">Yıllık Maaş</div><div className="text-base font-bold text-emerald-400">{selectedCountry.salary}</div>
-                        <div className="w-full bg-slate-700/50 h-1 mt-2 rounded-full"><div className="bg-emerald-500 h-full rounded-full" style={{width: '70%'}}></div></div>
-                      </div>
-                      <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-2 opacity-10"><BarChart3 size={32}/></div>
-                        <div className="text-[10px] text-slate-500 mb-1 font-bold uppercase">Giriş Zorluğu</div><div className={`text-base font-bold ${selectedCountry.difficulty > 50 ? 'text-red-400' : 'text-yellow-400'}`}>{selectedCountry.difficulty > 60 ? 'Yüksek' : 'Orta'}</div>
-                        <div className="w-full bg-slate-700/50 h-1 mt-2 rounded-full"><div className={`h-full rounded-full ${selectedCountry.difficulty > 50 ? 'bg-red-500' : 'bg-yellow-500'}`} style={{width: `${selectedCountry.difficulty}%`}}></div></div>
-                      </div>
+              {/* Body */}
+              <div className="p-8 space-y-8 max-w-4xl mx-auto w-full">
+                 {/* 1. Üst İstatistikler */}
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5">
+                       <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Maaş Skalası</div>
+                       <div className="text-xl font-bold text-emerald-400">{selectedCountry.salary}</div>
                     </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2 tracking-wider"><Layout size={12}/> Genel Durum</h4>
-                      <p className="text-xs text-slate-300 leading-relaxed pl-3 border-l-2 border-cyan-500/30">{selectedCountry.desc}</p>
+                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5">
+                       <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Giriş Zorluğu</div>
+                       <div className="text-xl font-bold text-white">{selectedCountry.difficulty}%</div>
                     </div>
-                    <div className="bg-gradient-to-r from-cyan-950/30 to-blue-950/30 border border-cyan-500/20 p-4 rounded-xl relative">
-                      <h4 className="text-xs font-bold text-cyan-400 mb-1 flex items-center gap-2"><Terminal size={14}/> Strateji</h4>
-                      <p className="text-[11px] text-slate-300 font-mono leading-relaxed">{selectedCountry.strategy}</p>
+                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5 col-span-2">
+                       <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Vize Stratejisi</div>
+                       <div className="text-sm text-slate-300">{selectedCountry.strategy}</div>
                     </div>
-                    <div className="border-t border-white/10 pt-6">
-                       <h4 className="text-[10px] font-bold text-slate-500 uppercase mb-3 flex items-center gap-2 tracking-wider"><Settings size={12}/> Görev Parametreleri</h4>
-                       <div className="relative mb-3 group">
-                         <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full bg-slate-950 border border-white/10 text-slate-200 text-xs rounded-xl p-3 appearance-none focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 cursor-pointer transition-all hover:bg-slate-900">
-                           {engineerRoles.map((role) => (<option key={role.title} value={role.title}>{role.label}</option>))}
-                         </select>
-                         <ChevronRight className="absolute right-3 top-3 text-slate-500 rotate-90 pointer-events-none group-hover:text-cyan-400 transition-colors" size={14} />
+                 </div>
+
+                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Sol: Detaylar */}
+                    <div className="lg:col-span-2 space-y-8">
+                       {viewMode === 'career' ? (
+                          <>
+                            <div>
+                               <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2"><Layout size={16} className="text-cyan-500"/> Genel Bakış</h4>
+                               <p className="text-sm text-slate-400 leading-relaxed bg-slate-800/30 p-4 rounded-xl border border-white/5">{selectedCountry.desc}</p>
+                            </div>
+                            <div>
+                               <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2"><Settings size={16} className="text-cyan-500"/> İş Arama Motoru</h4>
+                               <div className="bg-slate-800/30 p-5 rounded-xl border border-white/5 space-y-4">
+                                  <div>
+                                     <label className="text-xs text-slate-500 block mb-2">Hedef Pozisyon</label>
+                                     <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full bg-slate-950 border border-white/10 text-slate-200 text-sm rounded-lg p-3 outline-none">
+                                        {engineerRoles.map(r => <option key={r.title} value={r.title}>{r.label}</option>)}
+                                     </select>
+                                  </div>
+                                  <button onClick={() => performGoogleSearch(selectedCountry)} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all">
+                                     <Search size={16}/> Google'da {selectedCountry.englishName} İlanlarını Ara
+                                  </button>
+                                  <div className="grid grid-cols-2 gap-3 pt-2">
+                                     <button onClick={() => performNetworkSearch('alumni', selectedCountry)} className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs flex justify-center items-center gap-2"><Linkedin size={14}/> Türk Mühendisler</button>
+                                     <button onClick={() => performNetworkSearch('recruiter', selectedCountry)} className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs flex justify-center items-center gap-2"><Users size={14}/> İşe Alımcılar</button>
+                                  </div>
+                               </div>
+                            </div>
+                          </>
+                       ) : (
+                          <div className="space-y-4">
+                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between">
+                                <span className="text-sm text-slate-400">Eğitim Ücreti</span>
+                                <span className="text-sm font-bold text-white">{selectedCountry.education.tuition}</span>
+                             </div>
+                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between">
+                                <span className="text-sm text-slate-400">Çalışma İzni</span>
+                                <span className="text-sm font-bold text-yellow-400">{selectedCountry.education.workRights}</span>
+                             </div>
+                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5">
+                                <span className="text-sm text-slate-400 block mb-2">Öne Çıkan Üniversiteler</span>
+                                <div className="flex gap-2 flex-wrap">
+                                   {selectedCountry.education.topUnis.map(u => <span key={u} className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">{u}</span>)}
+                                </div>
+                             </div>
+                          </div>
+                       )}
+                    </div>
+
+                    {/* Sağ: Projeler & Notlar */}
+                    <div className="space-y-6">
+                       <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
+                          <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri</h4>
+                          {(projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"]).slice(0,1).map((idea, i) => (
+                             <div key={i}>
+                                <div className="text-sm font-bold text-white mb-1">{idea.title}</div>
+                                <div className="text-xs text-slate-500 leading-relaxed">{idea.desc}</div>
+                             </div>
+                          ))}
                        </div>
-                       <button onClick={() => performGoogleSearch(selectedCountry)} className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-3 px-4 rounded-xl text-xs font-bold transition-all transform hover:scale-[1.02] flex items-center justify-between shadow-xl shadow-blue-900/20 group border border-white/10">
-                          <span className="flex items-center gap-2"><div className="bg-white/20 p-1 rounded-lg"><Search size={12} /></div><span>Google'da İş Ara</span></span>
-                          <span className="text-blue-200 text-[10px] font-normal group-hover:text-white transition-colors">{selectedCountry.englishName}</span>
-                       </button>
-                    </div>
-                  </div>
-                )}
 
-                {viewMode === 'education' && (
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="space-y-3">
-                      <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5 flex justify-between items-center">
-                        <div className="flex items-center gap-2"><div className="p-1.5 bg-purple-500/20 rounded-lg text-purple-400"><Coins size={14}/></div><span className="text-[10px] font-bold text-slate-400 uppercase">Eğitim Ücreti</span></div>
-                        <div className="text-xs font-bold text-white text-right">{selectedCountry.education.tuition}</div>
-                      </div>
-                      <div className="bg-slate-800/50 p-3 rounded-xl border border-white/5 flex justify-between items-center">
-                        <div className="flex items-center gap-2"><div className="p-1.5 bg-pink-500/20 rounded-lg text-pink-400"><Clock size={14}/></div><span className="text-[10px] font-bold text-slate-400 uppercase">Çalışma İzni</span></div>
-                        <div className="text-xs font-bold text-yellow-400 text-right">{selectedCountry.education.workRights}</div>
-                      </div>
+                       <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
+                          <div className="flex justify-between items-center mb-3">
+                             <h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><Save size={14}/> Notlar</h4>
+                             {!isEditing && userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(true)} className="text-[10px] text-cyan-400"><Edit3 size={12}/></button>}
+                          </div>
+                          {isEditing || !userNotes[selectedCountry.id] ? (
+                             <div className="space-y-2">
+                                <textarea className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-300 outline-none min-h-[100px]" placeholder="Hedeflerini yaz..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} />
+                                <div className="flex gap-2">
+                                   <button onClick={handleSaveNote} disabled={isSaving} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-xs font-bold">{isSaving ? '...' : 'Kaydet'}</button>
+                                   {userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(false)} className="px-3 bg-slate-700 text-white py-2 rounded-lg text-xs">iptal</button>}
+                                </div>
+                             </div>
+                          ) : (
+                             <p className="text-xs text-slate-300 whitespace-pre-wrap cursor-pointer hover:text-white" onClick={() => setIsEditing(true)}>{userNotes[selectedCountry.id]}</p>
+                          )}
+                       </div>
                     </div>
-                    <div>
-                      <h4 className="text-[10px] font-bold text-slate-500 uppercase mb-2 flex items-center gap-2"><Building size={12}/> En İyi Okullar</h4>
-                      <div className="flex flex-wrap gap-2">{selectedCountry.education.topUnis.map(u => (<span key={u} className="text-[10px] bg-slate-950 text-slate-300 px-2 py-1.5 rounded-lg border border-white/10 hover:border-purple-500/50 transition-colors cursor-default">{u}</span>))}</div>
-                    </div>
-                    <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 p-4 rounded-xl border border-purple-500/20">
-                      <h4 className="text-[10px] font-bold text-purple-400 uppercase mb-1 flex items-center gap-2"><Award size={12}/> Mezuniyet Sonrası</h4>
-                      <p className="text-sm text-white font-bold mb-1">{selectedCountry.education.postGrad} <span className="text-xs font-normal text-slate-400">oturma izni</span></p>
-                      <p className="text-[10px] text-slate-400 italic mt-1 opacity-70">"{selectedCountry.education.note}"</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="pt-6 mt-4 border-t border-white/10">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2 tracking-wider"><Save size={12} /> Kişisel Notlar</h4>
-                    {!isEditing && userNotes[selectedCountry.id] && (<button onClick={() => setIsEditing(true)} className="text-[10px] text-cyan-400 hover:text-cyan-300 font-medium bg-cyan-950/30 px-2 py-1 rounded-full border border-cyan-500/20">Düzenle</button>)}
-                  </div>
-                  {isEditing || !userNotes[selectedCountry.id] ? (
-                    <div className="space-y-2 animate-in zoom-in-95 duration-200">
-                      <textarea className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-slate-200 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 outline-none min-h-[80px] shadow-inner" placeholder="Hedeflerini yaz..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} />
-                      <div className="flex gap-2">
-                        <button onClick={handleSaveNote} disabled={isSaving} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-2 rounded-lg text-xs font-bold shadow-lg shadow-emerald-900/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50">
-                            {isSaving ? <Loader2 size={12} className="animate-spin" /> : <><Check size={12}/> Kaydet</>}
-                        </button>
-                        {userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(false)} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg text-xs transition-all border border-white/10">İptal</button>}
-                      </div>
-                    </div>
-                  ) : (
-                    <div onClick={() => setIsEditing(true)} className="bg-slate-800/30 hover:bg-slate-800/60 border border-dashed border-slate-600 hover:border-cyan-500/50 rounded-xl p-3 text-xs text-slate-400 cursor-pointer transition-all flex flex-col items-center justify-center text-center gap-1 min-h-[60px] group">
-                      <p className="text-left w-full text-slate-300 whitespace-pre-wrap">{userNotes[selectedCountry.id]}</p>
-                    </div>
-                  )}
-                  <a href={selectedCountry.link} target="_blank" rel="noreferrer" className="mt-4 flex items-center justify-center gap-2 w-full bg-white hover:bg-slate-200 text-slate-900 py-2.5 rounded-xl font-bold text-xs transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5">Resmi Kaynağa Git <ExternalLink size={12} /></a>
-                </div>
+                 </div>
               </div>
             </div>
-          )}
-
-          {!selectedCountry && (
-             <div className="hidden md:flex flex-col items-center justify-center flex-1 bg-slate-900/50 border-l border-white/10 text-slate-600 relative z-0">
-               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.05),transparent)]"></div>
-               <Globe size={80} className="mb-6 opacity-20 animate-pulse" />
-               <p className="text-sm font-medium tracking-wide">DETAYLARI GÖRMEK İÇİN BİR HEDEF SEÇİN</p>
-             </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-slate-600"><p>Yükleniyor...</p></div>
           )}
         </main>
       </div>
     </div>
   );
-         }
+}
