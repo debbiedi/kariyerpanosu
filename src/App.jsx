@@ -10,7 +10,7 @@ import {
 
 // --- FIREBASE ENTEGRASYONU ---
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore"; // updateDoc kaldırıldı, yerine setDoc kullanılacak
 import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 
 // Kullanıcı tarafından sağlanan sabit Firebase yapılandırması
@@ -23,7 +23,8 @@ const firebaseConfig = {
   appId: "1:24937941128:web:ac7d3d38dccde96c97373d"
 };
 
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+// Vercel gibi ortamlarda __app_id tanımlı olmayabilir, bu yüzden sabit bir ID kullanmak daha güvenlidir.
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'kariyer-panosu-v1';
 
 let app, db, auth;
 try {
@@ -373,6 +374,7 @@ export default function CareerCommandCenterV18() {
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
     
     try {
+        // updateDoc yerine setDoc kullanarak dosya yoksa oluşturulmasını sağlıyoruz
         await setDoc(userDocRef, { notes: updatedNotes }, { merge: true });
         setTimeout(() => { setIsSaving(false); setIsEditing(false); }, 500);
     } catch (e) { 
@@ -397,7 +399,8 @@ export default function CareerCommandCenterV18() {
     setNewAppRole('');
     
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
-    await updateDoc(userDocRef, { applications: updatedApps }).catch(e => console.error("Uygulama Ekleme Hatası:", e));
+    // updateDoc yerine setDoc kullanarak dosya yoksa oluşturulmasını sağlıyoruz
+    await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Uygulama Ekleme Hatası:", e));
   };
 
   const updateApplicationStatus = async (appId, newStatus) => {
@@ -408,7 +411,8 @@ export default function CareerCommandCenterV18() {
     setUserApplications(updatedApps);
     
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
-    await updateDoc(userDocRef, { applications: updatedApps }).catch(e => console.error("Durum Güncelleme Hatası:", e));
+    // updateDoc yerine setDoc kullanarak dosya yoksa oluşturulmasını sağlıyoruz
+    await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Durum Güncelleme Hatası:", e));
   };
 
   const deleteApplication = async (appId) => {
@@ -417,7 +421,8 @@ export default function CareerCommandCenterV18() {
     setUserApplications(updatedApps);
     
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
-    await updateDoc(userDocRef, { applications: updatedApps }).catch(e => console.error("Uygulama Silme Hatası:", e));
+    // updateDoc yerine setDoc kullanarak dosya yoksa oluşturulmasını sağlıyoruz
+    await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Uygulama Silme Hatası:", e));
   };
 
   useEffect(() => {
