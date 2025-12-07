@@ -5,15 +5,14 @@ import {
   Terminal, Shield, Zap, ChevronRight, Save, ExternalLink, 
   Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity,
   Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb,
-  Linkedin, Cloud, Check, Loader2, Edit3
+  Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle
 } from 'lucide-react';
 
 // --- FIREBASE ENTEGRASYONU ---
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import { getAuth, signInAnonymously } from "firebase/auth";
 
-// SENİN FIREBASE AYARLARIN
 const firebaseConfig = {
   apiKey: "AIzaSyDepkmn5L-OZXdT8mKf9sHDqhBoJNSI90o",
   authDomain: "kariyerpanosu.firebaseapp.com",
@@ -32,89 +31,16 @@ try {
     console.error("Firebase Hatası:", e);
 }
 
-// --- DÜZELTME: EKSİK OLAN TARİH AYARLARI EKLENDİ ---
-const HEDEF_TARIH = '2026-02-01'; // Mezuniyet Tarihi
-const BASLANGIC_TARIHI = '2022-09-15'; // Başlangıç Tarihi
-
-// --- VERİTABANI (GENİŞLETİLMİŞ TAM LİSTE) ---
+// --- VERİTABANI (TÜM LİSTE) ---
 const allCountries = [
-  // --- KUZEY AMERİKA ---
-  {
-    id: 'us', name: 'ABD', englishName: 'United States', region: 'Amerika', 
-    tier: 'Tier 3', difficulty: 95, visa: 'F1 Visa', tags: ['Tech Giant', 'Maksimum Maaş'], salary: '$90k - $120k',
-    desc: 'Teknolojinin kalbi. En yüksek maaşlar burada ama rekabet ve vize süreci (Lottery) en zor olanıdır.',
-    strategy: 'Tek gerçekçi yol: STEM Master yapıp 3 yıl çalışma izni (OPT) almak.',
-    link: 'https://educationusa.state.gov/', 
-    education: { tuition: '$30k - $60k', workRights: '20 Saat (Kampüs İçi)', postGrad: '3 Yıl (STEM OPT)', topUnis: ['MIT', 'Stanford', 'Georgia Tech'], note: 'Kampüs dışı çalışma izni çok kısıtlıdır.' }
-  },
-  {
-    id: 'ca', name: 'Kanada', englishName: 'Canada', region: 'Amerika', 
-    tier: 'Tier 2', difficulty: 55, visa: 'Express Entry', tags: ['Göçmen Dostu', 'AI'], salary: 'CAD 65k - 90k',
-    desc: 'Toronto ve Vancouver büyük teknoloji merkezleridir. Göçmenlik politikaları şeffaftır.',
-    strategy: 'Master sonrası PGWP (Post-Grad Work Permit) almak vatandaşlığa giden en net yoldur.',
-    link: 'https://www.canada.ca/', 
-    education: { tuition: 'CAD 20k - 40k', workRights: '24 Saat/Hafta', postGrad: '3 Yıl (PGWP)', topUnis: ['U of Toronto', 'Waterloo'], note: 'Eğitim süresi kadar çalışma izni verilir.' }
-  },
-
-  // --- ASYA KAPLANLARI ---
-  {
-    id: 'sg', name: 'Singapur', englishName: 'Singapore', region: 'Asya', 
-    tier: 'Tier 2', difficulty: 70, visa: 'Employment Pass', tags: ['Fintech', 'Semicon'], salary: 'SGD 5k - 7k',
-    desc: 'Asya\'nın teknoloji ve finans başkenti. Çok güvenli, vergi oranları düşük. Yarı iletken sektörü güçlü.',
-    strategy: 'EP (Employment Pass) için yüksek maaş teklifi gerekir. İngilizce ana dildir.',
-    link: 'https://www.mom.gov.sg/passes-and-permits/employment-pass', 
-    education: { tuition: 'SGD 30k+', workRights: '16 Saat/Hafta', postGrad: '1 Yıl (LTVP)', topUnis: ['NUS', 'NTU'], note: 'NUS dünyanın en iyi üniversitelerindendir.' }
-  },
-  {
-    id: 'tw', name: 'Tayvan', englishName: 'Taiwan', region: 'Asya', 
-    tier: 'Tier 2', difficulty: 50, visa: 'Gold Card', tags: ['TSMC', 'Donanım'], salary: 'TWD 60k - 80k',
-    desc: 'Dünyanın çip üretim merkezi (TSMC). Donanım mühendisleri için cennet. "Gold Card" vizesi çok avantajlı.',
-    strategy: 'Employment Gold Card başvurusu yap. Mühendislikte İngilizce yeterli.',
-    link: 'https://goldcard.nat.gov.tw/en/', 
-    education: { tuition: 'TWD 100k', workRights: '20 Saat/Hafta', postGrad: '1-3 Yıl', topUnis: ['NTU', 'NTHU'], note: 'Burs imkanları geniştir.' }
-  },
-  {
-    id: 'hk', name: 'Hong Kong', englishName: 'Hong Kong', region: 'Asya', 
-    tier: 'Tier 3', difficulty: 65, visa: 'Top Talent Pass', tags: ['Fintech', 'Ticaret'], salary: 'HKD 25k+',
-    desc: 'Finans ve lojistik teknoloji merkezi. İngilizce yaygın. Çin pazarına açılan kapı.',
-    strategy: 'Top Talent Pass Scheme (TTPS) ile iyi üniversite mezunları doğrudan gidebilir.',
-    link: 'https://www.immd.gov.hk/eng/services/visas/TTPS.html', 
-    education: { tuition: 'HKD 140k', workRights: 'Kısıtlı', postGrad: '12 Ay (IANG)', topUnis: ['HKUST', 'HKU'], note: 'Mezuniyet sonrası kalmak kolaydır (IANG).' }
-  },
-  {
-    id: 'il', name: 'İsrail', englishName: 'Israel', region: 'Asya', 
-    tier: 'Tier 2', difficulty: 60, visa: 'B-1 Expert', tags: ['Siber Güvenlik', 'Startup'], salary: 'ILS 15k - 25k',
-    desc: '"Startup Nation". Siber güvenlik, yapay zeka ve tarım teknolojilerinde dünya lideri.',
-    strategy: 'Tel Aviv\'deki startuplara odaklan. Güvenlik soruşturmaları uzun sürebilir.',
-    link: 'https://www.gov.il/en', 
-    education: { tuition: '$10k - $15k', workRights: 'Kısıtlı', postGrad: 'Zor', topUnis: ['Technion', 'Tel Aviv U'], note: 'Technion mühendislikte çok prestijlidir.' }
-  },
-  {
-    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik', 'Disiplin'], salary: '¥4M+', desc: 'Teknoloji devi. MEXT bursu ile gitmek en mantıklısı.', strategy: 'Daijob sitesini kullan.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat', postGrad: 'İş bulana kadar', topUnis: ['Tokyo Tech'], note: 'Özel izinle çalışabilirsin.' }
-  },
-  {
-    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7 Visa', tags: ['Samsung', 'Batarya'], salary: '₩40M+', desc: 'Samsung, LG, Hyundai. GKS bursu çok popüler.', strategy: 'GKS bursuna başvur.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS ile Bedava', workRights: '20 Saat', postGrad: '2 Yıl', topUnis: ['KAIST'], note: '6 aydan sonra çalışma izni.' }
-  },
-
-  // --- OKYANUSYA ---
-  {
-    id: 'au', name: 'Avustralya', englishName: 'Australia', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Subclass 482', tags: ['Yüksek Yaşam', 'Maden'], salary: 'AUD 80k+', desc: 'Mühendisler için "Skilled Occupation List" açık.', strategy: 'Master (Subclass 500) en iyi giriş.', link: 'https://immi.homeaffairs.gov.au/', education: { tuition: 'AUD 30k+', workRights: '24 Saat', postGrad: '2-4 Yıl', topUnis: ['UNSW', 'Melbourne'], note: 'Tatillerde full-time.' }
-  },
-  {
-    id: 'nz', name: 'Yeni Zelanda', englishName: 'New Zealand', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Green List', tags: ['Doğa', 'Tarım Tek.'], salary: 'NZD 70k+', desc: 'Mühendislik "Green List"te. İş-yaşam dengesi harikadır.', strategy: 'Doğrudan iş teklifi almaya çalış.', link: 'https://www.immigration.govt.nz/', education: { tuition: 'NZD 30k+', workRights: '20 Saat', postGrad: '3 Yıl', topUnis: ['Auckland Univ'], note: 'Açık çalışma izni verilir.' }
-  },
-
-  // --- BATI AVRUPA ---
+  // TIER 1 & POPÜLER
   {
     id: 'uk', name: 'Birleşik Krallık', englishName: 'United Kingdom', region: 'Avrupa', 
     tier: 'Tier 2', difficulty: 60, visa: 'Skilled Worker', tags: ['Fintech', 'Savunma'], salary: '£35k - £55k',
-    desc: 'Londra finans ve teknoloji başkenti. "High Potential Individual" vizesi fırsattır.',
+    desc: 'Londra finans ve teknoloji başkenti. "High Potential Individual" vizesi büyük fırsattır.',
     strategy: 'HPI vizesini veya "Graduate Visa" veren bir Master programını hedefle.',
     link: 'https://www.gov.uk/browse/visas-immigration/work-visas',
-    education: { tuition: '£15k - £25k / Yıl', workRights: '20 Saat', postGrad: '2 Yıl', topUnis: ['Imperial', 'Manchester'], note: 'Mezuniyet sonrası 2 yıl şartsız çalışma izni.' }
-  },
-  {
-    id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech HQ'], salary: '€40k - €60k', desc: 'Google, Meta Avrupa merkezleri. İngilizce konuşulan tek AB ülkesi.', strategy: 'Critical Skills vizesine başvur.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k - €18k', workRights: '20 Saat', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' }
+    education: { tuition: '£15k - £25k', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Imperial', 'Manchester'], note: 'Mezuniyet sonrası 2 yıl izin.' }
   },
   {
     id: 'de', name: 'Almanya', englishName: 'Germany', region: 'Avrupa', 
@@ -122,93 +48,91 @@ const allCountries = [
     desc: 'Mühendislik devi. TU9 üniversiteleri ücretsizdir.',
     strategy: 'İş: Chancenkarte. Master: Not ortalaman 2.7 üzeriyse başvur.',
     link: 'https://www.daad.de/en/',
-    education: { tuition: 'Ücretsiz', workRights: '20 Saat', postGrad: '18 Ay', topUnis: ['TU Munich', 'RWTH Aachen'], note: 'Werkstudent yaygındır.' }
+    education: { tuition: 'Ücretsiz', workRights: '20 Saat/Hafta', postGrad: '18 Ay', topUnis: ['TU Munich', 'RWTH Aachen'], note: 'Werkstudent yaygındır.' }
   },
   {
-    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık', 'Enerji'], salary: '€40k - €55k', desc: 'Airbus, Thales, Schneider Electric.', strategy: 'Mühendislikte İngilizce rol çok ama sosyal hayat için Fransızca şart.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243 - €3.7k', workRights: 'Yıllık 964 Saat', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuzdur.' }
+    id: 'us', name: 'ABD', englishName: 'United States', region: 'Amerika', 
+    tier: 'Tier 3', difficulty: 95, visa: 'F1 Visa', tags: ['Tech Giant'], salary: '$90k - $120k',
+    desc: 'Teknolojinin kalbi. En yüksek maaşlar burada.',
+    strategy: 'STEM Master yapıp 3 yıl çalışma izni (OPT) al.',
+    link: 'https://educationusa.state.gov/', 
+    education: { tuition: '$30k+', workRights: '20 Saat (Kampüs İçi)', postGrad: '3 Yıl (STEM OPT)', topUnis: ['MIT', 'Stanford'], note: 'OPT hayati önem taşır.' }
+  },
+  {
+    id: 'ca', name: 'Kanada', englishName: 'Canada', region: 'Amerika', 
+    tier: 'Tier 2', difficulty: 55, visa: 'Express Entry', tags: ['Göçmen Dostu'], salary: 'CAD 65k - 90k',
+    desc: 'Toronto ve Vancouver teknoloji merkezleri. Göçmenlik politikaları şeffaf.',
+    strategy: 'Master sonrası PGWP (Çalışma izni) almak vatandaşlığa götürür.',
+    link: 'https://www.canada.ca/', 
+    education: { tuition: 'CAD 20k+', workRights: '24 Saat/Hafta', postGrad: '3 Yıl (PGWP)', topUnis: ['U of Toronto', 'Waterloo'], note: 'Eğitim süresi kadar izin.' }
+  },
+  {
+    id: 'ch', name: 'İsviçre', englishName: 'Switzerland', region: 'Avrupa', 
+    tier: 'Tier 3', difficulty: 90, visa: 'Quota', tags: ['Maksimum Maaş'], salary: 'CHF 85k+',
+    desc: 'Avrupa\'nın en yüksek maaşları. Google, ABB ve Roche burada.',
+    strategy: 'Doğrudan girmek zordur. Almanya üzerinden geçiş yap.',
+    link: 'https://www.sem.admin.ch/', 
+    education: { tuition: 'CHF 1.5k', workRights: '15 Saat/Hafta', postGrad: '6 Ay', topUnis: ['ETH Zurich', 'EPFL'], note: 'Okul ucuz, yaşam pahalı.' }
   },
   {
     id: 'nl', name: 'Hollanda', englishName: 'Netherlands', region: 'Avrupa', 
-    tier: 'Tier 2', difficulty: 65, visa: 'Orientation Year', tags: ['High Tech', 'ASML'], salary: '€50k - €70k',
+    tier: 'Tier 2', difficulty: 65, visa: 'Orientation Year', tags: ['High Tech'], salary: '€50k - €70k',
     desc: 'ASML ve Philips burada. Teknoloji çok ileri.',
     strategy: 'Top 200 üniversite mezunuysan "Orientation Year" alabilirsin.',
     link: 'https://www.studyinnl.org/',
-    education: { tuition: '€15k+', workRights: '16 Saat', postGrad: '1 Yıl', topUnis: ['TU Delft', 'Eindhoven'], note: 'Part-time iş zordur.' }
+    education: { tuition: '€15k+', workRights: '16 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Delft', 'Eindhoven'], note: 'Part-time iş zordur.' }
   },
   {
-    id: 'be', name: 'Belçika', englishName: 'Belgium', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Single Permit', tags: ['Mikroelektronik'], salary: '€40k - €55k', desc: 'IMEC (Yarı iletken ar-ge merkezi) burada.', strategy: 'IMEC stajlarına başvur.', link: 'https://www.international.socialsecurity.be/', education: { tuition: '€1k - €4k', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['KU Leuven'], note: 'KU Leuven çok iyidir.' }
+    id: 'au', name: 'Avustralya', englishName: 'Australia', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Subclass 482', tags: ['Yüksek Yaşam'], salary: 'AUD 80k+', desc: 'Mühendisler için "Skilled Occupation List" açık.', strategy: 'Master (Subclass 500) en iyi giriş.', link: 'https://immi.homeaffairs.gov.au/', education: { tuition: 'AUD 30k+', workRights: '24 Saat/Hafta', postGrad: '2-4 Yıl', topUnis: ['UNSW', 'Melbourne'], note: 'Tatillerde full-time.' }
+  },
+  // --- DİĞERLERİ ---
+  {
+    id: 'pl', name: 'Polonya', englishName: 'Poland', region: 'Avrupa', tier: 'Tier 1', difficulty: 20, visa: 'Work Permit', tags: ['Yazılım'], salary: '€25k - €40k', desc: 'Avrupa\'nın yazılım fabrikası. Vize kolay.', strategy: 'Master yaparken full-time çalışabilirsin.', link: 'https://study.gov.pl/', education: { tuition: '€2k - €4k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['Warsaw Tech'], note: 'İzin gerekmez.' }
   },
   {
-    id: 'lu', name: 'Lüksemburg', englishName: 'Luxembourg', region: 'Avrupa', tier: 'Tier 3', difficulty: 70, visa: 'Blue Card', tags: ['Uzay', 'Finans'], salary: '€60k+', desc: 'Çok zengin ve küçük. Uzay madenciliği ve uydu (SES) sektörü var.', strategy: 'Yüksek maaşlı iş bulmak gerekir.', link: 'https://guichet.public.lu/', education: { tuition: '€400 / Dönem', workRights: '15 Saat', postGrad: '9 Ay', topUnis: ['Univ of Luxembourg'], note: 'Çok dilli.' }
+    id: 'it', name: 'İtalya', englishName: 'Italy', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'DSU Bursu', tags: ['Burs', 'Otomotiv'], salary: '€28k - €35k', desc: 'DSU Bursu ile bedava okuyup cep harçlığı al.', strategy: 'Torino (Fiat) ideal.', link: 'https://www.universitaly.it/', education: { tuition: 'Bursla Bedava', workRights: '20 Saat/Hafta', postGrad: '12 Ay', topUnis: ['Politecnico di Milano'], note: 'Burslar Eylülde.' }
   },
-  {
-    id: 'ch', name: 'İsviçre', englishName: 'Switzerland', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Quota', tags: ['Maksimum Maaş'], salary: 'CHF 85k+', desc: 'En yüksek maaşlar. AB dışı kota var.', strategy: 'Almanya üzerinden geçiş yap.', link: 'https://www.sem.admin.ch/', education: { tuition: 'CHF 1.5k', workRights: '15 Saat', postGrad: '6 Ay', topUnis: ['ETH Zurich'], note: 'Okul ucuz, yaşam pahalı.' }
-  },
-  {
-    id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri var.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' }
-  },
-
-  // --- İSKANDİNAVYA & BALTIK ---
   {
     id: 'se', name: 'İsveç', englishName: 'Sweden', region: 'Kuzey', tier: 'Tier 2', difficulty: 45, visa: 'Job Seeker', tags: ['İnovasyon'], salary: '40k SEK', desc: 'Ericsson ve Volvo burada.', strategy: 'İş arama vizesi var.', link: 'https://studyinsweden.se/', education: { tuition: '€10k+', workRights: 'Limitsiz', postGrad: '12 Ay', topUnis: ['KTH'], note: 'Sınır yok.' }
   },
   {
-    id: 'no', name: 'Norveç', englishName: 'Norway', region: 'Kuzey', tier: 'Tier 2', difficulty: 65, visa: 'Skilled Worker', tags: ['Enerji'], salary: '€55k+', desc: 'Mühendis maaşları çok yüksek.', strategy: 'İş teklifi şart.', link: 'https://www.udi.no/', education: { tuition: 'Ücretli', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['NTNU'], note: 'Yaşam pahalı.' }
+    id: 'no', name: 'Norveç', englishName: 'Norway', region: 'Kuzey', tier: 'Tier 2', difficulty: 65, visa: 'Skilled Worker', tags: ['Enerji'], salary: '€55k+', desc: 'Mühendis maaşları çok yüksek.', strategy: 'İş teklifi şart.', link: 'https://www.udi.no/', education: { tuition: 'Ücretli', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['NTNU'], note: 'Yaşam pahalı.' }
   },
   {
-    id: 'fi', name: 'Finlandiya', englishName: 'Finland', region: 'Kuzey', tier: 'Tier 2', difficulty: 50, visa: 'Specialist', tags: ['Telekom'], salary: '€40k+', desc: 'Nokia\'nın evi. 5G/6G.', strategy: 'Finland Works programı.', link: 'https://migri.fi/', education: { tuition: '€10k+', workRights: '30 Saat', postGrad: '2 Yıl', topUnis: ['Aalto'], note: 'Çalışma saati arttı.' }
+    id: 'fi', name: 'Finlandiya', englishName: 'Finland', region: 'Kuzey', tier: 'Tier 2', difficulty: 50, visa: 'Specialist', tags: ['Telekom'], salary: '€40k+', desc: 'Nokia\'nın evi. 5G/6G.', strategy: 'Finland Works programı.', link: 'https://migri.fi/', education: { tuition: '€10k+', workRights: '30 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Aalto'], note: 'Çalışma saati arttı.' }
   },
   {
-    id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Positive List', tags: ['Rüzgar'], salary: '€50k+', desc: 'Vestas ve Lego burada.', strategy: 'Kopenhag çevresine odaklan.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat', postGrad: '3 Yıl', topUnis: ['DTU'], note: 'Mezuniyette 3 yıl izin.' }
+    id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Positive List', tags: ['Rüzgar'], salary: '€50k+', desc: 'Vestas ve Lego burada.', strategy: 'Kopenhag çevresine odaklan.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat/Hafta', postGrad: '3 Yıl', topUnis: ['DTU'], note: 'Mezuniyette 3 yıl izin.' }
   },
   {
-    id: 'ee', name: 'Estonya', englishName: 'Estonia', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Startup', tags: ['Dijital'], salary: '€35k', desc: 'Yazılım odaklı. Skype burada doğdu.', strategy: 'TalTech başvur.', link: 'https://www.studyinestonia.ee/', education: { tuition: '€3k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['TalTech'], note: 'Sınırsız çalışma.' }
+    id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech'], salary: '€40k+', desc: 'Google, Meta Avrupa merkezi.', strategy: 'Critical Skills vizesi.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k+', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' }
   },
   {
-    id: 'is', name: 'İzlanda', englishName: 'Iceland', region: 'Kuzey', tier: 'Tier 3', difficulty: 80, visa: 'Expert Visa', tags: ['Jeotermal'], salary: '€60k+', desc: 'Küçük pazar. Enerji ve veri merkezi sektörü.', strategy: 'Uzman vizesi zordur.', link: 'https://island.is/', education: { tuition: '€500 (Kayıt)', workRights: '15 Saat', postGrad: '6 Ay', topUnis: ['Reykjavik Univ'], note: 'Devlet okulları harçsız.' }
-  },
-
-  // --- GÜNEY AVRUPA & AKDENİZ ---
-  {
-    id: 'it', name: 'İtalya', englishName: 'Italy', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'DSU Bursu', tags: ['Burs', 'Otomotiv'], salary: '€28k - €35k', desc: 'DSU Bursu ile bedava okuyup cep harçlığı al.', strategy: 'Torino (Fiat) ideal.', link: 'https://www.universitaly.it/', education: { tuition: 'Bursla Bedava', workRights: '20 Saat', postGrad: '12 Ay', topUnis: ['Politecnico di Milano'], note: 'Burslar Eylülde.' }
+    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık'], salary: '€40k+', desc: 'Airbus, Thales.', strategy: 'B1 Fransızca öğren.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243+', workRights: '964 Saat/Yıl', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuz.' }
   },
   {
-    id: 'es', name: 'İspanya', englishName: 'Spain', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Highly Qualified', tags: ['Telekom'], salary: '€30k+', desc: 'Yenilenebilir enerji.', strategy: 'Barselona ve Madrid.', link: 'https://www.exteriores.gob.es/', education: { tuition: '€2k-5k', workRights: '30 Saat', postGrad: '1 Yıl', topUnis: ['UPC'], note: 'Çalışma izni kolaylaştı.' }
+    id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' }
   },
   {
-    id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'Job Seeker', tags: ['Ucuz'], salary: '€20k', desc: 'Kolay giriş. Maaşlar düşük.', strategy: 'Job Seeker vizesi.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat', postGrad: 'Kolay', topUnis: ['Porto Univ'], note: 'SEF bildirimi.' }
+    id: 'be', name: 'Belçika', englishName: 'Belgium', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Single Permit', tags: ['Mikroelektronik'], salary: '€40k+', desc: 'IMEC Leuven\'dedir.', strategy: 'IMEC stajlarına başvur.', link: 'https://www.international.socialsecurity.be/', education: { tuition: '€1k-4k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['KU Leuven'], note: 'KU Leuven çok iyi.' }
   },
   {
-    id: 'gr', name: 'Yunanistan', englishName: 'Greece', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'Digital Nomad', tags: ['Turizm Tech'], salary: '€20k - €30k', desc: 'Teknoloji sektörü büyüyor. Digital Nomad vizesi popüler.', strategy: 'Uzaktan çalışarak Atina\'da yaşa.', link: 'https://migration.gov.gr/', education: { tuition: '€2k - €5k', workRights: '20 Saat', postGrad: 'Zor', topUnis: ['NTUA'], note: 'Yaşam ucuz.' }
+    id: 'es', name: 'İspanya', englishName: 'Spain', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Highly Qualified', tags: ['Telekom'], salary: '€30k+', desc: 'Yenilenebilir enerji.', strategy: 'Barselona ve Madrid.', link: 'https://www.exteriores.gob.es/', education: { tuition: '€2k-5k', workRights: '30 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['UPC'], note: 'Çalışma izni kolaylaştı.' }
   },
   {
-    id: 'cy', name: 'Kıbrıs Cumhuriyeti', englishName: 'Cyprus', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Employment', tags: ['Fintech', 'Forex'], salary: '€25k - €40k', desc: 'Fintech ve Forex şirketlerinin merkezi. Vergi avantajı var.', strategy: 'Limasol\'daki şirketlere bak.', link: 'http://www.mfa.gov.cy/', education: { tuition: '€5k - €9k', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['Univ of Cyprus'], note: 'İklim harika.' }
+    id: 'ee', name: 'Estonya', englishName: 'Estonia', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Startup', tags: ['Dijital'], salary: '€35k', desc: 'Yazılım odaklı.', strategy: 'TalTech başvur.', link: 'https://www.studyinestonia.ee/', education: { tuition: '€3k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['TalTech'], note: 'Sınırsız çalışma.' }
   },
   {
-    id: 'mt', name: 'Malta', englishName: 'Malta', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'Work Permit', tags: ['iGaming'], salary: '€25k - €40k', desc: 'iGaming ve Blockchain adası. İngilizce resmi dildir.', strategy: 'Gaming şirketlerine başvur.', link: 'https://identitymalta.com/', education: { tuition: '€7k - €10k', workRights: '20 Saat', postGrad: '6 Ay', topUnis: ['Univ of Malta'], note: 'Yazılımcılar için iyi.' }
+    id: 'cz', name: 'Çekya', englishName: 'Czechia', region: 'Avrupa', tier: 'Tier 1', difficulty: 30, visa: 'Student Visa', tags: ['Teknik'], salary: '€35k', desc: 'Otomotiv güçlü.', strategy: 'CVUT Prag.', link: 'https://www.studyin.cz/', education: { tuition: '€3k-5k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['CTU Prague'], note: 'Akredite program.' }
   },
   {
-    id: 'sm', name: 'San Marino', englishName: 'San Marino', region: 'Avrupa', tier: 'Tier 3', difficulty: 85, visa: 'Work Permit', tags: ['Turizm'], salary: '€25k+', desc: 'Çok küçük. İtalya iş piyasasıyla entegre.', strategy: 'İtalya\'da iş bulup buraya geçiş yapılabilir.', link: 'https://www.esteri.sm/', education: { tuition: 'N/A', workRights: 'N/A', postGrad: 'N/A', topUnis: ['Univ of San Marino'], note: 'Eğitim fırsatı kısıtlı.' }
-  },
-
-  // --- DOĞU AVRUPA & BALKANLAR ---
-  {
-    id: 'hr', name: 'Hırvatistan', englishName: 'Croatia', region: 'Avrupa', tier: 'Tier 2', difficulty: 30, visa: 'Digital Nomad', tags: ['Rimac'], salary: '€25k - €40k', desc: 'Rimac Automobili (Elektrikli hiper araba) burada.', strategy: 'Rimac stajlarına başvur.', link: 'https://mup.gov.hr/', education: { tuition: '€2k - €5k', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['Zagreb Univ'], note: 'AB üyesi.' }
+    id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'Job Seeker', tags: ['Ucuz'], salary: '€20k', desc: 'Kolay giriş.', strategy: 'Job Seeker vizesi.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat/Hafta', postGrad: 'Kolay', topUnis: ['Porto Univ'], note: 'SEF bildirimi.' }
   },
   {
-    id: 'si', name: 'Slovenya', englishName: 'Slovenia', region: 'Avrupa', tier: 'Tier 2', difficulty: 30, visa: 'Single Permit', tags: ['Robotik'], salary: '€30k - €45k', desc: 'Yaskawa robot fabrikası var. Yaşam kalitesi yüksek.', strategy: 'Ljubljana çevresi.', link: 'https://infotujci.si/', education: { tuition: '€2k - €5k', workRights: 'Öğrenci Servisi', postGrad: '9 Ay', topUnis: ['Univ of Ljubljana'], note: 'Öğrenci çalışması esnektir.' }
+    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik'], salary: '¥4M+', desc: 'Teknoloji devi.', strategy: 'MEXT bursu.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Tokyo Tech'], note: 'Özel izin.' }
   },
-  {
-    id: 'sk', name: 'Slovakya', englishName: 'Slovakia', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'Blue Card', tags: ['Otomotiv'], salary: '€25k - €40k', desc: 'Otomotiv üretimi çok yüksek. Kia, JLR fabrikaları.', strategy: 'Üretim mühendisliği.', link: 'https://www.mic.iom.sk/', education: { tuition: '€2k - €5k', workRights: '20 Saat', postGrad: '9 Ay', topUnis: ['Slovak Tech'], note: 'Bratislava Viyana\'ya yakındır.' }
-  },
-  {
-    id: 'cz', name: 'Çekya', englishName: 'Czechia', region: 'Avrupa', tier: 'Tier 1', difficulty: 30, visa: 'Student Visa', tags: ['Teknik'], salary: '€35k', desc: 'Otomotiv güçlü. Prag teknoloji merkezi.', strategy: 'CVUT Prag.', link: 'https://www.studyin.cz/', education: { tuition: '€3k-5k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['CTU Prague'], note: 'Akredite program.' }
-  },
-  {
-    id: 'ro', name: 'Romanya', englishName: 'Romania', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'Work Permit', tags: ['Hızlı Net'], salary: '€25k - €45k', desc: 'Bükreş IT merkezi. UiPath (RPA) buradan çıktı.', strategy: 'Yazılım için çok iyi.', link: 'https://studyinromania.gov.ro/', education: { tuition: '€2k - €4k', workRights: '20 Saat', postGrad: '9 Ay', topUnis: ['Politehnica'], note: 'İnternet çok hızlı.' }
-  },
-  {
-    id: 'bg', name: 'Bulgaristan', englishName: 'Bulgaria', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Blue Card', tags: ['Otomotiv'], salary: '€20k - €35k', desc: 'Otomotiv yan sanayi ve SAP ofisleri var.', strategy: 'Sofya merkezli işler.', link: 'https://www.mfa.bg/', education: { tuition: '€2k - €4k', workRights: '20 Saat', postGrad: '9 Ay', topUnis: ['Tech Univ Sofia'], note: 'Vergiler düşük.' }
+   {
+    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7', tags: ['Samsung'], salary: '₩40M+', desc: 'Samsung, LG.', strategy: 'GKS bursu.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['KAIST'], note: '6 aydan sonra.' }
   }
 ];
 
@@ -255,7 +179,17 @@ const projectIdeas = {
   ]
 };
 
-export default function CareerCommandCenterV17() {
+// --- KANBAN SÜTUNLARI ---
+const kanbanColumns = [
+  { id: 'to_apply', title: 'Başvurulacak', color: 'border-slate-500' },
+  { id: 'applied', title: 'Başvuruldu', color: 'border-blue-500' },
+  { id: 'interview', title: 'Görüşme', color: 'border-yellow-500' },
+  { id: 'offer', title: 'Teklif', color: 'border-green-500' },
+  { id: 'rejected', title: 'Red', color: 'border-red-500' }
+];
+
+export default function CareerCommandCenterV18() {
+  const [appMode, setAppMode] = useState('explorer'); // 'explorer' | 'kanban'
   const [activeTab, setActiveTab] = useState('All');
   const [selectedCountry, setSelectedCountry] = useState(allCountries[0]); 
   const [searchTerm, setSearchTerm] = useState('');
@@ -264,12 +198,17 @@ export default function CareerCommandCenterV17() {
   
   const [user, setUser] = useState(null);
   const [userNotes, setUserNotes] = useState({});
+  const [userApplications, setUserApplications] = useState([]); // Kanban Data
   const [isSaving, setIsSaving] = useState(false);
   const [dbStatus, setDbStatus] = useState('connecting'); 
 
   const [currentNote, setCurrentNote] = useState('');
   const [isEditing, setIsEditing] = useState(false); 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Kanban Yeni Ekleme State'leri
+  const [newAppCompany, setNewAppCompany] = useState('');
+  const [newAppRole, setNewAppRole] = useState('');
 
   const diffDays = Math.ceil(Math.abs(new Date('2026-02-01') - new Date()) / (1000 * 60 * 60 * 24));
   
@@ -287,7 +226,11 @@ export default function CareerCommandCenterV17() {
         setUser(userCredential.user);
         setDbStatus('connected');
         const unsub = onSnapshot(doc(db, "users", userCredential.user.uid), (doc) => {
-            if (doc.exists()) setUserNotes(doc.data().notes || {});
+            if (doc.exists()) {
+                const data = doc.data();
+                if (data.notes) setUserNotes(data.notes);
+                if (data.applications) setUserApplications(data.applications);
+            }
         });
         return () => unsub();
     }).catch(() => setDbStatus('error'));
@@ -304,6 +247,39 @@ export default function CareerCommandCenterV17() {
     } catch (e) { setIsSaving(false); }
   };
 
+  // --- KANBAN İŞLEMLERİ ---
+  const addApplication = async () => {
+    if (!user || !newAppCompany || !newAppRole) return;
+    const newApp = {
+      id: Date.now(),
+      company: newAppCompany,
+      role: newAppRole,
+      status: 'to_apply',
+      date: new Date().toLocaleDateString('tr-TR')
+    };
+    const updatedApps = [...userApplications, newApp];
+    setUserApplications(updatedApps);
+    setNewAppCompany('');
+    setNewAppRole('');
+    await updateDoc(doc(db, "users", user.uid), { applications: updatedApps });
+  };
+
+  const moveApplication = async (appId, newStatus) => {
+    if (!user) return;
+    const updatedApps = userApplications.map(app => 
+      app.id === appId ? { ...app, status: newStatus } : app
+    );
+    setUserApplications(updatedApps);
+    await updateDoc(doc(db, "users", user.uid), { applications: updatedApps });
+  };
+
+  const deleteApplication = async (appId) => {
+    if (!user) return;
+    const updatedApps = userApplications.filter(app => app.id !== appId);
+    setUserApplications(updatedApps);
+    await updateDoc(doc(db, "users", user.uid), { applications: updatedApps });
+  };
+
   useEffect(() => {
     if (selectedCountry) {
       setCurrentNote(userNotes[selectedCountry.id] || '');
@@ -312,19 +288,13 @@ export default function CareerCommandCenterV17() {
   }, [selectedCountry, userNotes]);
 
   const performGoogleSearch = (country) => {
-    const jobTitle = selectedRole; 
-    const location = country.englishName || country.name; 
-    const query = `${jobTitle} jobs in ${location}`;
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(`${selectedRole} jobs in ${country.englishName || country.name}`)}`, '_blank');
   };
 
   const performNetworkSearch = (type, country) => {
-    let query = "";
-    if (type === 'alumni') {
-        query = `site:linkedin.com/in/ "Turkish" AND ("Engineer" OR "Mühendis") AND "Embedded" AND "${country.englishName}"`;
-    } else if (type === 'recruiter') {
-        query = `site:linkedin.com/in/ "Recruiter" AND ("Tech" OR "Engineering") AND "${country.englishName}"`;
-    }
+    let query = type === 'alumni' 
+        ? `site:linkedin.com/in/ "Turkish" AND ("Engineer" OR "Mühendis") AND "Embedded" AND "${country.englishName}"`
+        : `site:linkedin.com/in/ "Recruiter" AND ("Tech" OR "Engineering") AND "${country.englishName}"`;
     window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
   };
 
@@ -337,16 +307,16 @@ export default function CareerCommandCenterV17() {
     });
   }, [activeTab, searchTerm]);
   
-  // OTO-SEÇİM
   useEffect(() => {
-      if (filteredData.length > 0 && (!selectedCountry || !filteredData.find(c => c.id === selectedCountry.id))) {
-          setSelectedCountry(filteredData[0]);
-      } else if (filteredData.length === 0) {
-          setSelectedCountry(null);
+      if (appMode === 'explorer') {
+        if (filteredData.length > 0 && (!selectedCountry || !filteredData.find(c => c.id === selectedCountry.id))) {
+            setSelectedCountry(filteredData[0]);
+        } else if (filteredData.length === 0) {
+            setSelectedCountry(null);
+        }
       }
-  }, [filteredData, selectedCountry]);
+  }, [filteredData, selectedCountry, appMode]);
 
-  // --- DİNAMİK RENK ---
   const getTierGradient = (tier) => {
       if (tier === 'Tier 1') return 'from-emerald-900/50 via-slate-900 to-slate-900 border-emerald-500/30'; 
       if (tier === 'Tier 2') return 'from-yellow-900/50 via-slate-900 to-slate-900 border-yellow-500/30'; 
@@ -358,42 +328,73 @@ export default function CareerCommandCenterV17() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none z-0"></div>
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_800px_at_50%_-200px,#1e293b,transparent)] z-0 pointer-events-none"></div>
 
-      {/* 1. SÜTUN: SIDEBAR (SABİT 260px) */}
+      {/* SIDEBAR */}
       {mobileMenuOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/80 backdrop-blur-xl border-r border-white/10 transition-transform duration-300 md:relative md:translate-x-0 shrink-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl h-full`}>
         <div className="p-4 border-b border-white/10 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2 text-cyan-400 font-bold tracking-wider">
-            <Zap size={20} fill="currentColor" /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">KARİYER-V17</span>
+            <Zap size={20} fill="currentColor" /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">KARİYER-V18</span>
           </div>
           <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-slate-400"><X size={20} /></button>
         </div>
-        <nav className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
-          <div className={`px-3 py-2 rounded-lg border flex items-center gap-2 text-xs font-bold transition-colors ${dbStatus === 'connected' ? 'bg-emerald-900/30 border-emerald-500/30 text-emerald-400' : 'bg-yellow-900/30 border-yellow-500/30 text-yellow-400'}`}>
-             {dbStatus === 'connected' ? <Cloud size={14}/> : <Loader2 size={14} className="animate-spin"/>}
-             <span className="truncate">{dbStatus === 'connected' ? 'Veritabanı Aktif' : 'Bağlanıyor...'}</span>
-          </div>
-          <div>
-            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2 px-2">Bölgeler</h3>
-            <div className="space-y-1">
-              {['All', 'Avrupa', 'Asya', 'Amerika', 'Kuzey', 'Okyanusya'].map(tab => (
-                <button key={tab} onClick={() => { setActiveTab(tab); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex justify-between items-center group ${activeTab === tab ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
-                  {tab === 'All' ? 'Tüm Dünyalar' : tab} {activeTab === tab && <ChevronRight size={14} />}
-                </button>
-              ))}
+        
+        {/* ANA NAVİGASYON */}
+        <div className="p-4 space-y-2 border-b border-white/5">
+            <button 
+                onClick={() => setAppMode('explorer')} 
+                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold flex items-center gap-3 transition-all ${appMode === 'explorer' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:bg-white/5'}`}
+            >
+                <Globe size={16} /> Keşfet
+            </button>
+            <button 
+                onClick={() => setAppMode('kanban')} 
+                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold flex items-center gap-3 transition-all ${appMode === 'kanban' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-slate-400 hover:bg-white/5'}`}
+            >
+                <ClipboardList size={16} /> Başvurularım
+            </button>
+        </div>
+
+        {appMode === 'explorer' && (
+            <nav className="p-4 space-y-4 overflow-y-auto flex-1 min-h-0">
+            <div>
+                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2 px-2">Bölgeler</h3>
+                <div className="space-y-1">
+                {['All', 'Avrupa', 'Asya', 'Amerika', 'Kuzey', 'Okyanusya'].map(tab => (
+                    <button key={tab} onClick={() => { setActiveTab(tab); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex justify-between items-center group ${activeTab === tab ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
+                    {tab === 'All' ? 'Tüm Dünyalar' : tab} {activeTab === tab && <ChevronRight size={14} />}
+                    </button>
+                ))}
+                </div>
             </div>
-          </div>
-          <div>
-            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2 px-2">Öncelik</h3>
-            <div className="space-y-1">
-               {['Tier 1', 'Tier 2', 'Tier 3'].map(tier => (
-                <button key={tier} onClick={() => { setActiveTab(tier); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex gap-3 items-center group ${activeTab === tier ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
-                   <div className={`w-2 h-2 rounded-full shadow-[0_0_8px] ${tier === 'Tier 1' ? 'bg-green-500 shadow-green-500' : tier === 'Tier 2' ? 'bg-yellow-500 shadow-yellow-500' : 'bg-red-500 shadow-red-500'}`} />
-                  {tier}
-                </button>
-              ))}
+            <div>
+                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2 px-2">Öncelik</h3>
+                <div className="space-y-1">
+                {['Tier 1', 'Tier 2', 'Tier 3'].map(tier => (
+                    <button key={tier} onClick={() => { setActiveTab(tier); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex gap-3 items-center group ${activeTab === tier ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
+                    <div className={`w-2 h-2 rounded-full shadow-[0_0_8px] ${tier === 'Tier 1' ? 'bg-green-500 shadow-green-500' : tier === 'Tier 2' ? 'bg-yellow-500 shadow-yellow-500' : 'bg-red-500 shadow-red-500'}`} />
+                    {tier}
+                    </button>
+                ))}
+                </div>
             </div>
-          </div>
-        </nav>
+            </nav>
+        )}
+        
+        {appMode === 'kanban' && (
+            <div className="p-4 flex-1 overflow-y-auto">
+                 <div className="bg-slate-900/50 p-3 rounded-xl border border-white/5 text-center">
+                    <p className="text-xs text-slate-400 mb-2">Toplam Başvuru</p>
+                    <p className="text-2xl font-bold text-white">{userApplications.length}</p>
+                 </div>
+                 <div className="mt-4">
+                    <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">Hızlı Ekle</h3>
+                    <input type="text" placeholder="Şirket Adı" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs mb-2 outline-none focus:border-purple-500" value={newAppCompany} onChange={e => setNewAppCompany(e.target.value)} />
+                    <input type="text" placeholder="Pozisyon" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs mb-2 outline-none focus:border-purple-500" value={newAppRole} onChange={e => setNewAppRole(e.target.value)} />
+                    <button onClick={addApplication} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={12}/> Ekle</button>
+                 </div>
+            </div>
+        )}
+
         <div className="p-4 border-t border-white/10 shrink-0">
           <div className="bg-slate-800/50 rounded-xl p-3 border border-white/5 shadow-lg">
              <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-slate-300 flex items-center gap-1.5"><Clock size={12} className="text-cyan-400" /> Mezuniyet ({new Date('2026-02-01').getFullYear()})</span><span className="text-xs text-white font-mono font-bold">{diffDays} Gün</span></div>
@@ -403,160 +404,139 @@ export default function CareerCommandCenterV17() {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
+      {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0 h-full z-10 relative">
-        <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
-          <div className="flex items-center gap-3 w-full max-w-md">
-            <button onClick={() => setMobileMenuOpen(true)} className="md:hidden text-slate-400 p-1 rounded hover:bg-white/5"><Menu size={24} /></button>
-            <div className="relative w-full group">
-              <Search className="absolute left-3 top-2.5 text-slate-500" size={16} />
-              <input type="text" placeholder="Ülke ara..." className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            </div>
-          </div>
-          <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-slate-800/50 rounded-full border border-white/10 shadow-sm"><GraduationCap size={16} className="text-cyan-400"/><span className="text-xs font-bold text-slate-300">OCAK 2026</span></div>
-        </header>
-
-        <main className="flex-1 flex overflow-hidden relative">
-          {/* LIST (SABİT 380px) */}
-          <div className="w-[380px] border-r border-white/5 flex flex-col shrink-0 bg-slate-900/30 hidden lg:flex">
-             <div className="p-4 border-b border-white/5 text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between">
-                <span>Sonuçlar ({filteredData.length})</span>
-             </div>
-             <div className="flex-1 overflow-y-auto p-4 scroll-smooth space-y-3 pb-20">
-              {filteredData.map(country => (
-                <div key={country.id} onClick={() => setSelectedCountry(country)} className={`group relative p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedCountry?.id === country.id ? 'bg-slate-800 border-cyan-500/50 shadow-lg' : 'bg-slate-900/40 border-white/5 hover:bg-slate-800/60'}`}>
-                  <div className="flex justify-between items-start mb-2">
-                    <div><h3 className={`text-sm font-bold ${selectedCountry?.id === country.id ? 'text-cyan-400' : 'text-slate-200'}`}>{country.name}</h3><div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5"><MapPin size={10} /> {country.region}</div></div>
-                    <div className="flex gap-0.5">{[1,2,3,4,5].map(bar => (<div key={bar} className={`w-1 h-2.5 rounded-full ${(country.difficulty / 20) >= bar ? (country.difficulty > 70 ? 'bg-red-500' : 'bg-emerald-500') : 'bg-slate-800'}`}/>))}</div>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-slate-950/50 border border-white/10 text-slate-400">{country.visa}</span>
-                    {country.education.workRights.includes('Limitsiz') && (<span className="px-2 py-0.5 rounded text-[10px] bg-emerald-900/30 text-emerald-400 border border-emerald-500/20 flex items-center gap-1"><CheckCircle2 size={10} /> Full-Work</span>)}
-                  </div>
-                  {userNotes[country.id] && (<div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />)}
+        
+        {/* EXPLORER MODE */}
+        {appMode === 'explorer' && (
+            <>
+                <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
+                <div className="flex items-center gap-3 w-full max-w-md">
+                    <button onClick={() => setMobileMenuOpen(true)} className="md:hidden text-slate-400 p-1 rounded hover:bg-white/5"><Menu size={24} /></button>
+                    <div className="relative w-full group">
+                    <Search className="absolute left-3 top-2.5 text-slate-500" size={16} />
+                    <input type="text" placeholder="Ülke ara..." className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    </div>
                 </div>
-              ))}
-             </div>
-          </div>
+                <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-slate-800/50 rounded-full border border-white/10 shadow-sm"><GraduationCap size={16} className="text-cyan-400"/><span className="text-xs font-bold text-slate-300">OCAK 2026</span></div>
+                </header>
 
-          {/* DETAIL (ESNEK) */}
-          {selectedCountry ? (
-            <div className="flex-1 flex flex-col min-w-0 bg-slate-900/50 overflow-y-auto">
-              <div className="h-40 relative shrink-0 overflow-hidden">
-                <div className={`absolute inset-0 bg-gradient-to-br ${getTierGradient(selectedCountry.tier)} z-0 border-b`}></div>
-                <div className="absolute bottom-6 left-8 z-20 right-8 flex justify-between items-end">
-                   <div>
-                      <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-white/5 border-white/10 inline-block mb-2 text-white`}>{selectedCountry.tier}</div>
-                      <h2 className="text-3xl font-bold text-white tracking-tight">{selectedCountry.name}</h2>
-                   </div>
-                   <div className="flex bg-slate-950/50 rounded-lg p-1 border border-white/10">
-                      <button onClick={() => setViewMode('career')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'career' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'}`}>Profesyonel</button>
-                      <button onClick={() => setViewMode('education')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'education' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>Akademik</button>
-                   </div>
-                </div>
-              </div>
-
-              <div className="p-8 space-y-8 max-w-5xl mx-auto w-full pb-20">
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5">
-                       <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Maaş Skalası</div>
-                       <div className="text-xl font-bold text-emerald-400">{selectedCountry.salary}</div>
-                    </div>
-                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5">
-                       <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Giriş Zorluğu</div>
-                       <div className="text-xl font-bold text-white">{selectedCountry.difficulty}%</div>
-                    </div>
-                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5 col-span-2">
-                       <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Vize Stratejisi</div>
-                       <div className="text-sm text-slate-300">{selectedCountry.strategy}</div>
-                    </div>
-                 </div>
-
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    
-                    {/* SOL TARAF: GENEL BİLGİLER */}
-                    <div className="space-y-6">
-                       {viewMode === 'career' ? (
-                          <>
-                            <div>
-                               <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2"><Layout size={16} className="text-cyan-500"/> Genel Bakış</h4>
-                               <p className="text-sm text-slate-400 leading-relaxed bg-slate-800/30 p-4 rounded-xl border border-white/5">{selectedCountry.desc}</p>
-                            </div>
-                            <div>
-                               <h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2"><Settings size={16} className="text-cyan-500"/> İş Arama Motoru</h4>
-                               <div className="bg-slate-800/30 p-5 rounded-xl border border-white/5 space-y-4">
-                                  <div>
-                                     <label className="text-xs text-slate-500 block mb-2">Hedef Pozisyon</label>
-                                     <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full bg-slate-950 border border-white/10 text-slate-200 text-sm rounded-lg p-3 outline-none">
-                                        {engineerRoles.map(r => <option key={r.title} value={r.title}>{r.label}</option>)}
-                                     </select>
-                                  </div>
-                                  <button onClick={() => performGoogleSearch(selectedCountry)} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all">
-                                     <Search size={16}/> Google'da {selectedCountry.englishName} İlanlarını Ara
-                                  </button>
-                                  <div className="grid grid-cols-2 gap-3 pt-2">
-                                     <button onClick={() => performNetworkSearch('alumni', selectedCountry)} className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs flex justify-center items-center gap-2"><Linkedin size={14}/> Türk Mühendisler</button>
-                                     <button onClick={() => performNetworkSearch('recruiter', selectedCountry)} className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs flex justify-center items-center gap-2"><Users size={14}/> İşe Alımcılar</button>
-                                  </div>
-                               </div>
-                            </div>
-                          </>
-                       ) : (
-                          <div className="space-y-4">
-                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between">
-                                <span className="text-sm text-slate-400">Eğitim Ücreti</span>
-                                <span className="text-sm font-bold text-white">{selectedCountry.education.tuition}</span>
-                             </div>
-                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between">
-                                <span className="text-sm text-slate-400">Çalışma İzni</span>
-                                <span className="text-sm font-bold text-yellow-400">{selectedCountry.education.workRights}</span>
-                             </div>
-                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5">
-                                <span className="text-sm text-slate-400 block mb-2">Öne Çıkan Üniversiteler</span>
-                                <div className="flex gap-2 flex-wrap">
-                                   {selectedCountry.education.topUnis.map(u => <span key={u} className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">{u}</span>)}
+                <main className="flex-1 flex overflow-hidden relative">
+                    {/* LIST */}
+                    <div className="w-[380px] border-r border-white/5 flex flex-col shrink-0 bg-slate-900/30 hidden lg:flex">
+                        <div className="p-4 border-b border-white/5 text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between"><span>Sonuçlar ({filteredData.length})</span></div>
+                        <div className="flex-1 overflow-y-auto p-4 scroll-smooth space-y-3 pb-20">
+                            {filteredData.map(country => (
+                                <div key={country.id} onClick={() => setSelectedCountry(country)} className={`group relative p-4 rounded-xl border cursor-pointer transition-all duration-200 ${selectedCountry?.id === country.id ? 'bg-slate-800 border-cyan-500/50 shadow-lg' : 'bg-slate-900/40 border-white/5 hover:bg-slate-800/60'}`}>
+                                <div className="flex justify-between items-start mb-2">
+                                    <div><h3 className={`text-sm font-bold ${selectedCountry?.id === country.id ? 'text-cyan-400' : 'text-slate-200'}`}>{country.name}</h3><div className="text-[10px] text-slate-500 flex items-center gap-1 mt-0.5"><MapPin size={10} /> {country.region}</div></div>
+                                    <div className="flex gap-0.5">{[1,2,3,4,5].map(bar => (<div key={bar} className={`w-1 h-2.5 rounded-full ${(country.difficulty / 20) >= bar ? (country.difficulty > 70 ? 'bg-red-500' : 'bg-emerald-500') : 'bg-slate-800'}`}/>))}</div>
                                 </div>
-                             </div>
-                          </div>
-                       )}
-                    </div>
-
-                    <div className="space-y-6">
-                       <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
-                          <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri</h4>
-                          {(projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"]).slice(0,1).map((idea, i) => (
-                             <div key={i}>
-                                <div className="text-sm font-bold text-white mb-1">{idea.title}</div>
-                                <div className="text-xs text-slate-500 leading-relaxed">{idea.desc}</div>
-                             </div>
-                          ))}
-                       </div>
-
-                       <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
-                          <div className="flex justify-between items-center mb-3">
-                             <h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><Save size={14}/> Notlar</h4>
-                             {!isEditing && userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(true)} className="text-[10px] text-cyan-400"><Edit3 size={12}/></button>}
-                          </div>
-                          {isEditing || !userNotes[selectedCountry.id] ? (
-                             <div className="space-y-2">
-                                <textarea className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-300 outline-none min-h-[100px]" placeholder="Hedeflerini yaz..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} />
-                                <div className="flex gap-2">
-                                   <button onClick={handleSaveNote} disabled={isSaving} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-xs font-bold">{isSaving ? '...' : 'Kaydet'}</button>
-                                   {userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(false)} className="px-3 bg-slate-700 text-white py-2 rounded-lg text-xs">iptal</button>}
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    <span className="px-2 py-0.5 rounded text-[10px] bg-slate-950/50 border border-white/10 text-slate-400">{country.visa}</span>
                                 </div>
-                             </div>
-                          ) : (
-                             <p className="text-xs text-slate-300 whitespace-pre-wrap cursor-pointer hover:text-white" onClick={() => setIsEditing(true)}>{userNotes[selectedCountry.id]}</p>
-                          )}
-                       </div>
+                                {userNotes[country.id] && (<div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />)}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                 </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-slate-600"><p>Yükleniyor...</p></div>
-          )}
-        </main>
+
+                    {/* DETAIL */}
+                    {selectedCountry ? (
+                        <div className="flex-1 flex flex-col min-w-0 bg-slate-900/50 overflow-y-auto">
+                            <div className="h-40 relative shrink-0 overflow-hidden">
+                                <div className={`absolute inset-0 bg-gradient-to-br ${getTierGradient(selectedCountry.tier)} z-0 border-b`}></div>
+                                <div className="absolute bottom-6 left-8 z-20 right-8 flex justify-between items-end">
+                                <div>
+                                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-white/5 border-white/10 inline-block mb-2 text-white`}>{selectedCountry.tier}</div>
+                                    <h2 className="text-3xl font-bold text-white tracking-tight">{selectedCountry.name}</h2>
+                                </div>
+                                <div className="flex bg-slate-950/50 rounded-lg p-1 border border-white/10">
+                                    <button onClick={() => setViewMode('career')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'career' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'}`}>Profesyonel</button>
+                                    <button onClick={() => setViewMode('education')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'education' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>Akademik</button>
+                                </div>
+                                </div>
+                            </div>
+                            {/* ... Detail Content (Maaş, Zorluk, Genel Durum, Strateji, İş Arama, Notlar) ... */}
+                            <div className="p-8 space-y-8 max-w-4xl mx-auto w-full pb-20">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Maaş Skalası</div><div className="text-xl font-bold text-emerald-400">{selectedCountry.salary}</div></div>
+                                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Giriş Zorluğu</div><div className="text-xl font-bold text-white">{selectedCountry.difficulty}%</div></div>
+                                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5 col-span-2"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Vize Stratejisi</div><div className="text-sm text-slate-300">{selectedCountry.strategy}</div></div>
+                                </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    <div className="space-y-6">
+                                        {viewMode === 'career' ? (
+                                            <>
+                                                <div><h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2"><Layout size={16} className="text-cyan-500"/> Genel Bakış</h4><p className="text-sm text-slate-400 leading-relaxed bg-slate-800/30 p-4 rounded-xl border border-white/5">{selectedCountry.desc}</p></div>
+                                                <div className="bg-slate-800/30 p-5 rounded-xl border border-white/5 space-y-4">
+                                                    <div><label className="text-xs text-slate-500 block mb-2">Hedef Pozisyon</label><select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full bg-slate-950 border border-white/10 text-slate-200 text-sm rounded-lg p-3 outline-none">{engineerRoles.map(r => <option key={r.title} value={r.title}>{r.label}</option>)}</select></div>
+                                                    <button onClick={() => performGoogleSearch(selectedCountry)} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all"><Search size={16}/> Google'da {selectedCountry.englishName} İlanlarını Ara</button>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between"><span className="text-sm text-slate-400">Eğitim Ücreti</span><span className="text-sm font-bold text-white">{selectedCountry.education.tuition}</span></div>
+                                                <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between"><span className="text-sm text-slate-400">Çalışma İzni</span><span className="text-sm font-bold text-yellow-400">{selectedCountry.education.workRights}</span></div>
+                                                <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5"><span className="text-sm text-slate-400 block mb-2">Öne Çıkan Üniversiteler</span><div className="flex gap-2 flex-wrap">{selectedCountry.education.topUnis.map(u => <span key={u} className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">{u}</span>)}</div></div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="space-y-6">
+                                        <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5"><h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri</h4>{(projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"]).slice(0,1).map((idea, i) => (<div key={i}><div className="text-sm font-bold text-white mb-1">{idea.title}</div><div className="text-xs text-slate-500 leading-relaxed">{idea.desc}</div></div>))}</div>
+                                        <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
+                                            <div className="flex justify-between items-center mb-3"><h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><Save size={14}/> Notlar</h4>{!isEditing && userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(true)} className="text-[10px] text-cyan-400"><Edit3 size={12}/></button>}</div>
+                                            {isEditing || !userNotes[selectedCountry.id] ? (<div className="space-y-2"><textarea className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-300 outline-none min-h-[100px]" placeholder="Hedeflerini yaz..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} /><div className="flex gap-2"><button onClick={handleSaveNote} disabled={isSaving} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-xs font-bold">{isSaving ? '...' : 'Kaydet'}</button>{userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(false)} className="px-3 bg-slate-700 text-white py-2 rounded-lg text-xs">iptal</button>}</div></div>) : (<p className="text-xs text-slate-300 whitespace-pre-wrap cursor-pointer hover:text-white" onClick={() => setIsEditing(true)}>{userNotes[selectedCountry.id]}</p>)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center text-slate-600"><p>Yükleniyor...</p></div>
+                    )}
+                </main>
+            </>
+        )}
+
+        {/* KANBAN MODE */}
+        {appMode === 'kanban' && (
+            <main className="flex-1 flex overflow-x-auto overflow-y-hidden p-6 gap-4 bg-slate-950">
+                {kanbanColumns.map(col => (
+                    <div key={col.id} className={`w-72 shrink-0 flex flex-col bg-slate-900/50 rounded-xl border border-white/5 ${col.color.replace('border', 'border-t-4')}`}>
+                        <div className="p-3 border-b border-white/5 flex justify-between items-center">
+                            <span className="font-bold text-slate-200 text-sm">{col.title}</span>
+                            <span className="text-xs text-slate-500 bg-slate-950 px-2 py-0.5 rounded-full">{userApplications.filter(a => a.status === col.id).length}</span>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-2 space-y-2">
+                            {userApplications.filter(a => a.status === col.id).map(app => (
+                                <div key={app.id} className="bg-slate-800 p-3 rounded-lg border border-white/5 hover:border-white/20 transition-all group">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <div className="font-bold text-white text-sm">{app.company}</div>
+                                        <button onClick={() => deleteApplication(app.id)} className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100"><Trash2 size={12}/></button>
+                                    </div>
+                                    <div className="text-xs text-slate-400 mb-2">{app.role}</div>
+                                    
+                                    {/* Basit İlerleme Butonları */}
+                                    <div className="flex gap-1 justify-end">
+                                        {col.id !== 'to_apply' && (
+                                            <button onClick={() => moveApplication(app.id, kanbanColumns[kanbanColumns.findIndex(c => c.id === col.id) - 1].id)} className="p-1 hover:bg-slate-700 rounded text-slate-400"><ArrowRightCircle size={14} className="rotate-180"/></button>
+                                        )}
+                                        {col.id !== 'rejected' && col.id !== 'offer' && (
+                                            <button onClick={() => moveApplication(app.id, kanbanColumns[kanbanColumns.findIndex(c => c.id === col.id) + 1].id)} className="p-1 hover:bg-slate-700 rounded text-green-400"><ArrowRightCircle size={14}/></button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                            {userApplications.filter(a => a.status === col.id).length === 0 && (
+                                <div className="text-center py-4 text-xs text-slate-600 italic">Boş</div>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </main>
+        )}
+
       </div>
     </div>
   );
