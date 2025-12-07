@@ -6,7 +6,7 @@ import {
   Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity,
   Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb,
   Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle, LogOut, LogIn, 
-  ListTodo, PieChart, FileCheck
+  ListTodo, PieChart, FileCheck, Link as LinkIcon
 } from 'lucide-react';
 
 // --- FIREBASE ENTEGRASYONU ---
@@ -241,7 +241,21 @@ const KanbanCard = ({ app, deleteApplication, onDragStart, isDragging }) => {
                 </button>
             </div>
             <div className="text-xs text-slate-400 mb-2">{app.role}</div>
-            <div className="text-[10px] text-slate-500 text-right">Başvuru: {app.date}</div>
+            <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                    {app.companyUrl && (
+                        <a href={app.companyUrl} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors" title="Şirket Sitesi">
+                            <Globe size={12} />
+                        </a>
+                    )}
+                    {app.jobUrl && (
+                        <a href={app.jobUrl} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-purple-400 transition-colors" title="İlan Linki">
+                            <LinkIcon size={12} />
+                        </a>
+                    )}
+                </div>
+                <div className="text-[10px] text-slate-500 text-right">Başvuru: {app.date}</div>
+            </div>
         </div>
     );
 }
@@ -399,6 +413,8 @@ export default function CareerCommandCenterV18() {
   // Kanban Yeni Ekleme State'leri
   const [newAppCompany, setNewAppCompany] = useState('');
   const [newAppRole, setNewAppRole] = useState('');
+  const [newAppCompanyUrl, setNewAppCompanyUrl] = useState('');
+  const [newAppJobUrl, setNewAppJobUrl] = useState('');
 
   // Drag and Drop State'leri
   const [draggingAppId, setDraggingAppId] = useState(null);
@@ -530,6 +546,8 @@ export default function CareerCommandCenterV18() {
       id: Date.now(),
       company: newAppCompany,
       role: newAppRole,
+      companyUrl: newAppCompanyUrl,
+      jobUrl: newAppJobUrl,
       status: 'to_apply',
       date: new Date().toLocaleDateString('tr-TR')
     };
@@ -537,6 +555,8 @@ export default function CareerCommandCenterV18() {
     setUserApplications(updatedApps);
     setNewAppCompany('');
     setNewAppRole('');
+    setNewAppCompanyUrl('');
+    setNewAppJobUrl('');
     
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
     await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Uygulama Ekleme Hatası:", e));
@@ -737,8 +757,12 @@ export default function CareerCommandCenterV18() {
                  </div>
                  <div className="mt-4">
                     <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">Hızlı Ekle</h3>
-                    <input type="text" placeholder="Şirket Adı" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs mb-2 outline-none focus:border-purple-500" value={newAppCompany} onChange={e => setNewAppCompany(e.target.value)} />
-                    <input type="text" placeholder="Pozisyon" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs mb-2 outline-none focus:border-purple-500" value={newAppRole} onChange={e => setNewAppRole(e.target.value)} />
+                    <div className="space-y-2 mb-2">
+                        <input type="text" placeholder="Şirket Adı" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppCompany} onChange={e => setNewAppCompany(e.target.value)} />
+                        <input type="text" placeholder="Pozisyon" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppRole} onChange={e => setNewAppRole(e.target.value)} />
+                        <input type="text" placeholder="Şirket Web Sitesi (Opsiyonel)" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppCompanyUrl} onChange={e => setNewAppCompanyUrl(e.target.value)} />
+                        <input type="text" placeholder="İlan Linki (Opsiyonel)" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppJobUrl} onChange={e => setNewAppJobUrl(e.target.value)} />
+                    </div>
                     <button onClick={addApplication} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={12}/> Ekle</button>
                  </div>
             </div>
