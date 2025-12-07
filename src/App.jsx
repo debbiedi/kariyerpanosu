@@ -702,4 +702,4 @@ export default function CareerCommandCenterV9() {
       </div>
     </div>
   );
-                            }
+}
