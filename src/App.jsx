@@ -755,15 +755,32 @@ export default function CareerCommandCenterV18() {
                     <p className="text-xs text-slate-400 mb-2">Toplam Başvuru</p>
                     <p className="text-2xl font-bold text-white">{userApplications.length}</p>
                  </div>
+                 
                  <div className="mt-4">
                     <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 px-1">Hızlı Ekle</h3>
-                    <div className="space-y-2 mb-2">
-                        <input type="text" placeholder="Şirket Adı" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppCompany} onChange={e => setNewAppCompany(e.target.value)} />
-                        <input type="text" placeholder="Pozisyon" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppRole} onChange={e => setNewAppRole(e.target.value)} />
-                        <input type="text" placeholder="Şirket Web Sitesi (Opsiyonel)" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppCompanyUrl} onChange={e => setNewAppCompanyUrl(e.target.value)} />
-                        <input type="text" placeholder="İlan Linki (Opsiyonel)" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppJobUrl} onChange={e => setNewAppJobUrl(e.target.value)} />
-                    </div>
-                    <button onClick={addApplication} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={12}/> Ekle</button>
+                    
+                    {user && !user.isAnonymous ? (
+                        <>
+                            <div className="space-y-2 mb-2">
+                                <input type="text" placeholder="Şirket Adı" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppCompany} onChange={e => setNewAppCompany(e.target.value)} />
+                                <input type="text" placeholder="Pozisyon" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppRole} onChange={e => setNewAppRole(e.target.value)} />
+                                <input type="text" placeholder="Şirket Web Sitesi (Opsiyonel)" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppCompanyUrl} onChange={e => setNewAppCompanyUrl(e.target.value)} />
+                                <input type="text" placeholder="İlan Linki (Opsiyonel)" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppJobUrl} onChange={e => setNewAppJobUrl(e.target.value)} />
+                            </div>
+                            <button onClick={addApplication} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={12}/> Ekle</button>
+                        </>
+                    ) : (
+                        <div className="bg-slate-800/50 p-3 rounded-lg border border-dashed border-slate-600 text-center">
+                            <p className="text-[10px] text-slate-400 mb-2">İlan eklemek için giriş yapmalısın.</p>
+                            <button 
+                                onClick={handleGoogleLogin}
+                                disabled={isLoggingIn}
+                                className="w-full bg-white text-slate-900 py-1.5 rounded-md text-[10px] font-bold flex items-center justify-center gap-1 hover:bg-slate-200 transition-colors disabled:opacity-50"
+                            >
+                                {isLoggingIn ? <Loader2 size={10} className="animate-spin" /> : <><LogIn size={10} /> Giriş Yap</>}
+                            </button>
+                        </div>
+                    )}
                  </div>
             </div>
         )}
