@@ -6,7 +6,7 @@ import {
   Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity,
   Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb,
   Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle, LogOut, LogIn, 
-  ListTodo, PieChart, FileCheck, Link as LinkIcon
+  ListTodo, PieChart, FileCheck, Link as LinkIcon, RefreshCw
 } from 'lucide-react';
 
 // --- FIREBASE ENTEGRASYONU ---
@@ -191,24 +191,52 @@ const skillFocusData = [
 
 const projectIdeas = {
   "Junior Embedded Software Engineer": [
-    { title: "STM32 Bootloader", desc: "UART üzerinden kendi bootloader'ını yaz." },
-    { title: "RTOS Weather Station", desc: "FreeRTOS ile çoklu task (okuma/yazma) yapısı kur." }
+    { title: "STM32 Bootloader", desc: "UART üzerinden kendi bootloader'ını yazarak firmware güncelleme mantığını kavra." },
+    { title: "RTOS Weather Station", desc: "FreeRTOS ile sıcaklık/nem sensörlerini okuyan ve ekrana basan çoklu görev (multitasking) yapısı kur." },
+    { title: "Digital Oscilloscope", desc: "STM32 ADC ve DMA kullanarak yüksek hızlı analog sinyalleri yakala ve ekranda çizdir." },
+    { title: "MP3 Player", desc: "SPI/I2S protokolleri ile SD karttan ses dosyalarını okuyup bir DAC üzerinden çal." },
+    { title: "PID Line Follower", desc: "Kızılötesi sensörler ve PID kontrol algoritması kullanarak çizgi izleyen robot yap." },
+    { title: "Smart Lock System", desc: "Keypad, servo motor ve şifreleme algoritmaları kullanarak güvenli bir kilit sistemi tasarla." }
   ],
   "Junior Firmware Engineer": [
-    { title: "Bare Metal SPI Driver", desc: "HAL kütüphanesi kullanmadan SPI driver yaz." },
-    { title: "USB HID Device", desc: "Mikrodenetleyiciyi klavye/mouse olarak tanıt." }
+    { title: "Bare Metal SPI Driver", desc: "HAL kütüphanesi kullanmadan, doğrudan register'lara yazarak SPI sürücüsü geliştir." },
+    { title: "USB HID Device", desc: "Mikrodenetleyiciyi bilgisayara klavye veya mouse olarak tanıtan USB stack'i kullan." },
+    { title: "I2C EEPROM Bit-Banging", desc: "Donanım I2C modülü yerine GPIO'ları manuel kontrol ederek I2C protokolünü yazılımla oluştur." },
+    { title: "Low Power Sensor Node", desc: "Uyku modlarını ve kesmeleri (interrupts) kullanarak pil ömrünü maksimize eden bir sensör düğümü yap." },
+    { title: "OTA Update over BLE", desc: "Bluetooth Low Energy üzerinden kablosuz firmware güncellemesi (FOTA) yapan bir sistem kur." },
+    { title: "Custom Bootloader", desc: "Cihazın açılışını kontrol eden ve güvenli önyükleme (secure boot) sağlayan kendi bootloader'ını yaz." }
   ],
   "Junior IoT Engineer": [
-    { title: "MQTT Dashboard", desc: "ESP32 verisini AWS IoT Core'a gönder ve izle." },
-    { title: "Smart Home Hub", desc: "Home Assistant ile entegre akıllı priz." }
+    { title: "MQTT Dashboard", desc: "ESP32 ile sensör verilerini AWS IoT Core veya HiveMQ'ya gönderip React tabanlı bir panelde izle." },
+    { title: "Smart Home Hub", desc: "Farklı marka akıllı cihazları (Zigbee/WiFi) tek bir merkezden yöneten (Home Assistant benzeri) bir hub yap." },
+    { title: "GPS Asset Tracker", desc: "GPS ve GSM (SIM800L) modülleriyle bir varlığın konumunu canlı olarak haritada takip et." },
+    { title: "Smart Irrigation", desc: "Toprak nemine göre otomatik sulama yapan ve mobil uygulamadan kontrol edilen bir sistem." },
+    { title: "Voice Controlled Light", desc: "ESP32'yi Amazon Alexa veya Google Assistant ile entegre ederek sesle lamba kontrolü yap." },
+    { title: "Industrial Modbus Monitor", desc: "RS485 Modbus verilerini okuyup MQTT üzerinden buluta aktaran bir endüstriyel gateway tasarla." }
   ],
   "Test Automation Engineer Python": [
-    { title: "HIL Simulation Script", desc: "Python ile donanıma seri porttan komut gönderip test et." },
-    { title: "Log Analyzer", desc: "Cihaz loglarını analiz eden araç geliştir." }
+    { title: "HIL Simulation Script", desc: "Python (PySerial) ile donanıma komut gönderip yanıtları doğrulayan otomatik test senaryoları yaz." },
+    { title: "Log Analyzer Tool", desc: "Gigabaytlarca log dosyasını tarayıp hata desenlerini (error patterns) bulan ve raporlayan bir araç geliştir." },
+    { title: "API Testing Framework", desc: "Pytest ve Requests kütüphaneleriyle bir REST API'nin tüm uç noktalarını (endpoints) test eden yapı kur." },
+    { title: "Web Scraper & Validator", desc: "Selenium veya BeautifulSoup ile web sitelerinden veri çekip içerik doğruluğunu test et." },
+    { title: "CI/CD Pipeline Script", desc: "GitHub Actions veya Jenkins üzerinde çalışacak, kod commit edildiğinde otomatik testleri başlatan scriptler yaz." },
+    { title: "GUI Automation Bot", desc: "PyAutoGUI kullanarak masaüstü uygulamalarında tekrarlayan işlemleri otomatize eden bir bot yap." }
   ],
   "PLC Automation Engineer": [
-    { title: "Traffic Light Logic", desc: "Trafik ışığı simülasyonunu Ladder Logic ile yap." },
-    { title: "Tank Level Control", desc: "PID kontrol ile seviye otomasyonu." }
+    { title: "Traffic Light Logic", desc: "Karmaşık bir kavşak için zamanlayıcılar ve sensörler içeren trafik ışığı kontrol mantığı (Ladder Logic)." },
+    { title: "Tank Level Control", desc: "PID kontrol bloğu kullanarak bir tankın su seviyesini sabit tutan otomasyon sistemi." },
+    { title: "Elevator Control System", desc: "4 katlı bir asansörün çağrı önceliklendirme ve güvenlik kilitlerini içeren PLC programı." },
+    { title: "Conveyor Sorting System", desc: "Sensörler yardımıyla ürünleri boyutuna veya rengine göre ayıran konveyör bant otomasyonu." },
+    { title: "Automatic Car Wash", desc: "Sıralı işlem (sequential process) mantığıyla çalışan, fırça ve su jetlerini yöneten oto yıkama sistemi." },
+    { title: "VFD Motor Control", desc: "PLC üzerinden Modbus haberleşmesi ile bir AC motorun hızını ve yönünü kontrol et." }
+  ],
+  "System Integration Engineer": [
+    { title: "Sensor Fusion", desc: "İvmeölçer, Jiroskop ve Manyetometre verilerini Kalman Filtresi ile birleştirip hassas konum bul." },
+    { title: "CAN Bus Sniffer", desc: "Araç içi haberleşme ağını (CAN Bus) dinleyen, verileri çözümleyen ve kaydeden bir donanım aracı." },
+    { title: "Robot Arm Interface", desc: "Mekanik bir robot kolu ROS (Robot Operating System) ve seri haberleşme ile bilgisayardan kontrol et." },
+    { title: "Drone Flight Controller", desc: "Kendi uçuş kontrolcünü yazarak sensör verilerini motor hızlarına dönüştüren stabilizasyon algoritması." },
+    { title: "Vision Inspection System", desc: "OpenCV ve endüstriyel kamera kullanarak üretim hattındaki hatalı ürünleri tespit eden sistem." },
+    { title: "Multi-Sensor Data Logger", desc: "Farklı arayüzlerden (SPI, I2C, UART) gelen verileri toplayıp SQL veritabanına kaydeden entegre sistem." }
   ]
 };
 
@@ -419,6 +447,9 @@ export default function CareerCommandCenterV18() {
   // Drag and Drop State'leri
   const [draggingAppId, setDraggingAppId] = useState(null);
   const [dragOverColumn, setDragOverColumn] = useState(null);
+
+  // Project Idea State
+  const [projectIdeaIndex, setProjectIdeaIndex] = useState(0);
 
 
   const diffDays = Math.ceil(Math.abs(new Date('2026-02-01') - new Date()) / (1000 * 60 * 60 * 24));
@@ -912,7 +943,24 @@ export default function CareerCommandCenterV18() {
                                     
                                     {viewMode !== 'checklist' && (
                                         <div className="space-y-6">
-                                            <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5"><h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri</h4>{(projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"]).slice(0,1).map((idea, i) => (<div key={i}><div className="text-sm font-bold text-white mb-1">{idea.title}</div><div className="text-xs text-slate-500 leading-relaxed">{idea.desc}</div></div>))}</div>
+                                            <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri</h4>
+                                                    <button onClick={() => setProjectIdeaIndex(prev => prev + 1)} className="text-slate-500 hover:text-cyan-400 transition-colors" title="Fikri Değiştir">
+                                                        <RefreshCw size={12} />
+                                                    </button>
+                                                </div>
+                                                {(() => {
+                                                    const roleProjects = projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"];
+                                                    const currentProject = roleProjects[projectIdeaIndex % roleProjects.length];
+                                                    return (
+                                                        <div>
+                                                            <div className="text-sm font-bold text-white mb-1">{currentProject.title}</div>
+                                                            <div className="text-xs text-slate-500 leading-relaxed">{currentProject.desc}</div>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
                                             <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
                                                 <div className="flex justify-between items-center mb-3"><h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><Save size={14}/> Notlar</h4>{!isEditing && userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(true)} className="text-[10px] text-cyan-400"><Edit3 size={12}/></button>}</div>
                                                 {isEditing || !userNotes[selectedCountry.id] ? (<div className="space-y-2"><textarea className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-300 outline-none min-h-[100px]" placeholder="Hedeflerini yaz..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} /><div className="flex gap-2"><button onClick={handleSaveNote} disabled={isSaving} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-xs font-bold">{isSaving ? '...' : 'Kaydet'}</button>{userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(false)} className="px-3 bg-slate-700 text-white py-2 rounded-lg text-xs">iptal</button>}</div></div>) : (<p className="text-xs text-slate-300 whitespace-pre-wrap cursor-pointer hover:text-white" onClick={() => setIsEditing(true)}>{userNotes[selectedCountry.id]}</p>)}
