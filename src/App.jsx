@@ -31,7 +31,7 @@ try {
     console.error("Firebase Hatası:", e);
 }
 
-// --- VERİTABANI ---
+// --- VERİTABANI (GÜNCELLENMİŞ ABD BİLGİSİ İLE) ---
 const allCountries = [
   // TIER 1 & POPÜLER
   {
@@ -56,7 +56,8 @@ const allCountries = [
     desc: 'Teknolojinin kalbi. En yüksek maaşlar burada.',
     strategy: 'STEM Master yapıp 3 yıl çalışma izni (OPT) al.',
     link: 'https://educationusa.state.gov/', 
-    education: { tuition: '$30k+', workRights: 'Kampüs İçi', postGrad: '3 Yıl (STEM OPT)', topUnis: ['MIT', 'Stanford'], note: 'OPT hayati önem taşır.' }
+    // GÜNCELLENEN KISIM:
+    education: { tuition: '$30k+', workRights: '20 Saat (Kampüs İçi)', postGrad: '3 Yıl (STEM OPT)', topUnis: ['MIT', 'Stanford'], note: 'Sadece kampüs içi çalışılabilir. Tatillerde 40 saat izin var.' }
   },
   {
     id: 'ca', name: 'Kanada', englishName: 'Canada', region: 'Amerika', 
@@ -179,7 +180,7 @@ const projectIdeas = {
   ]
 };
 
-export default function CareerCommandCenterV13() {
+export default function CareerCommandCenterV14() {
   const [activeTab, setActiveTab] = useState('All');
   const [selectedCountry, setSelectedCountry] = useState(allCountries[0]); 
   const [searchTerm, setSearchTerm] = useState('');
@@ -273,7 +274,7 @@ export default function CareerCommandCenterV13() {
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/80 backdrop-blur-xl border-r border-white/10 transition-transform duration-300 md:relative md:translate-x-0 shrink-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl h-full`}>
         <div className="p-4 border-b border-white/10 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2 text-cyan-400 font-bold tracking-wider">
-            <Zap size={20} fill="currentColor" /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">KARİYER-V13.2</span>
+            <Zap size={20} fill="currentColor" /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">KARİYER-V14</span>
           </div>
           <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-slate-400"><X size={20} /></button>
         </div>
@@ -296,7 +297,7 @@ export default function CareerCommandCenterV13() {
             <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-2 px-2">Öncelik</h3>
             <div className="space-y-1">
                {['Tier 1', 'Tier 2', 'Tier 3'].map(tier => (
-                <button key={tier} onClick={() => { setActiveTab(tier); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex gap-3 items-center group ${activeTab === tier ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_15px_-5px_rgba(168,85,247,0.3)]' : 'text-slate-400 hover:bg-white/5'}`}>
+                <button key={tier} onClick={() => { setActiveTab(tier); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex gap-3 items-center group ${activeTab === tier ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
                    <div className={`w-2 h-2 rounded-full shadow-[0_0_8px] ${tier === 'Tier 1' ? 'bg-green-500 shadow-green-500' : tier === 'Tier 2' ? 'bg-yellow-500 shadow-yellow-500' : 'bg-red-500 shadow-red-500'}`} />
                   {tier}
                 </button>
@@ -410,13 +411,13 @@ export default function CareerCommandCenterV13() {
                           </>
                        ) : (
                           <div className="space-y-4">
-                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between items-center gap-4">
-                                <div className="flex items-center gap-2 shrink-0"><div className="p-2 bg-purple-500/20 rounded-lg text-purple-400"><Coins size={18}/></div><span className="text-sm text-slate-400">Eğitim Ücreti</span></div>
-                                <div className="text-sm font-bold text-white text-right flex-1">{selectedCountry.education.tuition}</div>
+                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between">
+                                <span className="text-sm text-slate-400">Eğitim Ücreti</span>
+                                <span className="text-sm font-bold text-white">{selectedCountry.education.tuition}</span>
                              </div>
-                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between items-center gap-4">
-                                <div className="flex items-center gap-2 shrink-0"><div className="p-2 bg-pink-500/20 rounded-lg text-pink-400"><Clock size={18}/></div><span className="text-sm text-slate-400">Çalışma İzni</span></div>
-                                <div className="text-sm font-bold text-yellow-400 text-right flex-1">{selectedCountry.education.workRights}</div>
+                             <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between">
+                                <span className="text-sm text-slate-400">Çalışma İzni</span>
+                                <span className="text-sm font-bold text-yellow-400">{selectedCountry.education.workRights}</span>
                              </div>
                              <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5">
                                 <span className="text-sm text-slate-400 block mb-2">Öne Çıkan Üniversiteler</span>
