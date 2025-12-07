@@ -1,13 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  Globe, Search, MapPin, Briefcase, GraduationCap, 
-  AlertTriangle, ArrowRight, Layout, TrendingUp, 
-  Terminal, Shield, Zap, ChevronRight, Save, ExternalLink, 
-  Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity,
-  Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb,
-  Linkedin, Cloud, Check, Loader2, Edit3
-} from 'lucide-react';
-
+import { Globe, Search, MapPin, Briefcase, GraduationCap, AlertTriangle, ArrowRight, Layout, TrendingUp, Terminal, Shield, Zap, ChevronRight, Save, ExternalLink, Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity, Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb, Linkedin, Cloud, Check, Loader2 } from 'lucide-react';
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, signInAnonymously } from "firebase/auth";
@@ -58,7 +50,6 @@ export default function CareerApp() {
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('career');
   const [selectedRole, setSelectedRole] = useState(engineerRoles[0].title); 
-  
   const [user, setUser] = useState(null);
   const [userNotes, setUserNotes] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -80,10 +71,7 @@ export default function CareerApp() {
             }
         });
         return () => unsub();
-    }).catch((error) => {
-        console.error("Giriş Hatası:", error);
-        setDbStatus('error');
-    });
+    }).catch(() => setDbStatus('error'));
   }, []);
 
   const handleSaveNote = async () => {
@@ -95,7 +83,6 @@ export default function CareerApp() {
         await setDoc(doc(db, "users", user.uid), { notes: updatedNotes }, { merge: true });
         setTimeout(() => setIsSaving(false), 500);
     } catch (e) {
-        console.error("Yazma hatası:", e);
         setIsSaving(false);
     }
   };
@@ -128,16 +115,16 @@ export default function CareerApp() {
   }, [filteredData]);
 
   return (
-    <div className="w-full h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden flex flex-col md:flex-row relative">
+    <div className="w-screen h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden flex relative">
       
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none z-0"></div>
-      <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_800px_at_50%_-200px,#1e293b,transparent)] z-0 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-200px,#1e293b,transparent)] z-0 pointer-events-none"></div>
 
       {/* MOBILE OVERLAY */}
       {mobileMenuOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />}
       
       {/* SIDEBAR */}
-      <div className={`${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:static inset-y-0 left-0 z-50 w-64 bg-slate-900/95 backdrop-blur-xl border-r border-white/10 transition-transform duration-300 flex flex-col shrink-0 h-screen md:h-full`}>
+      <aside className={`fixed md:static inset-y-0 left-0 z-50 w-64 bg-slate-900/95 backdrop-blur-xl border-r border-white/10 transition-transform ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} flex flex-col shrink-0 h-screen md:h-screen overflow-hidden`}>
         <div className="p-4 border-b border-white/10 flex justify-between items-center bg-gradient-to-r from-slate-900 to-slate-800 shrink-0">
           <div className="flex items-center gap-2 text-cyan-400 font-bold">
             <Zap size={20} fill="currentColor" />
@@ -151,15 +138,15 @@ export default function CareerApp() {
         <nav className="p-4 space-y-4 overflow-y-auto flex-1">
           <div className={`px-3 py-2 rounded-lg border flex items-center gap-2 text-xs font-bold ${dbStatus === 'connected' ? 'bg-emerald-900/30 border-emerald-500/30 text-emerald-400' : 'bg-yellow-900/30 border-yellow-500/30 text-yellow-400'}`}>
              {dbStatus === 'connected' ? <Cloud size={14}/> : <Loader2 size={14} className="animate-spin"/>}
-             <span className="truncate">{dbStatus === 'connected' ? 'Veritabanı Aktif' : 'Bağlanıyor...'}</span>
+             <span className="truncate">{dbStatus === 'connected' ? 'Aktif' : 'Bağlanıyor...'}</span>
           </div>
 
           <div>
             <h3 className="text-[10px] font-bold text-slate-500 uppercase mb-2">Bölgeler</h3>
             <div className="space-y-1">
               {['All', 'Avrupa', 'Asya', 'Amerika', 'Kuzey'].map(tab => (
-                <button key={tab} onClick={() => { setActiveTab(tab); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
-                  {tab === 'All' ? 'Tüm Dünyalar' : tab}
+                <button key={tab} onClick={() => { setActiveTab(tab); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${activeTab === tab ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-400 hover:bg-white/5'}`}>
+                  {tab === 'All' ? 'Tüm' : tab}
                 </button>
               ))}
             </div>
@@ -169,7 +156,7 @@ export default function CareerApp() {
             <h3 className="text-[10px] font-bold text-slate-500 uppercase mb-2">Tier</h3>
             <div className="space-y-1">
                {['Tier 1', 'Tier 2', 'Tier 3'].map(tier => (
-                <button key={tier} onClick={() => { setActiveTab(tier); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all flex gap-2 items-center ${activeTab === tier ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
+                <button key={tier} onClick={() => { setActiveTab(tier); setMobileMenuOpen(false); }} className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex gap-2 items-center ${activeTab === tier ? 'bg-purple-500/20 text-purple-400' : 'text-slate-400 hover:bg-white/5'}`}>
                    <div className={`w-2 h-2 rounded-full ${tier === 'Tier 1' ? 'bg-green-500' : tier === 'Tier 2' ? 'bg-yellow-500' : 'bg-red-500'}`} />
                   {tier}
                 </button>
@@ -179,22 +166,20 @@ export default function CareerApp() {
         </nav>
 
         <div className="p-4 border-t border-white/10 bg-slate-900/50 shrink-0">
-          <div className="bg-slate-800/50 rounded-xl p-3 border border-white/5">
-             <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold text-slate-300 flex items-center gap-1">
-                  <Clock size={12} className="text-cyan-400" /> Gün
-                </span>
-                <span className="text-xs font-bold text-white">{diffDays}</span>
+          <div className="bg-slate-800/50 rounded-lg p-2 border border-white/5">
+             <div className="flex justify-between items-center mb-1">
+                <span className="text-xs font-bold text-slate-300">Gün</span>
+                <span className="text-xs font-bold text-cyan-400">{diffDays}</span>
              </div>
-             <div className="w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden">
-                <div className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full" style={{ width: '75%' }}></div>
+             <div className="w-full bg-slate-700/50 h-1 rounded-full">
+                <div className="bg-cyan-500 h-full rounded-full" style={{ width: '75%' }}></div>
              </div>
           </div>
         </div>
-      </div>
+      </aside>
 
-      {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col min-w-0 h-full z-10">
+      {/* MAIN */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden z-10">
         
         {/* HEADER */}
         <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center px-4 gap-4 shrink-0">
@@ -203,23 +188,21 @@ export default function CareerApp() {
           </button>
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-2.5 text-slate-500" size={16} />
-            <input type="text" placeholder="Ülke ara..." className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <input type="text" placeholder="Ülke ara..." className="w-full bg-slate-950/50 border border-white/10 rounded-lg py-2 pl-9 pr-4 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </header>
 
-        {/* CONTENT AREA */}
-        <main className="flex-1 flex overflow-hidden min-h-0">
+        {/* CONTENT */}
+        <div className="flex-1 flex overflow-hidden min-h-0">
           
-          {/* LIST COLUMN - MOBILE: full width when no selection, MD+: fixed width */}
-          <div className={`${selectedCountry && 'hidden md:flex'} flex-col w-full md:w-[400px] md:flex-none overflow-y-auto p-3 md:p-4 border-r border-white/5 bg-slate-900/30 scroll-smooth`}>
-            <div className="space-y-3">
+          {/* LIST */}
+          <div className={`${selectedCountry && 'hidden md:flex'} flex-col w-full md:w-96 overflow-y-auto p-3 border-r border-white/5 bg-slate-900/30`}>
+            <div className="space-y-2">
               {filteredData.map(country => (
-                <div key={country.id} onClick={() => { setSelectedCountry(country); setMobileMenuOpen(false); }} className={`p-3 rounded-xl border cursor-pointer transition-all ${selectedCountry?.id === country.id ? 'bg-slate-800/80 border-cyan-500/50' : 'bg-slate-900/40 border-white/5 hover:bg-slate-800/60'}`}>
-                  <div className="flex justify-between items-start mb-2">
+                <div key={country.id} onClick={() => { setSelectedCountry(country); setMobileMenuOpen(false); }} className={`p-3 rounded-lg border cursor-pointer transition-all ${selectedCountry?.id === country.id ? 'bg-slate-800/80 border-cyan-500/50' : 'bg-slate-900/40 border-white/5 hover:bg-slate-800/50'}`}>
+                  <div className="flex justify-between items-start mb-1">
                     <div>
-                      <h3 className={`text-sm font-bold ${selectedCountry?.id === country.id ? 'text-cyan-400' : 'text-slate-200'}`}>
-                        {country.name}
-                      </h3>
+                      <h3 className="text-sm font-bold text-slate-200">{country.name}</h3>
                       <div className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
                         <MapPin size={10} /> {country.region}
                       </div>
@@ -246,42 +229,40 @@ export default function CareerApp() {
             </div>
           </div>
 
-          {/* DETAIL COLUMN - MOBILE: fixed overlay, MD+: normal */}
+          {/* DETAIL */}
           {selectedCountry && (
-            <div className="fixed inset-0 md:static md:inset-auto w-full md:w-[500px] md:flex-none bg-slate-900/95 backdrop-blur-xl flex flex-col z-50 md:z-auto border-l border-white/10">
+            <div className="fixed inset-0 md:static w-full md:w-96 bg-slate-900/95 backdrop-blur-xl flex flex-col z-50 md:z-auto border-l border-white/10 overflow-hidden">
               
-              <div className="h-40 md:h-48 shrink-0 bg-gradient-to-br from-blue-900/40 to-slate-900 relative">
+              <div className="h-40 shrink-0 bg-gradient-to-br from-blue-900/40 to-slate-900 relative flex flex-col justify-end p-4">
                 <button onClick={() => setSelectedCountry(null)} className="absolute top-4 left-4 md:hidden bg-black/50 p-2 rounded-full text-white">
                   <ArrowRight size={18} className="rotate-180" />
                 </button>
 
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold mb-2 ${selectedCountry.tier === 'Tier 1' ? 'bg-emerald-500/20 text-emerald-400' : selectedCountry.tier === 'Tier 2' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>
-                    {selectedCountry.tier}
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white">{selectedCountry.name}</h2>
-                  
-                  <div className="flex gap-1 mt-3">
-                    <button onClick={() => setViewMode('career')} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'career' ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
-                      Prof.
-                    </button>
-                    <button onClick={() => setViewMode('education')} className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${viewMode === 'education' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
-                      Akad.
-                    </button>
-                  </div>
+                <div className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold mb-2 w-fit ${selectedCountry.tier === 'Tier 1' ? 'bg-emerald-500/20 text-emerald-400' : selectedCountry.tier === 'Tier 2' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>
+                  {selectedCountry.tier}
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-3">{selectedCountry.name}</h2>
+                
+                <div className="flex gap-1">
+                  <button onClick={() => setViewMode('career')} className={`flex-1 py-2 rounded text-xs font-bold transition-all ${viewMode === 'career' ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
+                    Prof.
+                  </button>
+                  <button onClick={() => setViewMode('education')} className={`flex-1 py-2 rounded text-xs font-bold transition-all ${viewMode === 'education' ? 'bg-purple-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
+                    Akad.
+                  </button>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 pb-20 md:pb-6">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 
                 {viewMode === 'career' ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-slate-800/50 p-2 rounded-lg border border-white/5">
+                      <div className="bg-slate-800/50 p-2 rounded border border-white/5">
                         <div className="text-[9px] text-slate-500 mb-0.5 font-bold">MAAŞ</div>
                         <div className="text-xs font-bold text-emerald-400">{selectedCountry.salary}</div>
                       </div>
-                      <div className="bg-slate-800/50 p-2 rounded-lg border border-white/5">
+                      <div className="bg-slate-800/50 p-2 rounded border border-white/5">
                         <div className="text-[9px] text-slate-500 mb-0.5 font-bold">ZORLUK</div>
                         <div className="text-xs font-bold text-yellow-400">{selectedCountry.difficulty > 60 ? 'Yüksek' : 'Orta'}</div>
                       </div>
@@ -289,35 +270,35 @@ export default function CareerApp() {
                     
                     <div>
                       <h4 className="text-xs font-bold text-slate-500 uppercase mb-1">Durum</h4>
-                      <p className="text-xs text-slate-300 leading-relaxed">{selectedCountry.desc}</p>
+                      <p className="text-xs text-slate-300">{selectedCountry.desc}</p>
                     </div>
 
-                    <div className="bg-cyan-950/30 border border-cyan-500/20 p-3 rounded-lg">
+                    <div className="bg-cyan-950/30 border border-cyan-500/20 p-3 rounded">
                       <h4 className="text-xs font-bold text-cyan-400 mb-1">Strateji</h4>
                       <p className="text-[10px] text-slate-300">{selectedCountry.strategy}</p>
                     </div>
 
                     <div className="border-t border-white/10 pt-3">
                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-2">Pozisyon</label>
-                       <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full bg-slate-950 border border-white/10 text-slate-200 text-xs rounded-lg p-2 mb-2">
+                       <select value={selectedRole} onChange={(e) => setSelectedRole(e.target.value)} className="w-full bg-slate-950 border border-white/10 text-slate-200 text-xs rounded p-2 mb-2">
                          {engineerRoles.map((role) => (
                            <option key={role.title} value={role.title}>{role.label}</option>
                          ))}
                        </select>
 
-                       <button onClick={() => performGoogleSearch(selectedCountry)} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2">
+                       <button onClick={() => performGoogleSearch(selectedCountry)} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-2">
                         <Search size={12} />
                         İş Ara
                        </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-3">
-                    <div className="bg-slate-800/50 p-2 rounded-lg border border-white/5 flex justify-between">
+                  <div className="space-y-2">
+                    <div className="bg-slate-800/50 p-2 rounded border border-white/5 flex justify-between">
                       <span className="text-[9px] font-bold text-slate-400">ÜCRET</span>
                       <span className="text-xs font-bold text-white">{selectedCountry.education.tuition}</span>
                     </div>
-                    <div className="bg-slate-800/50 p-2 rounded-lg border border-white/5 flex justify-between">
+                    <div className="bg-slate-800/50 p-2 rounded border border-white/5 flex justify-between">
                       <span className="text-[9px] font-bold text-slate-400">ÇALIŞMA</span>
                       <span className="text-xs font-bold text-yellow-400">{selectedCountry.education.workRights}</span>
                     </div>
@@ -333,38 +314,38 @@ export default function CareerApp() {
                   </div>
                 )}
 
-                <div className="pt-4 border-t border-white/10">
+                <div className="pt-3 border-t border-white/10">
                   <h4 className="text-xs font-bold text-slate-500 uppercase mb-2">NOTLAR</h4>
 
                   {showNoteInput ? (
                     <div className="space-y-2">
-                      <textarea className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 min-h-[60px]" placeholder="Not ekle..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} />
+                      <textarea className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-slate-200 min-h-[60px]" placeholder="Not ekle..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} />
                       <div className="flex gap-2">
                         <button onClick={handleSaveNote} disabled={isSaving} className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-1.5 rounded text-xs font-bold">
-                            {isSaving ? <Loader2 size={12} className="animate-spin inline" /> : 'Kaydet'}
+                            {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
                         </button>
                         <button onClick={() => setShowNoteInput(false)} className="flex-1 bg-slate-800 text-white py-1.5 rounded text-xs">İptal</button>
                       </div>
                     </div>
                   ) : (
-                    <div onClick={() => setShowNoteInput(true)} className="bg-slate-800/30 border border-dashed border-slate-600 rounded-lg p-2 text-xs text-slate-400 text-center cursor-pointer min-h-[50px] flex items-center justify-center">
+                    <div onClick={() => setShowNoteInput(true)} className="bg-slate-800/30 border border-dashed border-slate-600 rounded p-2 text-xs text-slate-400 text-center cursor-pointer min-h-[50px] flex items-center justify-center">
                       {userNotes[selectedCountry.id] ? (
-                          <p className="text-left text-slate-300">{userNotes[selectedCountry.id]}</p>
+                          <p className="text-left text-slate-300 text-[11px]">{userNotes[selectedCountry.id]}</p>
                       ) : (
                           <span>Not ekle</span>
                       )}
                     </div>
                   )}
 
-                  <a href={selectedCountry.link} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-2 w-full bg-white text-slate-900 py-2 rounded-lg font-bold text-xs">
+                  <a href={selectedCountry.link} target="_blank" rel="noreferrer" className="mt-3 flex items-center justify-center gap-2 w-full bg-white text-slate-900 py-2 rounded font-bold text-xs">
                     Kaynak <ExternalLink size={10} />
                   </a>
                 </div>
               </div>
             </div>
           )}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
