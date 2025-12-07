@@ -5,7 +5,8 @@ import {
   Terminal, Shield, Zap, ChevronRight, Save, ExternalLink, 
   Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity,
   Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb,
-  Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle, LogOut, LogIn
+  Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle, LogOut, LogIn, 
+  ListTodo, PieChart, FileCheck
 } from 'lucide-react';
 
 // --- FIREBASE ENTEGRASYONU ---
@@ -35,6 +36,15 @@ try {
     console.error("Firebase Hatası:", e);
 }
 
+// --- CHECKLIST ŞABLONLARI ---
+const commonChecklist = [
+    "Pasaportun geçerlilik süresini kontrol et (en az 1 yıl)",
+    "Diploma ve Transkript İngilizce tercümesi",
+    "Adli Sicil Kaydı (E-Devlet)",
+    "CV'ni o ülkenin formatına göre güncelle",
+    "LinkedIn profilini hedef ülkeye göre düzenle"
+];
+
 // --- VERİTABANI (TÜM LİSTE) ---
 const allCountries = [
   // TIER 1 & POPÜLER
@@ -44,7 +54,8 @@ const allCountries = [
     desc: 'Londra finans ve teknoloji başkenti. "High Potential Individual" vizesi büyük fırsattır.',
     strategy: 'HPI vizesini veya "Graduate Visa" veren bir Master programını hedefle.',
     link: 'https://www.gov.uk/browse/visas-immigration/work-visas',
-    education: { tuition: '£15k - £25k', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Imperial', 'Manchester'], note: 'Mezuniyet sonrası 2 yıl izin.' }
+    education: { tuition: '£15k - £25k', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Imperial', 'Manchester'], note: 'Mezuniyet sonrası 2 yıl izin.' },
+    checklist: [...commonChecklist, "IELTS UKVI sınavına gir", "TB (Verem) Testi yaptır", "Skilled Worker sponsorlu iş bul"]
   },
   {
     id: 'de', name: 'Almanya', englishName: 'Germany', region: 'Avrupa', 
@@ -52,7 +63,8 @@ const allCountries = [
     desc: 'Mühendislik devi. TU9 üniversiteleri ücretsizdir.',
     strategy: 'İş: Chancenkarte. Master: Not ortalaman 2.7 üzerindeyse başvur.',
     link: 'https://www.daad.de/en/',
-    education: { tuition: 'Ücretsiz', workRights: '20 Saat/Hafta', postGrad: '18 Ay', topUnis: ['TU Munich', 'RWTH Aachen'], note: 'Werkstudent yaygındır.' }
+    education: { tuition: 'Ücretsiz', workRights: '20 Saat/Hafta', postGrad: '18 Ay', topUnis: ['TU Munich', 'RWTH Aachen'], note: 'Werkstudent yaygındır.' },
+    checklist: [...commonChecklist, "Bloke Hesap (Sperrkonto) aç", "Sağlık Sigortası (Krankenkasse)", "ZAB Denklik Belgesi al", "Almanca A1/A2 sertifikası"]
   },
   {
     id: 'us', name: 'ABD', englishName: 'United States', region: 'Amerika', 
@@ -60,7 +72,8 @@ const allCountries = [
     desc: 'Teknolojinin kalbi. En yüksek maaşlar burada.',
     strategy: 'STEM Master yapıp 3 yıl çalışma izni (OPT) al.',
     link: 'https://educationusa.state.gov/', 
-    education: { tuition: '$30k+', workRights: '20 Saat (Kampüs İçi)', postGrad: '3 Yıl (STEM OPT)', topUnis: ['MIT', 'Stanford'], note: 'OPT hayati önem taşır.' }
+    education: { tuition: '$30k+', workRights: '20 Saat (Kampüs İçi)', postGrad: '3 Yıl (STEM OPT)', topUnis: ['MIT', 'Stanford'], note: 'OPT hayati önem taşır.' },
+    checklist: [...commonChecklist, "DS-160 Formunu doldur", "SEVIS ücretini öde", "I-20 belgesini okuldan al", "Banka teminat mektubu hazırla"]
   },
   {
     id: 'ca', name: 'Kanada', englishName: 'Canada', region: 'Amerika', 
@@ -68,7 +81,8 @@ const allCountries = [
     desc: 'Toronto ve Vancouver teknoloji merkezleri. Göçmenlik politikaları şeffaf.',
     strategy: 'Master sonrası PGWP (Çalışma izni) almak vatandaşlığa götürür.',
     link: 'https://www.canada.ca/', 
-    education: { tuition: 'CAD 20k+', workRights: '24 Saat/Hafta', postGrad: '3 Yıl (PGWP)', topUnis: ['U of Toronto', 'Waterloo'], note: 'Eğitim süresi kadar izin.' }
+    education: { tuition: 'CAD 20k+', workRights: '24 Saat/Hafta', postGrad: '3 Yıl (PGWP)', topUnis: ['U of Toronto', 'Waterloo'], note: 'Eğitim süresi kadar izin.' },
+    checklist: [...commonChecklist, "WES Denkliği al", "Express Entry profili oluştur", "Biometrik randevusu al"]
   },
   {
     id: 'ch', name: 'İsviçre', englishName: 'Switzerland', region: 'Avrupa', 
@@ -76,7 +90,8 @@ const allCountries = [
     desc: 'Avrupa\'nın en yüksek maaşları. Google, ABB ve Roche burada.',
     strategy: 'Doğrudan girmek zordur. Almanya üzerinden geçiş yap.',
     link: 'https://www.sem.admin.ch/', 
-    education: { tuition: 'CHF 1.5k', workRights: '15 Saat/Hafta', postGrad: '6 Ay', topUnis: ['ETH Zurich', 'EPFL'], note: 'Okul ucuz, yaşam pahalı.' }
+    education: { tuition: 'CHF 1.5k', workRights: '15 Saat/Hafta', postGrad: '6 Ay', topUnis: ['ETH Zurich', 'EPFL'], note: 'Okul ucuz, yaşam pahalı.' },
+    checklist: [...commonChecklist, "Kanton göçmenlik ofisi onayı", "Finansal yeterlilik kanıtı", "Konaklama sözleşmesi"]
   },
   {
     id: 'nl', name: 'Hollanda', englishName: 'Netherlands', region: 'Avrupa', 
@@ -84,59 +99,77 @@ const allCountries = [
     desc: 'ASML ve Philips burada. Teknoloji çok ileri.',
     strategy: 'Top 200 üniversite mezunuysan "Orientation Year" alabilirsin.',
     link: 'https://www.studyinnl.org/',
-    education: { tuition: '€15k+', workRights: '16 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Delft', 'Eindhoven'], note: 'Part-time iş zordur.' }
+    education: { tuition: '€15k+', workRights: '16 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Delft', 'Eindhoven'], note: 'Part-time iş zordur.' },
+    checklist: [...commonChecklist, "BSN Numarası için randevu", "DigiD başvurusu", "Orientation Year vizesi şartlarını kontrol et"]
   },
   {
-    id: 'au', name: 'Avustralya', englishName: 'Australia', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Subclass 482', tags: ['Yüksek Yaşam'], salary: 'AUD 80k+', desc: 'Mühendisler için "Skilled Occupation List" açık.', strategy: 'Master (Subclass 500) en iyi giriş.', link: 'https://immi.homeaffairs.gov.au/', education: { tuition: 'AUD 30k+', workRights: '24 Saat/Hafta', postGrad: '2-4 Yıl', topUnis: ['UNSW', 'Melbourne'], note: 'Tatillerde full-time.' }
+    id: 'au', name: 'Avustralya', englishName: 'Australia', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Subclass 482', tags: ['Yüksek Yaşam'], salary: 'AUD 80k+', desc: 'Mühendisler için "Skilled Occupation List" açık.', strategy: 'Master (Subclass 500) en iyi giriş.', link: 'https://immi.homeaffairs.gov.au/', education: { tuition: 'AUD 30k+', workRights: '24 Saat/Hafta', postGrad: '2-4 Yıl', topUnis: ['UNSW', 'Melbourne'], note: 'Tatillerde full-time.' },
+    checklist: [...commonChecklist, "PTE/IELTS sınav sonucu", "Sağlık sigortası (OSHC)", "GTE (Geçici Giriş) mektubu yaz"]
   },
   // --- DİĞERLERİ ---
   {
-    id: 'pl', name: 'Polonya', englishName: 'Poland', region: 'Avrupa', tier: 'Tier 1', difficulty: 20, visa: 'Work Permit', tags: ['Yazılım'], salary: '€25k - €40k', desc: 'Avrupa\'nın yazılım fabrikası. Vize kolay.', strategy: 'Master yaparken full-time çalışabilirsin.', link: 'https://study.gov.pl/', education: { tuition: '€2k - €4k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['Warsaw Tech'], note: 'İzin gerekmez.' }
+    id: 'pl', name: 'Polonya', englishName: 'Poland', region: 'Avrupa', tier: 'Tier 1', difficulty: 20, visa: 'Work Permit', tags: ['Yazılım'], salary: '€25k - €40k', desc: 'Avrupa\'nın yazılım fabrikası. Vize kolay.', strategy: 'Master yaparken full-time çalışabilirsin.', link: 'https://study.gov.pl/', education: { tuition: '€2k - €4k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['Warsaw Tech'], note: 'İzin gerekmez.' },
+    checklist: [...commonChecklist, "Çalışma izni (Type A) başvurusu", "Konaklama belgesi", "Sağlık sigortası"]
   },
   {
-    id: 'it', name: 'İtalya', englishName: 'Italy', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'DSU Bursu', tags: ['Burs', 'Otomotiv'], salary: '€28k - €35k', desc: 'DSU Bursu ile bedava okuyup cep harçlığı al.', strategy: 'Torino (Fiat) ideal.', link: 'https://www.universitaly.it/', education: { tuition: 'Bursla Bedava', workRights: '20 Saat/Hafta', postGrad: '12 Ay', topUnis: ['Politecnico di Milano'], note: 'Burslar Eylülde.' }
+    id: 'it', name: 'İtalya', englishName: 'Italy', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'DSU Bursu', tags: ['Burs', 'Otomotiv'], salary: '€28k - €35k', desc: 'DSU Bursu ile bedava okuyup cep harçlığı al.', strategy: 'Torino (Fiat) ideal.', link: 'https://www.universitaly.it/', education: { tuition: 'Bursla Bedava', workRights: '20 Saat/Hafta', postGrad: '12 Ay', topUnis: ['Politecnico di Milano'], note: 'Burslar Eylülde.' },
+    checklist: [...commonChecklist, "CIMEA Denklik Belgesi", "Codice Fiscale al", "DSU Bursu için ISEE paritificato belgesi"]
   },
   {
-    id: 'se', name: 'İsveç', englishName: 'Sweden', region: 'Kuzey', tier: 'Tier 2', difficulty: 45, visa: 'Job Seeker', tags: ['İnovasyon'], salary: '40k SEK', desc: 'Ericsson ve Volvo burada.', strategy: 'İş arama vizesi var.', link: 'https://studyinsweden.se/', education: { tuition: '€10k+', workRights: 'Limitsiz', postGrad: '12 Ay', topUnis: ['KTH'], note: 'Sınır yok.' }
+    id: 'se', name: 'İsveç', englishName: 'Sweden', region: 'Kuzey', tier: 'Tier 2', difficulty: 45, visa: 'Job Seeker', tags: ['İnovasyon'], salary: '40k SEK', desc: 'Ericsson ve Volvo burada.', strategy: 'İş arama vizesi var.', link: 'https://studyinsweden.se/', education: { tuition: '€10k+', workRights: 'Limitsiz', postGrad: '12 Ay', topUnis: ['KTH'], note: 'Sınır yok.' },
+    checklist: [...commonChecklist, "Personnummer başvurusu", "İş arama vizesi şartlarını incele", "Konaklama sırasına gir"]
   },
   {
-    id: 'no', name: 'Norveç', englishName: 'Norway', region: 'Kuzey', tier: 'Tier 2', difficulty: 65, visa: 'Skilled Worker', tags: ['Enerji'], salary: '€55k+', desc: 'Mühendis maaşları çok yüksek.', strategy: 'İş teklifi şart.', link: 'https://www.udi.no/', education: { tuition: 'Ücretli', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['NTNU'], note: 'Yaşam pahalı.' }
+    id: 'no', name: 'Norveç', englishName: 'Norway', region: 'Kuzey', tier: 'Tier 2', difficulty: 65, visa: 'Skilled Worker', tags: ['Enerji'], salary: '€55k+', desc: 'Mühendis maaşları çok yüksek.', strategy: 'İş teklifi şart.', link: 'https://www.udi.no/', education: { tuition: 'Ücretli', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['NTNU'], note: 'Yaşam pahalı.' },
+    checklist: [...commonChecklist, "UDI başvuru portalına kaydol", "İş teklifi al", "Konaklama garantisi"]
   },
   {
-    id: 'fi', name: 'Finlandiya', englishName: 'Finland', region: 'Kuzey', tier: 'Tier 2', difficulty: 50, visa: 'Specialist', tags: ['Telekom'], salary: '€40k+', desc: 'Nokia\'nın evi. 5G/6G.', strategy: 'Finland Works programı.', link: 'https://migri.fi/', education: { tuition: '€10k+', workRights: '30 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Aalto'], note: 'Çalışma saati arttı.' }
+    id: 'fi', name: 'Finlandiya', englishName: 'Finland', region: 'Kuzey', tier: 'Tier 2', difficulty: 50, visa: 'Specialist', tags: ['Telekom'], salary: '€40k+', desc: 'Nokia\'nın evi. 5G/6G.', strategy: 'Finland Works programı.', link: 'https://migri.fi/', education: { tuition: '€10k+', workRights: '30 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Aalto'], note: 'Çalışma saati arttı.' },
+    checklist: [...commonChecklist, "Migri üzerinden oturum izni başvurusu", "Finland Works profili oluştur"]
   },
   {
-    id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Positive List', tags: ['Rüzgar'], salary: '€50k+', desc: 'Vestas ve Lego burada.', strategy: 'Kopenhag çevresine odaklan.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat/Hafta', postGrad: '3 Yıl', topUnis: ['DTU'], note: 'Mezuniyette 3 yıl izin.' }
+    id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Positive List', tags: ['Rüzgar'], salary: '€50k+', desc: 'Vestas ve Lego burada.', strategy: 'Kopenhag çevresine odaklan.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat/Hafta', postGrad: '3 Yıl', topUnis: ['DTU'], note: 'Mezuniyette 3 yıl izin.' },
+    checklist: [...commonChecklist, "SIRI üzerinden başvuru yap", "NemID al", "CPR numarası kaydı"]
   },
   {
-    id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech'], salary: '€40k+', desc: 'Google, Meta Avrupa merkezi.', strategy: 'Critical Skills vizesi.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k+', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' }
+    id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech'], salary: '€40k+', desc: 'Google, Meta Avrupa merkezi.', strategy: 'Critical Skills vizesi.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k+', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' },
+    checklist: [...commonChecklist, "Critical Skills Occupations List kontrolü", "GNIB/IRP kartı başvurusu"]
   },
   {
-    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık'], salary: '€40k+', desc: 'Airbus, Thales.', strategy: 'B1 Fransızca öğren.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243+', workRights: '964 Saat/Yıl', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuz.' }
+    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık'], salary: '€40k+', desc: 'Airbus, Thales.', strategy: 'B1 Fransızca öğren.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243+', workRights: '964 Saat/Yıl', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuz.' },
+    checklist: [...commonChecklist, "Campus France prosedürü", "OFII başvurusu", "Konut sigortası"]
   },
   {
-    id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' }
+    id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' },
+    checklist: [...commonChecklist, "Red-White-Red Card puan hesabı", "Almanca A1 belgesi"]
   },
   {
-    id: 'be', name: 'Belçika', englishName: 'Belgium', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Single Permit', tags: ['Mikroelektronik'], salary: '€40k+', desc: 'IMEC Leuven\'dedir.', strategy: 'IMEC stajlarına başvur.', link: 'https://www.international.socialsecurity.be/', education: { tuition: '€1k-4k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['KU Leuven'], note: 'KU Leuven çok iyi.' }
+    id: 'be', name: 'Belçika', englishName: 'Belgium', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Single Permit', tags: ['Mikroelektronik'], salary: '€40k+', desc: 'IMEC Leuven\'dedir.', strategy: 'IMEC stajlarına başvur.', link: 'https://www.international.socialsecurity.be/', education: { tuition: '€1k-4k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['KU Leuven'], note: 'KU Leuven çok iyi.' },
+    checklist: [...commonChecklist, "Single Permit başvurusu", "Diploma denklik (NARIC)"]
   },
   {
-    id: 'es', name: 'İspanya', englishName: 'Spain', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Highly Qualified', tags: ['Telekom'], salary: '€30k+', desc: 'Yenilenebilir enerji.', strategy: 'Barselona ve Madrid.', link: 'https://www.exteriores.gob.es/', education: { tuition: '€2k-5k', workRights: '30 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['UPC'], note: 'Çalışma izni kolaylaştı.' }
+    id: 'es', name: 'İspanya', englishName: 'Spain', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Highly Qualified', tags: ['Telekom'], salary: '€30k+', desc: 'Yenilenebilir enerji.', strategy: 'Barselona ve Madrid.', link: 'https://www.exteriores.gob.es/', education: { tuition: '€2k-5k', workRights: '30 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['UPC'], note: 'Çalışma izni kolaylaştı.' },
+    checklist: [...commonChecklist, "NIE numarası al", "Empadronamiento (adres kaydı)"]
   },
   {
-    id: 'ee', name: 'Estonya', englishName: 'Estonia', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Startup', tags: ['Dijital'], salary: '€35k', desc: 'Yazılım odaklı.', strategy: 'TalTech başvur.', link: 'https://www.studyinestonia.ee/', education: { tuition: '€3k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['TalTech'], note: 'Sınırsız çalışma.' }
+    id: 'ee', name: 'Estonya', englishName: 'Estonia', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Startup', tags: ['Dijital'], salary: '€35k', desc: 'Yazılım odaklı.', strategy: 'TalTech başvur.', link: 'https://www.studyinestonia.ee/', education: { tuition: '€3k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['TalTech'], note: 'Sınırsız çalışma.' },
+    checklist: [...commonChecklist, "E-Residency başvurusu (opsiyonel)", "D-Visa başvurusu"]
   },
   {
-    id: 'cz', name: 'Çekya', englishName: 'Czechia', region: 'Avrupa', tier: 'Tier 1', difficulty: 30, visa: 'Student Visa', tags: ['Teknik'], salary: '€35k', desc: 'Otomotiv güçlü.', strategy: 'CVUT Prag.', link: 'https://www.studyin.cz/', education: { tuition: '€3k-5k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['CTU Prague'], note: 'Akredite program.' }
+    id: 'cz', name: 'Çekya', englishName: 'Czechia', region: 'Avrupa', tier: 'Tier 1', difficulty: 30, visa: 'Student Visa', tags: ['Teknik'], salary: '€35k', desc: 'Otomotiv güçlü.', strategy: 'CVUT Prag.', link: 'https://www.studyin.cz/', education: { tuition: '€3k-5k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['CTU Prague'], note: 'Akredite program.' },
+    checklist: [...commonChecklist, "Nostrifikasyon (diploma denklik)", "Çekçe dil kursu kaydı"]
   },
   {
-    id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'Job Seeker', tags: ['Ucuz'], salary: '€20k', desc: 'Kolay giriş.', strategy: 'Job Seeker vizesi.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat/Hafta', postGrad: 'Kolay', topUnis: ['Porto Univ'], note: 'SEF bildirimi.' }
+    id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'Job Seeker', tags: ['Ucuz'], salary: '€20k', desc: 'Kolay giriş.', strategy: 'Job Seeker vizesi.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat/Hafta', postGrad: 'Kolay', topUnis: ['Porto Univ'], note: 'SEF bildirimi.' },
+    checklist: [...commonChecklist, "NIF (Vergi Numarası) al", "Job Seeker vizesi formu"]
   },
   {
-    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik'], salary: '¥4M+', desc: 'Teknoloji devi.', strategy: 'MEXT bursu.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Tokyo Tech'], note: 'Özel izin.' }
+    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik'], salary: '¥4M+', desc: 'Teknoloji devi.', strategy: 'MEXT bursu.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Tokyo Tech'], note: 'Özel izin.' },
+    checklist: [...commonChecklist, "MEXT bursu başvuru formu", "Japonca seviye tespiti (JLPT)"]
   },
    {
-    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7', tags: ['Samsung'], salary: '₩40M+', desc: 'Samsung, LG.', strategy: 'GKS bursu.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['KAIST'], note: '6 aydan sonra.' }
+    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7', tags: ['Samsung'], salary: '₩40M+', desc: 'Samsung, LG.', strategy: 'GKS bursu.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['KAIST'], note: '6 aydan sonra.' },
+    checklist: [...commonChecklist, "GKS bursu belgeleri", "TOPIK sınav sonucu"]
   }
 ];
 
@@ -255,18 +288,105 @@ const KanbanColumn = ({ column, applications, deleteApplication, onDragStart, on
     );
 }
 
+// --- DASHBOARD BİLEŞENİ ---
+const DashboardView = ({ applications }) => {
+    const totalApps = applications.length;
+    const interviewCount = applications.filter(a => a.status === 'interview').length;
+    const rejectedCount = applications.filter(a => a.status === 'rejected').length;
+    const offerCount = applications.filter(a => a.status === 'offer').length;
+    const waitingCount = applications.filter(a => a.status === 'applied').length;
+
+    // Basit bir başarı oranı hesabı (Görüşme + Teklif) / Toplam (Red hariç)
+    const successRate = totalApps > 0 ? Math.round(((interviewCount + offerCount) / (totalApps)) * 100) : 0;
+
+    return (
+        <div className="p-6 md:p-8 overflow-y-auto h-full space-y-8 animate-in fade-in duration-500">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                <PieChart className="text-cyan-400" /> Analiz Paneli
+            </h2>
+
+            {/* Özet Kartlar */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
+                    <div className="text-slate-400 text-xs font-bold uppercase mb-1">Toplam Başvuru</div>
+                    <div className="text-3xl font-bold text-white">{totalApps}</div>
+                </div>
+                <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
+                    <div className="text-slate-400 text-xs font-bold uppercase mb-1">Görüşme Oranı</div>
+                    <div className="text-3xl font-bold text-cyan-400">%{successRate}</div>
+                </div>
+                <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
+                    <div className="text-slate-400 text-xs font-bold uppercase mb-1">Bekleyenler</div>
+                    <div className="text-3xl font-bold text-yellow-400">{waitingCount}</div>
+                </div>
+                <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
+                    <div className="text-slate-400 text-xs font-bold uppercase mb-1">Teklifler</div>
+                    <div className="text-3xl font-bold text-emerald-400">{offerCount}</div>
+                </div>
+            </div>
+
+            {/* Durum Dağılım Grafiği (Bar Chart) */}
+            <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5">
+                <h3 className="text-sm font-bold text-slate-300 mb-6 uppercase tracking-wider">Başvuru Dağılımı</h3>
+                <div className="space-y-4">
+                    {[
+                        { label: 'Başvuruldu', count: waitingCount, color: 'bg-blue-500', width: `${(waitingCount/totalApps)*100}%` },
+                        { label: 'Görüşme', count: interviewCount, color: 'bg-yellow-500', width: `${(interviewCount/totalApps)*100}%` },
+                        { label: 'Teklif', count: offerCount, color: 'bg-emerald-500', width: `${(offerCount/totalApps)*100}%` },
+                        { label: 'Red', count: rejectedCount, color: 'bg-red-500', width: `${(rejectedCount/totalApps)*100}%` },
+                    ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-4">
+                            <div className="w-24 text-xs font-bold text-slate-400 text-right">{item.label}</div>
+                            <div className="flex-1 h-3 bg-slate-800 rounded-full overflow-hidden relative">
+                                <div 
+                                    className={`h-full rounded-full transition-all duration-1000 ${item.color}`} 
+                                    style={{ width: totalApps > 0 ? item.width : '0%' }}
+                                ></div>
+                            </div>
+                            <div className="w-8 text-xs font-bold text-white">{item.count}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Tavsiyeler */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 p-5 rounded-xl border border-purple-500/20">
+                    <h4 className="text-sm font-bold text-purple-400 mb-2 flex items-center gap-2"><Lightbulb size={16}/> İpucu</h4>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                        Kabul oranını artırmak için başvurularını "Tier 2" ülkelerine yoğunlaştırabilirsin. İstatistiklere göre bu ülkelerden dönüş alma şansın daha yüksek.
+                    </p>
+                </div>
+                <div className="bg-gradient-to-br from-emerald-900/20 to-teal-900/20 p-5 rounded-xl border border-emerald-500/20">
+                    <h4 className="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2"><Target size={16}/> Hedef</h4>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                        Haftalık başvuru hedefini 5 olarak belirle. Düzenli başvuru yapmak, algoritmanın seni aktif aday olarak öne çıkarmasını sağlar.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// İkon komponenti olmadığı için sahte bir ikon oluşturuyoruz
+const Target = ({size, className}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+);
+
 
 export default function CareerCommandCenterV18() {
-  const [appMode, setAppMode] = useState('explorer'); // 'explorer' | 'kanban'
+  const [appMode, setAppMode] = useState('explorer'); // 'explorer' | 'kanban' | 'dashboard'
   const [activeTab, setActiveTab] = useState('All');
   const [selectedCountry, setSelectedCountry] = useState(allCountries[0]); 
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState('career');
+  const [viewMode, setViewMode] = useState('career'); // 'career' | 'education' | 'checklist'
   const [selectedRole, setSelectedRole] = useState(engineerRoles[0].title); 
   
   const [user, setUser] = useState(null);
   const [userNotes, setUserNotes] = useState({});
   const [userApplications, setUserApplications] = useState([]); // Kanban Data
+  const [userChecklists, setUserChecklists] = useState({}); // Checklist Data: { countryId: { itemIndex: true/false } }
+  
   const [isSaving, setIsSaving] = useState(false);
   const [dbStatus, setDbStatus] = useState('connecting'); 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -315,15 +435,13 @@ export default function CareerCommandCenterV18() {
                     const data = docSnapshot.data();
                     if (data.notes) setUserNotes(data.notes);
                     if (data.applications) setUserApplications(data.applications);
+                    if (data.checklists) setUserChecklists(data.checklists);
                 }
             });
         } else {
-            // Kullanıcı çıkış yaptıysa veya henüz girmediyse
             setUser(null);
             setDbStatus('disconnected');
-            // Otomatik anonim girişi burada zorlamıyoruz, kullanıcı seçimine bırakıyoruz
-            // Ancak uygulamanın boş görünmemesi için anonim girişi deneyebiliriz
-            signInAnonymously(auth).catch(e => console.log("Anonim giriş yapılamadı, manuel giriş bekleniyor."));
+            signInAnonymously(auth).catch(e => console.log("Anonim giriş yapılamadı."));
         }
     });
 
@@ -337,19 +455,14 @@ export default function CareerCommandCenterV18() {
     const provider = new GoogleAuthProvider();
     try {
         await signInWithPopup(auth, provider);
-        // onAuthStateChanged zaten durumu güncelleyecek
     } catch (error) {
         console.error("Google Giriş Hatası:", error);
         setIsLoggingIn(false);
         
         if (error.code === 'auth/unauthorized-domain') {
-            setLoginError(`Bu alan adı (${window.location.hostname}) Firebase'de yetkili değil. Lütfen Firebase Console -> Authentication -> Settings -> Authorized Domains kısmına ekleyin.`);
-        } else if (error.code === 'auth/popup-blocked') {
-            setLoginError("Tarayıcı açılır pencereyi engelledi. Lütfen izin verin.");
-        } else if (error.code === 'auth/popup-closed-by-user') {
-            setLoginError("Giriş penceresini kapattınız.");
+            setLoginError(`Bu alan adı (${window.location.hostname}) Firebase'de yetkili değil.`);
         } else {
-            setLoginError("Giriş yapılırken bir hata oluştu: " + error.message);
+            setLoginError("Giriş hatası: " + error.message);
         }
     }
   };
@@ -360,6 +473,7 @@ export default function CareerCommandCenterV18() {
         await signOut(auth);
         setUserNotes({});
         setUserApplications([]);
+        setUserChecklists({});
     } catch (error) {
         console.error("Çıkış Hatası:", error);
     }
@@ -374,13 +488,39 @@ export default function CareerCommandCenterV18() {
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
     
     try {
-        // updateDoc yerine setDoc kullanarak dosya yoksa oluşturulmasını sağlıyoruz
         await setDoc(userDocRef, { notes: updatedNotes }, { merge: true });
         setTimeout(() => { setIsSaving(false); setIsEditing(false); }, 500);
     } catch (e) { 
         console.error("Not Kaydetme Hatası:", e);
         setIsSaving(false); 
     }
+  };
+
+  // --- CHECKLIST İŞLEMİ ---
+  const handleToggleChecklist = async (countryId, itemIndex) => {
+      if (!user) return;
+      
+      const currentCountryChecklist = userChecklists[countryId] || {};
+      const newStatus = !currentCountryChecklist[itemIndex];
+      
+      const updatedChecklists = {
+          ...userChecklists,
+          [countryId]: {
+              ...currentCountryChecklist,
+              [itemIndex]: newStatus
+          }
+      };
+
+      // UI'ı hemen güncelle (Optimistic UI)
+      setUserChecklists(updatedChecklists);
+
+      const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
+      try {
+          await setDoc(userDocRef, { checklists: updatedChecklists }, { merge: true });
+      } catch (e) {
+          console.error("Checklist Hatası:", e);
+          // Hata olursa eski haline döndürebiliriz ama şimdilik gerek yok
+      }
   };
 
   // --- KANBAN İŞLEMLERİ ---
@@ -399,7 +539,6 @@ export default function CareerCommandCenterV18() {
     setNewAppRole('');
     
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
-    // updateDoc yerine setDoc kullanarak dosya yoksa oluşturulmasını sağlıyoruz
     await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Uygulama Ekleme Hatası:", e));
   };
 
@@ -411,7 +550,6 @@ export default function CareerCommandCenterV18() {
     setUserApplications(updatedApps);
     
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
-    // updateDoc yerine setDoc kullanarak dosya yoksa oluşturulmasını sağlıyoruz
     await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Durum Güncelleme Hatası:", e));
   };
 
@@ -421,7 +559,6 @@ export default function CareerCommandCenterV18() {
     setUserApplications(updatedApps);
     
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
-    // updateDoc yerine setDoc kullanarak dosya yoksa oluşturulmasını sağlıyoruz
     await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Uygulama Silme Hatası:", e));
   };
 
@@ -434,13 +571,6 @@ export default function CareerCommandCenterV18() {
 
   const performGoogleSearch = (country) => {
     window.open(`https://www.google.com/search?q=${encodeURIComponent(`${selectedRole} jobs in ${country.englishName || country.name}`)}`, '_blank');
-  };
-
-  const performNetworkSearch = (type, country) => {
-    let query = type === 'alumni' 
-        ? `site:linkedin.com/in/ "Turkish" AND ("Engineer" OR "Mühendis") AND "Embedded" AND "${country.englishName}"`
-        : `site:linkedin.com/in/ "Recruiter" AND ("Tech" OR "Engineering") AND "${country.englishName}"`;
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
   };
 
   const filteredData = useMemo(() => {
@@ -491,7 +621,6 @@ export default function CareerCommandCenterV18() {
 
   const handleDragLeave = (e, columnId) => {
       e.preventDefault();
-      // Mouse gerçekten sütun alanından çıkarsa vurguyu kaldır
       if (e.currentTarget.contains(e.relatedTarget)) {
           return;
       }
@@ -526,6 +655,12 @@ export default function CareerCommandCenterV18() {
                 className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold flex items-center gap-3 transition-all ${appMode === 'kanban' ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/50' : 'text-slate-400 hover:bg-white/5'}`}
             >
                 <ClipboardList size={16} /> Başvurularım
+            </button>
+            <button 
+                onClick={() => setAppMode('dashboard')} 
+                className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold flex items-center gap-3 transition-all ${appMode === 'dashboard' ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-900/50' : 'text-slate-400 hover:bg-white/5'}`}
+            >
+                <PieChart size={16} /> Analiz Paneli
             </button>
         </div>
 
@@ -672,19 +807,26 @@ export default function CareerCommandCenterV18() {
                                 <div className="flex bg-slate-950/50 rounded-lg p-1 border border-white/10">
                                     <button onClick={() => setViewMode('career')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'career' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'}`}>Profesyonel</button>
                                     <button onClick={() => setViewMode('education')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'education' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>Akademik</button>
+                                    <button onClick={() => setViewMode('checklist')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'checklist' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}>
+                                        <div className='flex items-center gap-1'><FileCheck size={12}/> Vize & Hazırlık</div>
+                                    </button>
                                 </div>
                                 </div>
                             </div>
                             {/* ... Detail Content (Maaş, Zorluk, Genel Durum, Strateji, İş Arama, Notlar) ... */}
                             <div className="p-8 space-y-8 max-w-4xl mx-auto w-full pb-20">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Maaş Skalası</div><div className="text-xl font-bold text-emerald-400">{selectedCountry.salary}</div></div>
-                                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Giriş Zorluğu</div><div className="text-xl font-bold text-white">{selectedCountry.difficulty}%</div></div>
-                                    <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5 col-span-2"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Vize Stratejisi</div><div className="text-sm text-slate-300">{selectedCountry.strategy}</div></div>
-                                </div>
+                                
+                                {viewMode !== 'checklist' ? (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Maaş Skalası</div><div className="text-xl font-bold text-emerald-400">{selectedCountry.salary}</div></div>
+                                        <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Giriş Zorluğu</div><div className="text-xl font-bold text-white">{selectedCountry.difficulty}%</div></div>
+                                        <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5 col-span-2"><div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Vize Stratejisi</div><div className="text-sm text-slate-300">{selectedCountry.strategy}</div></div>
+                                    </div>
+                                ) : null}
+
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                     <div className="space-y-6">
-                                        {viewMode === 'career' ? (
+                                        {viewMode === 'career' && (
                                             <>
                                                 <div><h4 className="text-sm font-bold text-white mb-3 flex items-center gap-2"><Layout size={16} className="text-cyan-500"/> Genel Bakış</h4><p className="text-sm text-slate-400 leading-relaxed bg-slate-800/30 p-4 rounded-xl border border-white/5">{selectedCountry.desc}</p></div>
                                                 <div className="bg-slate-800/30 p-5 rounded-xl border border-white/5 space-y-4">
@@ -692,21 +834,50 @@ export default function CareerCommandCenterV18() {
                                                     <button onClick={() => performGoogleSearch(selectedCountry)} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all"><Search size={16}/> Google'da {selectedCountry.englishName} İlanlarını Ara</button>
                                                 </div>
                                             </>
-                                        ) : (
+                                        )}
+                                        {viewMode === 'education' && (
                                             <div className="space-y-4">
                                                 <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between"><span className="text-sm text-slate-400">Eğitim Ücreti</span><span className="text-sm font-bold text-white">{selectedCountry.education.tuition}</span></div>
                                                 <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5 flex justify-between"><span className="text-sm text-slate-400">Çalışma İzni</span><span className="text-sm font-bold text-yellow-400">{selectedCountry.education.workRights}</span></div>
                                                 <div className="bg-slate-800/30 p-4 rounded-xl border border-white/5"><span className="text-sm text-slate-400 block mb-2">Öne Çıkan Üniversiteler</span><div className="flex gap-2 flex-wrap">{selectedCountry.education.topUnis.map(u => <span key={u} className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">{u}</span>)}</div></div>
                                             </div>
                                         )}
+                                        {viewMode === 'checklist' && (
+                                            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                                <div className="bg-emerald-900/20 p-4 rounded-xl border border-emerald-500/20 mb-4">
+                                                    <h4 className="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2"><ListTodo size={16}/> Vize & Hazırlık Listesi</h4>
+                                                    <p className="text-xs text-slate-300">Bu liste {selectedCountry.name} için genel gereklilikleri içerir. Tamamladıklarını işaretleyerek ilerlemeni takip edebilirsin.</p>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {(selectedCountry.checklist || []).map((item, index) => {
+                                                        const isChecked = userChecklists[selectedCountry.id]?.[index] || false;
+                                                        return (
+                                                            <div 
+                                                                key={index} 
+                                                                onClick={() => handleToggleChecklist(selectedCountry.id, index)}
+                                                                className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${isChecked ? 'bg-emerald-900/10 border-emerald-500/30 opacity-70' : 'bg-slate-800/30 border-white/5 hover:bg-slate-800/50'}`}
+                                                            >
+                                                                <div className={`mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isChecked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-600 bg-slate-900'}`}>
+                                                                    {isChecked && <Check size={12} strokeWidth={3} />}
+                                                                </div>
+                                                                <span className={`text-sm ${isChecked ? 'text-slate-400 line-through' : 'text-slate-200'}`}>{item}</span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="space-y-6">
-                                        <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5"><h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri</h4>{(projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"]).slice(0,1).map((idea, i) => (<div key={i}><div className="text-sm font-bold text-white mb-1">{idea.title}</div><div className="text-xs text-slate-500 leading-relaxed">{idea.desc}</div></div>))}</div>
-                                        <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
-                                            <div className="flex justify-between items-center mb-3"><h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><Save size={14}/> Notlar</h4>{!isEditing && userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(true)} className="text-[10px] text-cyan-400"><Edit3 size={12}/></button>}</div>
-                                            {isEditing || !userNotes[selectedCountry.id] ? (<div className="space-y-2"><textarea className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-300 outline-none min-h-[100px]" placeholder="Hedeflerini yaz..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} /><div className="flex gap-2"><button onClick={handleSaveNote} disabled={isSaving} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-xs font-bold">{isSaving ? '...' : 'Kaydet'}</button>{userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(false)} className="px-3 bg-slate-700 text-white py-2 rounded-lg text-xs">iptal</button>}</div></div>) : (<p className="text-xs text-slate-300 whitespace-pre-wrap cursor-pointer hover:text-white" onClick={() => setIsEditing(true)}>{userNotes[selectedCountry.id]}</p>)}
+                                    
+                                    {viewMode !== 'checklist' && (
+                                        <div className="space-y-6">
+                                            <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5"><h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri</h4>{(projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"]).slice(0,1).map((idea, i) => (<div key={i}><div className="text-sm font-bold text-white mb-1">{idea.title}</div><div className="text-xs text-slate-500 leading-relaxed">{idea.desc}</div></div>))}</div>
+                                            <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
+                                                <div className="flex justify-between items-center mb-3"><h4 className="text-xs font-bold text-slate-400 uppercase flex items-center gap-2"><Save size={14}/> Notlar</h4>{!isEditing && userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(true)} className="text-[10px] text-cyan-400"><Edit3 size={12}/></button>}</div>
+                                                {isEditing || !userNotes[selectedCountry.id] ? (<div className="space-y-2"><textarea className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs text-slate-300 outline-none min-h-[100px]" placeholder="Hedeflerini yaz..." value={currentNote} onChange={(e) => setCurrentNote(e.target.value)} /><div className="flex gap-2"><button onClick={handleSaveNote} disabled={isSaving} className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-xs font-bold">{isSaving ? '...' : 'Kaydet'}</button>{userNotes[selectedCountry.id] && <button onClick={() => setIsEditing(false)} className="px-3 bg-slate-700 text-white py-2 rounded-lg text-xs">iptal</button>}</div></div>) : (<p className="text-xs text-slate-300 whitespace-pre-wrap cursor-pointer hover:text-white" onClick={() => setIsEditing(true)}>{userNotes[selectedCountry.id]}</p>)}
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -734,6 +905,13 @@ export default function CareerCommandCenterV18() {
                         dragOverColumn={dragOverColumn}
                     />
                 ))}
+            </main>
+        )}
+
+        {/* DASHBOARD MODE */}
+        {appMode === 'dashboard' && (
+            <main className="flex-1 overflow-hidden bg-slate-950">
+                <DashboardView applications={userApplications} />
             </main>
         )}
 
