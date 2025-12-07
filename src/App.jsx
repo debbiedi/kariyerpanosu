@@ -332,7 +332,10 @@ const KanbanColumn = ({ column, applications, deleteApplication, onDragStart, on
 
 // --- DASHBOARD BİLEŞENİ ---
 const DashboardView = ({ applications }) => {
-    const totalApps = applications.length;
+    // Sadece gerçek süreçleri (Planlama HARİÇ) sayıyoruz
+    const activeApps = applications.filter(a => a.status !== 'to_apply');
+    const totalApps = activeApps.length;
+    
     const interviewCount = applications.filter(a => a.status === 'interview').length;
     const rejectedCount = applications.filter(a => a.status === 'rejected').length;
     const offerCount = applications.filter(a => a.status === 'offer').length;
@@ -350,7 +353,7 @@ const DashboardView = ({ applications }) => {
             {/* Özet Kartlar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
-                    <div className="text-slate-400 text-xs font-bold uppercase mb-1">Toplam Başvuru</div>
+                    <div className="text-slate-400 text-xs font-bold uppercase mb-1">Aktif Başvuru</div>
                     <div className="text-3xl font-bold text-white">{totalApps}</div>
                 </div>
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
@@ -784,7 +787,8 @@ export default function CareerCommandCenterV18() {
             <div className="p-4 flex-1 overflow-y-auto">
                  <div className="bg-slate-900/50 p-3 rounded-xl border border-white/5 text-center">
                     <p className="text-xs text-slate-400 mb-2">Toplam Başvuru</p>
-                    <p className="text-2xl font-bold text-white">{userApplications.length}</p>
+                    {/* YENİ MANTIK: Sadece 'Planlama' dışındakileri say */}
+                    <p className="text-2xl font-bold text-white">{userApplications.filter(a => a.status !== 'to_apply').length}</p>
                  </div>
                  
                  <div className="mt-4">
@@ -845,7 +849,8 @@ export default function CareerCommandCenterV18() {
                     {user && !user.isAnonymous && (
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20 shadow-sm animate-in fade-in">
                             <ClipboardList size={14} />
-                            <span className="text-xs font-bold">Toplam {userApplications.length} Başvuru</span>
+                            {/* YENİ MANTIK: Sadece 'Planlama' dışındakileri say */}
+                            <span className="text-xs font-bold">Toplam {userApplications.filter(a => a.status !== 'to_apply').length} Başvuru</span>
                         </div>
                     )}
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-full border border-white/10 shadow-sm">
