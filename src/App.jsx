@@ -373,7 +373,7 @@ export default function CareerCommandCenterV9() {
         </header>
 
         {/* İçerik Gövdesi - Kaydırılabilir Alanlar Burası */}
-        <main className="flex-1 flex overflow-hidden md:overflow-auto relative flex-col md:flex-row">
+        <main className="flex-1 flex md:overflow-hidden relative flex-col md:flex-row">
           
           {/* 1. SÜTUN: LİSTE (Kaydırılabilir) */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6 scroll-smooth min-w-0 border-r border-white/5 pb-20">
@@ -425,7 +425,7 @@ export default function CareerCommandCenterV9() {
           
           {/* 2. SÜTUN: ORTA PANEL (Kaydırılabilir) */}
           {selectedCountry && (
-             <div className="hidden 2xl:flex w-[320px] flex-col p-4 bg-slate-900/30 backdrop-blur-sm border-l border-white/5 shrink-0 overflow-y-auto">
+             <div className="hidden 2xl:flex w-[320px] flex-col p-4 bg-slate-900/30 backdrop-blur-sm border-l border-white/5 shrink-0 overflow-y-auto pb-20">
                <h3 className="text-xs font-bold text-white mb-4 flex items-center gap-2 border-b border-white/10 pb-2 uppercase tracking-wider sticky top-0 bg-slate-900/90 z-10 py-2 -mt-2">
                  <Activity className="text-yellow-400" size={14} />
                  Taktiksel Destek
@@ -485,7 +485,7 @@ export default function CareerCommandCenterV9() {
 
           {/* 3. SÜTUN: SAĞ DETAY (Kaydırılabilir) */}
           {selectedCountry && (
-            <div className="fixed inset-0 z-40 md:static md:z-auto md:w-[480px] md:border-l md:border-white/10 bg-slate-900/95 backdrop-blur-xl flex flex-col transition-all duration-300 shrink-0 shadow-[-10px_0_30px_rgba(0,0,0,0.5)] overflow-y-auto md:overflow-hidden">
+            <div className="fixed inset-0 z-40 md:static md:z-auto md:w-[480px] md:border-l md:border-white/10 bg-slate-900/95 backdrop-blur-xl flex flex-col transition-all duration-300 shrink-0 shadow-[-10px_0_30px_rgba(0,0,0,0.5)]">
               
               {/* Header - Sabit */}
               <div className="relative h-48 shrink-0 overflow-hidden group">
@@ -534,7 +534,7 @@ export default function CareerCommandCenterV9() {
               </div>
 
               {/* Detay İçeriği - Kaydırılabilir */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-900/50 pb-20 min-h-0">
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-900/50 pb-20">
                 
                 {viewMode === 'career' ? (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -700,4 +700,4 @@ export default function CareerCommandCenterV9() {
       </div>
     </div>
   );
-                        }
+}
