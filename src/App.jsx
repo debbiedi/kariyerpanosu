@@ -5,13 +5,13 @@ import {
   Terminal, Shield, Zap, ChevronRight, Save, ExternalLink, 
   Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity,
   Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb,
-  Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle
+  Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle, LogOut, LogIn
 } from 'lucide-react';
 
 // --- FIREBASE ENTEGRASYONU ---
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "firebase/firestore";
-import { getAuth, signInAnonymously, signInWithCustomToken } from "firebase/auth";
+import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 
 // Kullanıcı tarafından sağlanan sabit Firebase yapılandırması
 const firebaseConfig = {
@@ -268,6 +268,8 @@ export default function CareerCommandCenterV18() {
   const [userApplications, setUserApplications] = useState([]); // Kanban Data
   const [isSaving, setIsSaving] = useState(false);
   const [dbStatus, setDbStatus] = useState('connecting'); 
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState(null);
 
   const [currentNote, setCurrentNote] = useState('');
   const [isEditing, setIsEditing] = useState(false); 
@@ -293,73 +295,75 @@ export default function CareerCommandCenterV18() {
   const progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
 
   useEffect(() => {
-    // Firebase ve Firestore nesnelerinin mevcut olduğunu kontrol edin
     if (!auth || !db) {
         setDbStatus('error');
-        console.error("Firebase başlatılamadı veya mevcut değil.");
         return;
     }
 
-    const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-    
-    // Auth denemesi için async fonksiyon
-    const attemptAuthAndSetupListener = async () => {
-      let userCredential;
-      let signedIn = false;
-
-      // 1. Custom Token ile Giriş Denemesi
-      if (token) {
-        try {
-          userCredential = await signInWithCustomToken(auth, token);
-          signedIn = true;
-          console.log("Custom Token Girişi Başarılı.");
-        } catch (customTokenError) {
-          // Hata mesajını sadece konsola yazdır (Anonim girişe geri dönüş zaten bekleniyor)
-          console.log("Custom Token Girişi Başarısız. Anonim girişe geri dönülüyor (auth/custom-token-mismatch)."); 
-          // Devam ediyoruz, signedIn false kalıyor
+    // Auth durumunu dinle
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        if (currentUser) {
+            setUser(currentUser);
+            setDbStatus('connected');
+            setIsLoggingIn(false);
+            
+            // Kullanıcı verilerini dinle
+            const userDocRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/career_data/data`);
+            return onSnapshot(userDocRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    if (data.notes) setUserNotes(data.notes);
+                    if (data.applications) setUserApplications(data.applications);
+                }
+            });
+        } else {
+            // Kullanıcı çıkış yaptıysa veya henüz girmediyse
+            setUser(null);
+            setDbStatus('disconnected');
+            // Otomatik anonim girişi burada zorlamıyoruz, kullanıcı seçimine bırakıyoruz
+            // Ancak uygulamanın boş görünmemesi için anonim girişi deneyebiliriz
+            signInAnonymously(auth).catch(e => console.log("Anonim giriş yapılamadı, manuel giriş bekleniyor."));
         }
-      }
-
-      // 2. Custom Token başarısız veya yoksa Anonim Giriş Denemesi
-      if (!signedIn) {
-        try {
-          userCredential = await signInAnonymously(auth);
-          signedIn = true;
-          console.log("Anonim Giriş Başarılı.");
-        } catch (anonError) {
-          console.error("Anonim Giriş de Başarısız. Veritabanı bağlantısı kurulamadı.", anonError);
-          setDbStatus('error');
-          return; // Hata durumunda dinleyici kurma
-        }
-      }
-
-      // Giriş Başarılı ise Firestore dinleyicisini kurun
-      setUser(userCredential.user);
-      setDbStatus('connected');
-
-      const userDocRef = doc(db, `artifacts/${appId}/users/${userCredential.user.uid}/career_data/data`);
-      
-      const unsub = onSnapshot(userDocRef, (docSnapshot) => {
-          if (docSnapshot.exists()) {
-              const data = docSnapshot.data();
-              if (data.notes) setUserNotes(data.notes);
-              if (data.applications) setUserApplications(data.applications);
-          }
-      });
-      return unsub;
-    };
-
-    // Dinleyiciyi başlat ve temizleme fonksiyonunu yakala
-    let cleanupFunction;
-    attemptAuthAndSetupListener().then(unsub => {
-        cleanupFunction = unsub;
     });
 
-    return () => {
-        if (cleanupFunction) cleanupFunction();
-    };
+    return () => unsubscribe();
+  }, []);
 
-  }, [auth, db]);
+  const handleGoogleLogin = async () => {
+    if (!auth) return;
+    setIsLoggingIn(true);
+    setLoginError(null);
+    const provider = new GoogleAuthProvider();
+    try {
+        await signInWithPopup(auth, provider);
+        // onAuthStateChanged zaten durumu güncelleyecek
+    } catch (error) {
+        console.error("Google Giriş Hatası:", error);
+        setIsLoggingIn(false);
+        
+        if (error.code === 'auth/unauthorized-domain') {
+            setLoginError(`Bu alan adı (${window.location.hostname}) Firebase'de yetkili değil. Lütfen Firebase Console -> Authentication -> Settings -> Authorized Domains kısmına ekleyin.`);
+        } else if (error.code === 'auth/popup-blocked') {
+            setLoginError("Tarayıcı açılır pencereyi engelledi. Lütfen izin verin.");
+        } else if (error.code === 'auth/popup-closed-by-user') {
+            setLoginError("Giriş penceresini kapattınız.");
+        } else {
+            setLoginError("Giriş yapılırken bir hata oluştu: " + error.message);
+        }
+    }
+  };
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+        await signOut(auth);
+        setUserNotes({});
+        setUserApplications([]);
+    } catch (error) {
+        console.error("Çıkış Hatası:", error);
+    }
+  };
+
 
   const handleSaveNote = async () => {
     if (!user || !selectedCountry) return;
@@ -506,14 +510,6 @@ export default function CareerCommandCenterV18() {
         
         {/* ANA NAVİGASYON */}
         <div className="p-4 space-y-2 border-b border-white/5">
-            <div className={`px-3 py-2 rounded-lg border flex items-center gap-2 text-xs font-bold transition-colors
-              ${dbStatus === 'connected' ? 'bg-emerald-900/30 border-emerald-500/30 text-emerald-400' : 
-                dbStatus === 'error' ? 'bg-red-900/30 border-red-500/30 text-red-400' : 
-                'bg-yellow-900/30 border-yellow-500/30 text-yellow-400'}`}>
-              {dbStatus === 'connected' ? <Cloud size={14}/> : dbStatus === 'error' ? <AlertTriangle size={14}/> : <Loader2 size={14} className="animate-spin"/>}
-              <span className="truncate">{dbStatus === 'connected' ? 'Bağlantı Başarılı' : dbStatus === 'error' ? 'Bağlantı Başarısız' : 'Bağlanıyor...'}</span>
-            </div>
-
             <button 
                 onClick={() => setAppMode('explorer')} 
                 className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold flex items-center gap-3 transition-all ${appMode === 'explorer' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:bg-white/5'}`}
@@ -526,6 +522,45 @@ export default function CareerCommandCenterV18() {
             >
                 <ClipboardList size={16} /> Başvurularım
             </button>
+        </div>
+
+        {/* GOOGLE LOGIN / PROFILE AREA */}
+        <div className="px-4 py-2 mt-auto border-t border-white/5">
+             {user && !user.isAnonymous ? (
+                 <div className="flex items-center gap-3 bg-slate-800/50 p-2 rounded-xl border border-white/5">
+                     <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-cyan-500/50" />
+                     <div className="flex-1 min-w-0">
+                         <div className="text-xs font-bold text-white truncate">{user.displayName}</div>
+                         <div className="text-[10px] text-slate-400 truncate">{user.email}</div>
+                     </div>
+                     <button onClick={handleLogout} className="text-red-400 hover:text-red-300 p-1.5 hover:bg-white/5 rounded-lg transition-colors" title="Çıkış Yap">
+                         <LogOut size={14} />
+                     </button>
+                 </div>
+             ) : (
+                <div className="bg-slate-800/40 p-3 rounded-xl border border-white/5">
+                    <p className="text-[10px] text-slate-400 mb-2">Verilerini kaybetmemek için giriş yapmalısın.</p>
+                    
+                    {loginError && (
+                        <div className="mb-2 p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-[10px] text-red-400">
+                            {loginError}
+                        </div>
+                    )}
+
+                    <button 
+                        onClick={handleGoogleLogin} 
+                        disabled={isLoggingIn}
+                        className="w-full bg-white hover:bg-slate-200 text-slate-900 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-lg"
+                    >
+                        {isLoggingIn ? <Loader2 size={14} className="animate-spin" /> : (
+                            <>
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-4 h-4" />
+                                Google ile Giriş Yap
+                            </>
+                        )}
+                    </button>
+                </div>
+             )}
         </div>
 
         {appMode === 'explorer' && (
