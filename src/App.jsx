@@ -109,7 +109,7 @@ const allCountries = [
     id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech'], salary: '€40k+', desc: 'Google, Meta Avrupa merkezi.', strategy: 'Critical Skills vizesi.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k+', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' }
   },
   {
-    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık'], salary: '€40k+', desc: 'Airbus, Thales.', strategy: 'B1 Fransızca öğren.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243+', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuz.' }
+    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık'], salary: '€40k+', desc: 'Airbus, Thales.', strategy: 'B1 Fransızca öğren.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243+', workRights: '964 Saat/Yıl', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuz.' }
   },
   {
     id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' }
@@ -269,6 +269,7 @@ export default function CareerCommandCenterV16() {
       }
   }, [filteredData, selectedCountry]);
 
+  // --- DİNAMİK RENK ---
   const getTierGradient = (tier) => {
       if (tier === 'Tier 1') return 'from-emerald-900/50 via-slate-900 to-slate-900 border-emerald-500/30'; 
       if (tier === 'Tier 2') return 'from-yellow-900/50 via-slate-900 to-slate-900 border-yellow-500/30'; 
@@ -280,7 +281,7 @@ export default function CareerCommandCenterV16() {
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none z-0"></div>
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_800px_at_50%_-200px,#1e293b,transparent)] z-0 pointer-events-none"></div>
 
-      {/* 1. SÜTUN: SIDEBAR (SABİT 250px) */}
+      {/* 1. SÜTUN: SIDEBAR (SABİT 260px) */}
       {mobileMenuOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMobileMenuOpen(false)} />}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/80 backdrop-blur-xl border-r border-white/10 transition-transform duration-300 md:relative md:translate-x-0 shrink-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl h-full`}>
         <div className="p-4 border-b border-white/10 flex justify-between items-center shrink-0">
@@ -318,13 +319,14 @@ export default function CareerCommandCenterV16() {
         </nav>
         <div className="p-4 border-t border-white/10 shrink-0">
           <div className="bg-slate-800/50 rounded-xl p-3 border border-white/5 shadow-lg">
-             <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-slate-300 flex items-center gap-1.5"><Clock size={12} className="text-cyan-400" /> Mezuniyet</span><span className="text-xs text-white font-mono font-bold">{diffDays} Gün</span></div>
-             <div className="w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden"><div className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 h-full rounded-full" style={{ width: `${progress}%` }}></div></div>
+             <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-slate-300 flex items-center gap-1.5"><Clock size={12} className="text-cyan-400" /> Mezuniyet ({new Date('2026-02-01').getFullYear()})</span><span className="text-xs text-white font-mono font-bold">{diffDays} Gün</span></div>
+             <div className="w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden mb-1"><div className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 h-full rounded-full" style={{ width: `${progress}%` }}></div></div>
+             <div className="text-[10px] text-right text-slate-500">%{Math.floor(progress)} Tamamlandı</div>
           </div>
         </div>
       </div>
 
-      {/* MAIN CONTAINER */}
+      {/* 2. & 3. SÜTUN: İÇERİK ALANI */}
       <div className="flex-1 flex flex-col min-w-0 h-full z-10 relative">
         <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-3 w-full max-w-md">
@@ -338,9 +340,8 @@ export default function CareerCommandCenterV16() {
         </header>
 
         <main className="flex-1 flex overflow-hidden relative">
-          
-          {/* 2. SÜTUN: LİSTE (SABİT 380px) */}
-          <div className="w-[380px] border-r border-white/5 flex flex-col shrink-0 bg-slate-900/30">
+          {/* 2. SÜTUN: LİSTE (SABİT 400px) */}
+          <div className="w-[400px] border-r border-white/5 flex flex-col shrink-0 bg-slate-900/30 hidden lg:flex">
              <div className="p-4 border-b border-white/5 text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between">
                 <span>Sonuçlar ({filteredData.length})</span>
              </div>
@@ -378,7 +379,7 @@ export default function CareerCommandCenterV16() {
                 </div>
               </div>
 
-              <div className="p-8 space-y-8 max-w-5xl mx-auto w-full pb-20">
+              <div className="p-8 space-y-8 max-w-4xl mx-auto w-full pb-20">
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5">
                        <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Maaş Skalası</div>
@@ -394,8 +395,7 @@ export default function CareerCommandCenterV16() {
                     </div>
                  </div>
 
-                 {/* İÇERİK BÖLÜMÜ (3 SÜTUN YERİNE 2 SÜTUN YAPTIK) */}
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     
                     {/* SOL TARAF: GENEL BİLGİLER */}
                     <div className="space-y-6">
@@ -415,7 +415,7 @@ export default function CareerCommandCenterV16() {
                                      </select>
                                   </div>
                                   <button onClick={() => performGoogleSearch(selectedCountry)} className="w-full bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-lg text-sm font-bold flex justify-center items-center gap-2 transition-all">
-                                     <Search size={16}/> Google'da İş Ara
+                                     <Search size={16}/> Google'da {selectedCountry.englishName} İlanlarını Ara
                                   </button>
                                   <div className="grid grid-cols-2 gap-3 pt-2">
                                      <button onClick={() => performNetworkSearch('alumni', selectedCountry)} className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs flex justify-center items-center gap-2"><Linkedin size={14}/> Türk Mühendisler</button>
@@ -444,7 +444,7 @@ export default function CareerCommandCenterV16() {
                        )}
                     </div>
 
-                    {/* SAĞ TARAF: NOTLAR & PROJE & TAKTİKSEL (HEPSİ BİRLEŞTİ) */}
+                    {/* SAĞ TARAF: NOTLAR & PROJE */}
                     <div className="space-y-6">
                        <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
                           <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri (Portföy İçin)</h4>
