@@ -32,16 +32,89 @@ try {
     console.error("Firebase Hatası:", e);
 }
 
-// --- VERİTABANI (TÜM ÜLKELER + İNGİLİZCE İSİMLER) ---
+// --- DÜZELTME: EKSİK OLAN TARİH AYARLARI EKLENDİ ---
+const HEDEF_TARIH = '2026-02-01'; // Mezuniyet Tarihi
+const BASLANGIC_TARIHI = '2022-09-15'; // Başlangıç Tarihi
+
+// --- VERİTABANI (GENİŞLETİLMİŞ TAM LİSTE) ---
 const allCountries = [
-  // TIER 1 & POPÜLER
+  // --- KUZEY AMERİKA ---
+  {
+    id: 'us', name: 'ABD', englishName: 'United States', region: 'Amerika', 
+    tier: 'Tier 3', difficulty: 95, visa: 'F1 Visa', tags: ['Tech Giant', 'Maksimum Maaş'], salary: '$90k - $120k',
+    desc: 'Teknolojinin kalbi. En yüksek maaşlar burada ama rekabet ve vize süreci (Lottery) en zor olanıdır.',
+    strategy: 'Tek gerçekçi yol: STEM Master yapıp 3 yıl çalışma izni (OPT) almak.',
+    link: 'https://educationusa.state.gov/', 
+    education: { tuition: '$30k - $60k', workRights: '20 Saat (Kampüs İçi)', postGrad: '3 Yıl (STEM OPT)', topUnis: ['MIT', 'Stanford', 'Georgia Tech'], note: 'Kampüs dışı çalışma izni çok kısıtlıdır.' }
+  },
+  {
+    id: 'ca', name: 'Kanada', englishName: 'Canada', region: 'Amerika', 
+    tier: 'Tier 2', difficulty: 55, visa: 'Express Entry', tags: ['Göçmen Dostu', 'AI'], salary: 'CAD 65k - 90k',
+    desc: 'Toronto ve Vancouver büyük teknoloji merkezleridir. Göçmenlik politikaları şeffaftır.',
+    strategy: 'Master sonrası PGWP (Post-Grad Work Permit) almak vatandaşlığa giden en net yoldur.',
+    link: 'https://www.canada.ca/', 
+    education: { tuition: 'CAD 20k - 40k', workRights: '24 Saat/Hafta', postGrad: '3 Yıl (PGWP)', topUnis: ['U of Toronto', 'Waterloo'], note: 'Eğitim süresi kadar çalışma izni verilir.' }
+  },
+
+  // --- ASYA KAPLANLARI ---
+  {
+    id: 'sg', name: 'Singapur', englishName: 'Singapore', region: 'Asya', 
+    tier: 'Tier 2', difficulty: 70, visa: 'Employment Pass', tags: ['Fintech', 'Semicon'], salary: 'SGD 5k - 7k',
+    desc: 'Asya\'nın teknoloji ve finans başkenti. Çok güvenli, vergi oranları düşük. Yarı iletken sektörü güçlü.',
+    strategy: 'EP (Employment Pass) için yüksek maaş teklifi gerekir. İngilizce ana dildir.',
+    link: 'https://www.mom.gov.sg/passes-and-permits/employment-pass', 
+    education: { tuition: 'SGD 30k+', workRights: '16 Saat/Hafta', postGrad: '1 Yıl (LTVP)', topUnis: ['NUS', 'NTU'], note: 'NUS dünyanın en iyi üniversitelerindendir.' }
+  },
+  {
+    id: 'tw', name: 'Tayvan', englishName: 'Taiwan', region: 'Asya', 
+    tier: 'Tier 2', difficulty: 50, visa: 'Gold Card', tags: ['TSMC', 'Donanım'], salary: 'TWD 60k - 80k',
+    desc: 'Dünyanın çip üretim merkezi (TSMC). Donanım mühendisleri için cennet. "Gold Card" vizesi çok avantajlı.',
+    strategy: 'Employment Gold Card başvurusu yap. Mühendislikte İngilizce yeterli.',
+    link: 'https://goldcard.nat.gov.tw/en/', 
+    education: { tuition: 'TWD 100k', workRights: '20 Saat/Hafta', postGrad: '1-3 Yıl', topUnis: ['NTU', 'NTHU'], note: 'Burs imkanları geniştir.' }
+  },
+  {
+    id: 'hk', name: 'Hong Kong', englishName: 'Hong Kong', region: 'Asya', 
+    tier: 'Tier 3', difficulty: 65, visa: 'Top Talent Pass', tags: ['Fintech', 'Ticaret'], salary: 'HKD 25k+',
+    desc: 'Finans ve lojistik teknoloji merkezi. İngilizce yaygın. Çin pazarına açılan kapı.',
+    strategy: 'Top Talent Pass Scheme (TTPS) ile iyi üniversite mezunları doğrudan gidebilir.',
+    link: 'https://www.immd.gov.hk/eng/services/visas/TTPS.html', 
+    education: { tuition: 'HKD 140k', workRights: 'Kısıtlı', postGrad: '12 Ay (IANG)', topUnis: ['HKUST', 'HKU'], note: 'Mezuniyet sonrası kalmak kolaydır (IANG).' }
+  },
+  {
+    id: 'il', name: 'İsrail', englishName: 'Israel', region: 'Asya', 
+    tier: 'Tier 2', difficulty: 60, visa: 'B-1 Expert', tags: ['Siber Güvenlik', 'Startup'], salary: 'ILS 15k - 25k',
+    desc: '"Startup Nation". Siber güvenlik, yapay zeka ve tarım teknolojilerinde dünya lideri.',
+    strategy: 'Tel Aviv\'deki startuplara odaklan. Güvenlik soruşturmaları uzun sürebilir.',
+    link: 'https://www.gov.il/en', 
+    education: { tuition: '$10k - $15k', workRights: 'Kısıtlı', postGrad: 'Zor', topUnis: ['Technion', 'Tel Aviv U'], note: 'Technion mühendislikte çok prestijlidir.' }
+  },
+  {
+    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik', 'Disiplin'], salary: '¥4M+', desc: 'Teknoloji devi. MEXT bursu ile gitmek en mantıklısı.', strategy: 'Daijob sitesini kullan.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat', postGrad: 'İş bulana kadar', topUnis: ['Tokyo Tech'], note: 'Özel izinle çalışabilirsin.' }
+  },
+  {
+    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7 Visa', tags: ['Samsung', 'Batarya'], salary: '₩40M+', desc: 'Samsung, LG, Hyundai. GKS bursu çok popüler.', strategy: 'GKS bursuna başvur.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS ile Bedava', workRights: '20 Saat', postGrad: '2 Yıl', topUnis: ['KAIST'], note: '6 aydan sonra çalışma izni.' }
+  },
+
+  // --- OKYANUSYA ---
+  {
+    id: 'au', name: 'Avustralya', englishName: 'Australia', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Subclass 482', tags: ['Yüksek Yaşam', 'Maden'], salary: 'AUD 80k+', desc: 'Mühendisler için "Skilled Occupation List" açık.', strategy: 'Master (Subclass 500) en iyi giriş.', link: 'https://immi.homeaffairs.gov.au/', education: { tuition: 'AUD 30k+', workRights: '24 Saat', postGrad: '2-4 Yıl', topUnis: ['UNSW', 'Melbourne'], note: 'Tatillerde full-time.' }
+  },
+  {
+    id: 'nz', name: 'Yeni Zelanda', englishName: 'New Zealand', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Green List', tags: ['Doğa', 'Tarım Tek.'], salary: 'NZD 70k+', desc: 'Mühendislik "Green List"te. İş-yaşam dengesi harikadır.', strategy: 'Doğrudan iş teklifi almaya çalış.', link: 'https://www.immigration.govt.nz/', education: { tuition: 'NZD 30k+', workRights: '20 Saat', postGrad: '3 Yıl', topUnis: ['Auckland Univ'], note: 'Açık çalışma izni verilir.' }
+  },
+
+  // --- BATI AVRUPA ---
   {
     id: 'uk', name: 'Birleşik Krallık', englishName: 'United Kingdom', region: 'Avrupa', 
     tier: 'Tier 2', difficulty: 60, visa: 'Skilled Worker', tags: ['Fintech', 'Savunma'], salary: '£35k - £55k',
-    desc: 'Londra finans ve teknoloji başkenti. "High Potential Individual" vizesi büyük fırsattır.',
+    desc: 'Londra finans ve teknoloji başkenti. "High Potential Individual" vizesi fırsattır.',
     strategy: 'HPI vizesini veya "Graduate Visa" veren bir Master programını hedefle.',
     link: 'https://www.gov.uk/browse/visas-immigration/work-visas',
-    education: { tuition: '£15k - £25k', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Imperial', 'Manchester'], note: 'Mezuniyet sonrası 2 yıl izin.' }
+    education: { tuition: '£15k - £25k / Yıl', workRights: '20 Saat', postGrad: '2 Yıl', topUnis: ['Imperial', 'Manchester'], note: 'Mezuniyet sonrası 2 yıl şartsız çalışma izni.' }
+  },
+  {
+    id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech HQ'], salary: '€40k - €60k', desc: 'Google, Meta Avrupa merkezleri. İngilizce konuşulan tek AB ülkesi.', strategy: 'Critical Skills vizesine başvur.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k - €18k', workRights: '20 Saat', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' }
   },
   {
     id: 'de', name: 'Almanya', englishName: 'Germany', region: 'Avrupa', 
@@ -49,91 +122,93 @@ const allCountries = [
     desc: 'Mühendislik devi. TU9 üniversiteleri ücretsizdir.',
     strategy: 'İş: Chancenkarte. Master: Not ortalaman 2.7 üzeriyse başvur.',
     link: 'https://www.daad.de/en/',
-    education: { tuition: 'Ücretsiz', workRights: '20 Saat/Hafta', postGrad: '18 Ay', topUnis: ['TU Munich', 'RWTH Aachen'], note: 'Werkstudent yaygındır.' }
+    education: { tuition: 'Ücretsiz', workRights: '20 Saat', postGrad: '18 Ay', topUnis: ['TU Munich', 'RWTH Aachen'], note: 'Werkstudent yaygındır.' }
   },
   {
-    id: 'us', name: 'ABD', englishName: 'United States', region: 'Amerika', 
-    tier: 'Tier 3', difficulty: 95, visa: 'F1 Visa', tags: ['Tech Giant'], salary: '$90k - $120k',
-    desc: 'Teknolojinin kalbi. En yüksek maaşlar burada.',
-    strategy: 'STEM Master yapıp 3 yıl çalışma izni (OPT) al.',
-    link: 'https://educationusa.state.gov/', 
-    education: { tuition: '$30k+', workRights: '20 Saat (Kampüs İçi)', postGrad: '3 Yıl (STEM OPT)', topUnis: ['MIT', 'Stanford'], note: 'OPT hayati önem taşır.' }
-  },
-  {
-    id: 'ca', name: 'Kanada', englishName: 'Canada', region: 'Amerika', 
-    tier: 'Tier 2', difficulty: 55, visa: 'Express Entry', tags: ['Göçmen Dostu'], salary: 'CAD 65k - 90k',
-    desc: 'Toronto ve Vancouver teknoloji merkezleri. Göçmenlik politikaları şeffaf.',
-    strategy: 'Master sonrası PGWP (Çalışma izni) almak vatandaşlığa götürür.',
-    link: 'https://www.canada.ca/', 
-    education: { tuition: 'CAD 20k+', workRights: '24 Saat/Hafta', postGrad: '3 Yıl (PGWP)', topUnis: ['U of Toronto', 'Waterloo'], note: 'Eğitim süresi kadar izin.' }
-  },
-  {
-    id: 'ch', name: 'İsviçre', englishName: 'Switzerland', region: 'Avrupa', 
-    tier: 'Tier 3', difficulty: 90, visa: 'Quota', tags: ['Maksimum Maaş'], salary: 'CHF 85k+',
-    desc: 'Avrupa\'nın en yüksek maaşları. Google, ABB ve Roche burada.',
-    strategy: 'Doğrudan girmek zordur. Almanya üzerinden geçiş yap.',
-    link: 'https://www.sem.admin.ch/', 
-    education: { tuition: 'CHF 1.5k', workRights: '15 Saat/Hafta', postGrad: '6 Ay', topUnis: ['ETH Zurich', 'EPFL'], note: 'Okul ucuz, yaşam pahalı.' }
+    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık', 'Enerji'], salary: '€40k - €55k', desc: 'Airbus, Thales, Schneider Electric.', strategy: 'Mühendislikte İngilizce rol çok ama sosyal hayat için Fransızca şart.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243 - €3.7k', workRights: 'Yıllık 964 Saat', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuzdur.' }
   },
   {
     id: 'nl', name: 'Hollanda', englishName: 'Netherlands', region: 'Avrupa', 
-    tier: 'Tier 2', difficulty: 65, visa: 'Orientation Year', tags: ['High Tech'], salary: '€50k - €70k',
+    tier: 'Tier 2', difficulty: 65, visa: 'Orientation Year', tags: ['High Tech', 'ASML'], salary: '€50k - €70k',
     desc: 'ASML ve Philips burada. Teknoloji çok ileri.',
     strategy: 'Top 200 üniversite mezunuysan "Orientation Year" alabilirsin.',
     link: 'https://www.studyinnl.org/',
-    education: { tuition: '€15k+', workRights: '16 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Delft', 'Eindhoven'], note: 'Part-time iş zordur.' }
+    education: { tuition: '€15k+', workRights: '16 Saat', postGrad: '1 Yıl', topUnis: ['TU Delft', 'Eindhoven'], note: 'Part-time iş zordur.' }
   },
   {
-    id: 'au', name: 'Avustralya', englishName: 'Australia', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Subclass 482', tags: ['Yüksek Yaşam'], salary: 'AUD 80k+', desc: 'Mühendisler için "Skilled Occupation List" açık.', strategy: 'Master (Subclass 500) en iyi giriş.', link: 'https://immi.homeaffairs.gov.au/', education: { tuition: 'AUD 30k+', workRights: '24 Saat/Hafta', postGrad: '2-4 Yıl', topUnis: ['UNSW', 'Melbourne'], note: 'Tatillerde full-time.' }
-  },
-  // --- DİĞER AVRUPA ---
-  {
-    id: 'pl', name: 'Polonya', englishName: 'Poland', region: 'Avrupa', tier: 'Tier 1', difficulty: 20, visa: 'Work Permit', tags: ['Yazılım'], salary: '€25k - €40k', desc: 'Avrupa\'nın yazılım fabrikası. Vize kolay.', strategy: 'Master yaparken full-time çalışabilirsin.', link: 'https://study.gov.pl/', education: { tuition: '€2k - €4k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['Warsaw Tech'], note: 'İzin gerekmez.' }
+    id: 'be', name: 'Belçika', englishName: 'Belgium', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Single Permit', tags: ['Mikroelektronik'], salary: '€40k - €55k', desc: 'IMEC (Yarı iletken ar-ge merkezi) burada.', strategy: 'IMEC stajlarına başvur.', link: 'https://www.international.socialsecurity.be/', education: { tuition: '€1k - €4k', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['KU Leuven'], note: 'KU Leuven çok iyidir.' }
   },
   {
-    id: 'it', name: 'İtalya', englishName: 'Italy', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'DSU Bursu', tags: ['Burs', 'Otomotiv'], salary: '€28k - €35k', desc: 'DSU Bursu ile bedava okuyup cep harçlığı al.', strategy: 'Torino (Fiat) ideal.', link: 'https://www.universitaly.it/', education: { tuition: 'Bursla Bedava', workRights: '20 Saat/Hafta', postGrad: '12 Ay', topUnis: ['Politecnico di Milano'], note: 'Burslar Eylülde.' }
+    id: 'lu', name: 'Lüksemburg', englishName: 'Luxembourg', region: 'Avrupa', tier: 'Tier 3', difficulty: 70, visa: 'Blue Card', tags: ['Uzay', 'Finans'], salary: '€60k+', desc: 'Çok zengin ve küçük. Uzay madenciliği ve uydu (SES) sektörü var.', strategy: 'Yüksek maaşlı iş bulmak gerekir.', link: 'https://guichet.public.lu/', education: { tuition: '€400 / Dönem', workRights: '15 Saat', postGrad: '9 Ay', topUnis: ['Univ of Luxembourg'], note: 'Çok dilli.' }
   },
+  {
+    id: 'ch', name: 'İsviçre', englishName: 'Switzerland', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Quota', tags: ['Maksimum Maaş'], salary: 'CHF 85k+', desc: 'En yüksek maaşlar. AB dışı kota var.', strategy: 'Almanya üzerinden geçiş yap.', link: 'https://www.sem.admin.ch/', education: { tuition: 'CHF 1.5k', workRights: '15 Saat', postGrad: '6 Ay', topUnis: ['ETH Zurich'], note: 'Okul ucuz, yaşam pahalı.' }
+  },
+  {
+    id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri var.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' }
+  },
+
+  // --- İSKANDİNAVYA & BALTIK ---
   {
     id: 'se', name: 'İsveç', englishName: 'Sweden', region: 'Kuzey', tier: 'Tier 2', difficulty: 45, visa: 'Job Seeker', tags: ['İnovasyon'], salary: '40k SEK', desc: 'Ericsson ve Volvo burada.', strategy: 'İş arama vizesi var.', link: 'https://studyinsweden.se/', education: { tuition: '€10k+', workRights: 'Limitsiz', postGrad: '12 Ay', topUnis: ['KTH'], note: 'Sınır yok.' }
   },
   {
-    id: 'no', name: 'Norveç', englishName: 'Norway', region: 'Kuzey', tier: 'Tier 2', difficulty: 65, visa: 'Skilled Worker', tags: ['Enerji'], salary: '€55k+', desc: 'Mühendis maaşları çok yüksek.', strategy: 'İş teklifi şart.', link: 'https://www.udi.no/', education: { tuition: 'Ücretli', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['NTNU'], note: 'Yaşam pahalı.' }
+    id: 'no', name: 'Norveç', englishName: 'Norway', region: 'Kuzey', tier: 'Tier 2', difficulty: 65, visa: 'Skilled Worker', tags: ['Enerji'], salary: '€55k+', desc: 'Mühendis maaşları çok yüksek.', strategy: 'İş teklifi şart.', link: 'https://www.udi.no/', education: { tuition: 'Ücretli', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['NTNU'], note: 'Yaşam pahalı.' }
   },
   {
-    id: 'fi', name: 'Finlandiya', englishName: 'Finland', region: 'Kuzey', tier: 'Tier 2', difficulty: 50, visa: 'Specialist', tags: ['Telekom'], salary: '€40k+', desc: 'Nokia\'nın evi. 5G/6G.', strategy: 'Finland Works programı.', link: 'https://migri.fi/', education: { tuition: '€10k+', workRights: '30 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Aalto'], note: 'Çalışma saati arttı.' }
+    id: 'fi', name: 'Finlandiya', englishName: 'Finland', region: 'Kuzey', tier: 'Tier 2', difficulty: 50, visa: 'Specialist', tags: ['Telekom'], salary: '€40k+', desc: 'Nokia\'nın evi. 5G/6G.', strategy: 'Finland Works programı.', link: 'https://migri.fi/', education: { tuition: '€10k+', workRights: '30 Saat', postGrad: '2 Yıl', topUnis: ['Aalto'], note: 'Çalışma saati arttı.' }
   },
   {
-    id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Positive List', tags: ['Rüzgar'], salary: '€50k+', desc: 'Vestas ve Lego burada.', strategy: 'Kopenhag çevresine odaklan.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat/Hafta', postGrad: '3 Yıl', topUnis: ['DTU'], note: 'Mezuniyette 3 yıl izin.' }
+    id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Positive List', tags: ['Rüzgar'], salary: '€50k+', desc: 'Vestas ve Lego burada.', strategy: 'Kopenhag çevresine odaklan.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat', postGrad: '3 Yıl', topUnis: ['DTU'], note: 'Mezuniyette 3 yıl izin.' }
   },
   {
-    id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech'], salary: '€40k+', desc: 'Google, Meta Avrupa merkezi.', strategy: 'Critical Skills vizesi.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k+', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' }
+    id: 'ee', name: 'Estonya', englishName: 'Estonia', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Startup', tags: ['Dijital'], salary: '€35k', desc: 'Yazılım odaklı. Skype burada doğdu.', strategy: 'TalTech başvur.', link: 'https://www.studyinestonia.ee/', education: { tuition: '€3k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['TalTech'], note: 'Sınırsız çalışma.' }
   },
   {
-    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık'], salary: '€40k+', desc: 'Airbus, Thales.', strategy: 'B1 Fransızca öğren.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243+', workRights: '964 Saat/Yıl', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuz.' }
+    id: 'is', name: 'İzlanda', englishName: 'Iceland', region: 'Kuzey', tier: 'Tier 3', difficulty: 80, visa: 'Expert Visa', tags: ['Jeotermal'], salary: '€60k+', desc: 'Küçük pazar. Enerji ve veri merkezi sektörü.', strategy: 'Uzman vizesi zordur.', link: 'https://island.is/', education: { tuition: '€500 (Kayıt)', workRights: '15 Saat', postGrad: '6 Ay', topUnis: ['Reykjavik Univ'], note: 'Devlet okulları harçsız.' }
+  },
+
+  // --- GÜNEY AVRUPA & AKDENİZ ---
+  {
+    id: 'it', name: 'İtalya', englishName: 'Italy', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'DSU Bursu', tags: ['Burs', 'Otomotiv'], salary: '€28k - €35k', desc: 'DSU Bursu ile bedava okuyup cep harçlığı al.', strategy: 'Torino (Fiat) ideal.', link: 'https://www.universitaly.it/', education: { tuition: 'Bursla Bedava', workRights: '20 Saat', postGrad: '12 Ay', topUnis: ['Politecnico di Milano'], note: 'Burslar Eylülde.' }
   },
   {
-    id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' }
+    id: 'es', name: 'İspanya', englishName: 'Spain', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Highly Qualified', tags: ['Telekom'], salary: '€30k+', desc: 'Yenilenebilir enerji.', strategy: 'Barselona ve Madrid.', link: 'https://www.exteriores.gob.es/', education: { tuition: '€2k-5k', workRights: '30 Saat', postGrad: '1 Yıl', topUnis: ['UPC'], note: 'Çalışma izni kolaylaştı.' }
   },
   {
-    id: 'be', name: 'Belçika', englishName: 'Belgium', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Single Permit', tags: ['Mikroelektronik'], salary: '€40k+', desc: 'IMEC Leuven\'dedir.', strategy: 'IMEC stajlarına başvur.', link: 'https://www.international.socialsecurity.be/', education: { tuition: '€1k-4k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['KU Leuven'], note: 'KU Leuven çok iyi.' }
+    id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'Job Seeker', tags: ['Ucuz'], salary: '€20k', desc: 'Kolay giriş. Maaşlar düşük.', strategy: 'Job Seeker vizesi.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat', postGrad: 'Kolay', topUnis: ['Porto Univ'], note: 'SEF bildirimi.' }
   },
   {
-    id: 'es', name: 'İspanya', englishName: 'Spain', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Highly Qualified', tags: ['Telekom'], salary: '€30k+', desc: 'Yenilenebilir enerji.', strategy: 'Barselona ve Madrid.', link: 'https://www.exteriores.gob.es/', education: { tuition: '€2k-5k', workRights: '30 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['UPC'], note: 'Çalışma izni kolaylaştı.' }
+    id: 'gr', name: 'Yunanistan', englishName: 'Greece', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'Digital Nomad', tags: ['Turizm Tech'], salary: '€20k - €30k', desc: 'Teknoloji sektörü büyüyor. Digital Nomad vizesi popüler.', strategy: 'Uzaktan çalışarak Atina\'da yaşa.', link: 'https://migration.gov.gr/', education: { tuition: '€2k - €5k', workRights: '20 Saat', postGrad: 'Zor', topUnis: ['NTUA'], note: 'Yaşam ucuz.' }
   },
   {
-    id: 'ee', name: 'Estonya', englishName: 'Estonia', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Startup', tags: ['Dijital'], salary: '€35k', desc: 'Yazılım odaklı.', strategy: 'TalTech başvur.', link: 'https://www.studyinestonia.ee/', education: { tuition: '€3k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['TalTech'], note: 'Sınırsız çalışma.' }
+    id: 'cy', name: 'Kıbrıs Cumhuriyeti', englishName: 'Cyprus', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Employment', tags: ['Fintech', 'Forex'], salary: '€25k - €40k', desc: 'Fintech ve Forex şirketlerinin merkezi. Vergi avantajı var.', strategy: 'Limasol\'daki şirketlere bak.', link: 'http://www.mfa.gov.cy/', education: { tuition: '€5k - €9k', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['Univ of Cyprus'], note: 'İklim harika.' }
   },
   {
-    id: 'cz', name: 'Çekya', englishName: 'Czechia', region: 'Avrupa', tier: 'Tier 1', difficulty: 30, visa: 'Student Visa', tags: ['Teknik'], salary: '€35k', desc: 'Otomotiv güçlü.', strategy: 'CVUT Prag.', link: 'https://www.studyin.cz/', education: { tuition: '€3k-5k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['CTU Prague'], note: 'Akredite program.' }
+    id: 'mt', name: 'Malta', englishName: 'Malta', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'Work Permit', tags: ['iGaming'], salary: '€25k - €40k', desc: 'iGaming ve Blockchain adası. İngilizce resmi dildir.', strategy: 'Gaming şirketlerine başvur.', link: 'https://identitymalta.com/', education: { tuition: '€7k - €10k', workRights: '20 Saat', postGrad: '6 Ay', topUnis: ['Univ of Malta'], note: 'Yazılımcılar için iyi.' }
   },
   {
-    id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'Job Seeker', tags: ['Ucuz'], salary: '€20k', desc: 'Kolay giriş.', strategy: 'Job Seeker vizesi.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat/Hafta', postGrad: 'Kolay', topUnis: ['Porto Univ'], note: 'SEF bildirimi.' }
+    id: 'sm', name: 'San Marino', englishName: 'San Marino', region: 'Avrupa', tier: 'Tier 3', difficulty: 85, visa: 'Work Permit', tags: ['Turizm'], salary: '€25k+', desc: 'Çok küçük. İtalya iş piyasasıyla entegre.', strategy: 'İtalya\'da iş bulup buraya geçiş yapılabilir.', link: 'https://www.esteri.sm/', education: { tuition: 'N/A', workRights: 'N/A', postGrad: 'N/A', topUnis: ['Univ of San Marino'], note: 'Eğitim fırsatı kısıtlı.' }
+  },
+
+  // --- DOĞU AVRUPA & BALKANLAR ---
+  {
+    id: 'hr', name: 'Hırvatistan', englishName: 'Croatia', region: 'Avrupa', tier: 'Tier 2', difficulty: 30, visa: 'Digital Nomad', tags: ['Rimac'], salary: '€25k - €40k', desc: 'Rimac Automobili (Elektrikli hiper araba) burada.', strategy: 'Rimac stajlarına başvur.', link: 'https://mup.gov.hr/', education: { tuition: '€2k - €5k', workRights: '20 Saat', postGrad: '1 Yıl', topUnis: ['Zagreb Univ'], note: 'AB üyesi.' }
   },
   {
-    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik'], salary: '¥4M+', desc: 'Teknoloji devi.', strategy: 'MEXT bursu.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Tokyo Tech'], note: 'Özel izin.' }
+    id: 'si', name: 'Slovenya', englishName: 'Slovenia', region: 'Avrupa', tier: 'Tier 2', difficulty: 30, visa: 'Single Permit', tags: ['Robotik'], salary: '€30k - €45k', desc: 'Yaskawa robot fabrikası var. Yaşam kalitesi yüksek.', strategy: 'Ljubljana çevresi.', link: 'https://infotujci.si/', education: { tuition: '€2k - €5k', workRights: 'Öğrenci Servisi', postGrad: '9 Ay', topUnis: ['Univ of Ljubljana'], note: 'Öğrenci çalışması esnektir.' }
   },
-   {
-    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7', tags: ['Samsung'], salary: '₩40M+', desc: 'Samsung, LG.', strategy: 'GKS bursu.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['KAIST'], note: '6 aydan sonra.' }
+  {
+    id: 'sk', name: 'Slovakya', englishName: 'Slovakia', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'Blue Card', tags: ['Otomotiv'], salary: '€25k - €40k', desc: 'Otomotiv üretimi çok yüksek. Kia, JLR fabrikaları.', strategy: 'Üretim mühendisliği.', link: 'https://www.mic.iom.sk/', education: { tuition: '€2k - €5k', workRights: '20 Saat', postGrad: '9 Ay', topUnis: ['Slovak Tech'], note: 'Bratislava Viyana\'ya yakındır.' }
+  },
+  {
+    id: 'cz', name: 'Çekya', englishName: 'Czechia', region: 'Avrupa', tier: 'Tier 1', difficulty: 30, visa: 'Student Visa', tags: ['Teknik'], salary: '€35k', desc: 'Otomotiv güçlü. Prag teknoloji merkezi.', strategy: 'CVUT Prag.', link: 'https://www.studyin.cz/', education: { tuition: '€3k-5k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['CTU Prague'], note: 'Akredite program.' }
+  },
+  {
+    id: 'ro', name: 'Romanya', englishName: 'Romania', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'Work Permit', tags: ['Hızlı Net'], salary: '€25k - €45k', desc: 'Bükreş IT merkezi. UiPath (RPA) buradan çıktı.', strategy: 'Yazılım için çok iyi.', link: 'https://studyinromania.gov.ro/', education: { tuition: '€2k - €4k', workRights: '20 Saat', postGrad: '9 Ay', topUnis: ['Politehnica'], note: 'İnternet çok hızlı.' }
+  },
+  {
+    id: 'bg', name: 'Bulgaristan', englishName: 'Bulgaria', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Blue Card', tags: ['Otomotiv'], salary: '€20k - €35k', desc: 'Otomotiv yan sanayi ve SAP ofisleri var.', strategy: 'Sofya merkezli işler.', link: 'https://www.mfa.bg/', education: { tuition: '€2k - €4k', workRights: '20 Saat', postGrad: '9 Ay', topUnis: ['Tech Univ Sofia'], note: 'Vergiler düşük.' }
   }
 ];
 
@@ -180,7 +255,7 @@ const projectIdeas = {
   ]
 };
 
-export default function CareerCommandCenterV16() {
+export default function CareerCommandCenterV17() {
   const [activeTab, setActiveTab] = useState('All');
   const [selectedCountry, setSelectedCountry] = useState(allCountries[0]); 
   const [searchTerm, setSearchTerm] = useState('');
@@ -196,7 +271,6 @@ export default function CareerCommandCenterV16() {
   const [isEditing, setIsEditing] = useState(false); 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // MEZUNİYET TARİHİ
   const diffDays = Math.ceil(Math.abs(new Date('2026-02-01') - new Date()) / (1000 * 60 * 60 * 24));
   
   // Progress Bar
@@ -237,17 +311,20 @@ export default function CareerCommandCenterV16() {
     }
   }, [selectedCountry, userNotes]);
 
-  // GOOGLE ARAMA: "EnglishName" kullanarak arama yapar
   const performGoogleSearch = (country) => {
-    const loc = country.englishName || country.name;
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(`${selectedRole} jobs in ${loc}`)}`, '_blank');
+    const jobTitle = selectedRole; 
+    const location = country.englishName || country.name; 
+    const query = `${jobTitle} jobs in ${location}`;
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
   };
 
   const performNetworkSearch = (type, country) => {
-    const loc = country.englishName || country.name;
-    let query = type === 'alumni' 
-        ? `site:linkedin.com/in/ "Turkish" AND ("Engineer" OR "Mühendis") AND "Embedded" AND "${loc}"`
-        : `site:linkedin.com/in/ "Recruiter" AND ("Tech" OR "Engineering") AND "${loc}"`;
+    let query = "";
+    if (type === 'alumni') {
+        query = `site:linkedin.com/in/ "Turkish" AND ("Engineer" OR "Mühendis") AND "Embedded" AND "${country.englishName}"`;
+    } else if (type === 'recruiter') {
+        query = `site:linkedin.com/in/ "Recruiter" AND ("Tech" OR "Engineering") AND "${country.englishName}"`;
+    }
     window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
   };
 
@@ -286,7 +363,7 @@ export default function CareerCommandCenterV16() {
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/80 backdrop-blur-xl border-r border-white/10 transition-transform duration-300 md:relative md:translate-x-0 shrink-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} flex flex-col shadow-2xl h-full`}>
         <div className="p-4 border-b border-white/10 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2 text-cyan-400 font-bold tracking-wider">
-            <Zap size={20} fill="currentColor" /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">KARİYER-V16</span>
+            <Zap size={20} fill="currentColor" /> <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">KARİYER-V17</span>
           </div>
           <button onClick={() => setMobileMenuOpen(false)} className="md:hidden text-slate-400"><X size={20} /></button>
         </div>
@@ -326,7 +403,7 @@ export default function CareerCommandCenterV16() {
         </div>
       </div>
 
-      {/* 2. & 3. SÜTUN: İÇERİK ALANI */}
+      {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full z-10 relative">
         <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-3 w-full max-w-md">
@@ -340,8 +417,8 @@ export default function CareerCommandCenterV16() {
         </header>
 
         <main className="flex-1 flex overflow-hidden relative">
-          {/* 2. SÜTUN: LİSTE (SABİT 400px) */}
-          <div className="w-[400px] border-r border-white/5 flex flex-col shrink-0 bg-slate-900/30 hidden lg:flex">
+          {/* LIST (SABİT 380px) */}
+          <div className="w-[380px] border-r border-white/5 flex flex-col shrink-0 bg-slate-900/30 hidden lg:flex">
              <div className="p-4 border-b border-white/5 text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between">
                 <span>Sonuçlar ({filteredData.length})</span>
              </div>
@@ -362,7 +439,7 @@ export default function CareerCommandCenterV16() {
              </div>
           </div>
 
-          {/* 3. SÜTUN: DETAY (ESNEK - EKRANIN KALANINI KAPLAR) */}
+          {/* DETAIL (ESNEK) */}
           {selectedCountry ? (
             <div className="flex-1 flex flex-col min-w-0 bg-slate-900/50 overflow-y-auto">
               <div className="h-40 relative shrink-0 overflow-hidden">
@@ -379,7 +456,7 @@ export default function CareerCommandCenterV16() {
                 </div>
               </div>
 
-              <div className="p-8 space-y-8 max-w-4xl mx-auto w-full pb-20">
+              <div className="p-8 space-y-8 max-w-5xl mx-auto w-full pb-20">
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="bg-slate-800/40 p-4 rounded-xl border border-white/5">
                        <div className="text-[10px] text-slate-500 font-bold uppercase mb-1">Maaş Skalası</div>
@@ -395,7 +472,7 @@ export default function CareerCommandCenterV16() {
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
                     {/* SOL TARAF: GENEL BİLGİLER */}
                     <div className="space-y-6">
@@ -444,10 +521,9 @@ export default function CareerCommandCenterV16() {
                        )}
                     </div>
 
-                    {/* SAĞ TARAF: NOTLAR & PROJE */}
                     <div className="space-y-6">
                        <div className="bg-slate-900/50 border border-white/5 rounded-xl p-5">
-                          <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri (Portföy İçin)</h4>
+                          <h4 className="text-xs font-bold text-slate-400 uppercase mb-4 flex items-center gap-2"><Lightbulb size={14}/> Proje Fikri</h4>
                           {(projectIdeas[selectedRole] || projectIdeas["Junior Embedded Software Engineer"]).slice(0,1).map((idea, i) => (
                              <div key={i}>
                                 <div className="text-sm font-bold text-white mb-1">{idea.title}</div>
