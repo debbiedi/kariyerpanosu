@@ -24,7 +24,6 @@ const firebaseConfig = {
   appId: "1:24937941128:web:ac7d3d38dccde96c97373d"
 };
 
-// Vercel gibi ortamlarda __app_id tanımlı olmayabilir, bu yüzden sabit bir ID kullanmak daha güvenlidir.
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'kariyer-panosu-v1';
 
 let app, db, auth;
@@ -47,7 +46,7 @@ const commonChecklist = [
 
 // --- VERİTABANI (TÜM LİSTE) ---
 const allCountries = [
-  // TIER 1 & POPÜLER
+  // --- MEVCUT POPÜLER ÜLKELER ---
   {
     id: 'uk', name: 'Birleşik Krallık', englishName: 'United Kingdom', region: 'Avrupa', 
     tier: 'Tier 2', difficulty: 60, visa: 'Skilled Worker', tags: ['Fintech', 'Savunma'], salary: '£35k - £55k',
@@ -106,70 +105,165 @@ const allCountries = [
     id: 'au', name: 'Avustralya', englishName: 'Australia', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Subclass 482', tags: ['Yüksek Yaşam'], salary: 'AUD 80k+', desc: 'Mühendisler için "Skilled Occupation List" açık.', strategy: 'Master (Subclass 500) en iyi giriş.', link: 'https://immi.homeaffairs.gov.au/', education: { tuition: 'AUD 30k+', workRights: '24 Saat/Hafta', postGrad: '2-4 Yıl', topUnis: ['UNSW', 'Melbourne'], note: 'Tatillerde full-time.' },
     checklist: [...commonChecklist, "PTE/IELTS sınav sonucu", "Sağlık sigortası (OSHC)", "GTE (Geçici Giriş) mektubu yaz"]
   },
-  // --- DİĞERLERİ ---
+  // --- BATI AVRUPA ---
   {
-    id: 'pl', name: 'Polonya', englishName: 'Poland', region: 'Avrupa', tier: 'Tier 1', difficulty: 20, visa: 'Work Permit', tags: ['Yazılım'], salary: '€25k - €40k', desc: 'Avrupa\'nın yazılım fabrikası. Vize kolay.', strategy: 'Master yaparken full-time çalışabilirsin.', link: 'https://study.gov.pl/', education: { tuition: '€2k - €4k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['Warsaw Tech'], note: 'İzin gerekmez.' },
-    checklist: [...commonChecklist, "Çalışma izni (Type A) başvurusu", "Konaklama belgesi", "Sağlık sigortası"]
+    id: 'lu', name: 'Lüksemburg', englishName: 'Luxembourg', region: 'Avrupa', tier: 'Tier 1', difficulty: 65, visa: 'Work Visa', tags: ['Finans', 'Yüksek Maaş'], salary: '€60k+', desc: 'Avrupa\'nın en zengin ülkelerinden. Bankacılık ve IT sektörü çok güçlü.', strategy: 'İngilizce iş bulmak mümkün ama Fransızca/Almanca büyük artı.', link: 'https://guichet.public.lu/', education: { tuition: '€400 - €800', workRights: '15 Saat/Hafta', postGrad: 'Var', topUnis: ['Univ. of Luxembourg'], note: 'Küçük ama zengin bir pazar.' }, checklist: [...commonChecklist, "Diploma denkliği", "Konaklama sözleşmesi (zor)"]
   },
   {
-    id: 'it', name: 'İtalya', englishName: 'Italy', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'DSU Bursu', tags: ['Burs', 'Otomotiv'], salary: '€28k - €35k', desc: 'DSU Bursu ile bedava okuyup cep harçlığı al.', strategy: 'Torino (Fiat) ideal.', link: 'https://www.universitaly.it/', education: { tuition: 'Bursla Bedava', workRights: '20 Saat/Hafta', postGrad: '12 Ay', topUnis: ['Politecnico di Milano'], note: 'Burslar Eylülde.' },
-    checklist: [...commonChecklist, "CIMEA Denklik Belgesi", "Codice Fiscale al", "DSU Bursu için ISEE paritificato belgesi"]
+    id: 'li', name: 'Lihtenştayn', englishName: 'Liechtenstein', region: 'Avrupa', tier: 'Tier 3', difficulty: 95, visa: 'Strict Quota', tags: ['Mikro Devlet', 'Zor'], salary: 'CHF 80k+', desc: 'Oturum izni almak çok zordur, genelde İsviçre veya Avusturya\'da yaşayıp buraya çalışmaya gelinir.', strategy: 'Sınır ötesi çalışan (Frontalier) olmak en mantıklısı.', link: 'https://www.llv.li/', education: { tuition: 'Yüksek', workRights: 'Kısıtlı', postGrad: 'Yok', topUnis: ['Univ. of Liechtenstein'], note: 'Nüfus çok az.' }, checklist: [...commonChecklist, "İsviçre veya Avusturya oturumu"]
   },
   {
-    id: 'se', name: 'İsveç', englishName: 'Sweden', region: 'Kuzey', tier: 'Tier 2', difficulty: 45, visa: 'Job Seeker', tags: ['İnovasyon'], salary: '40k SEK', desc: 'Ericsson ve Volvo burada.', strategy: 'İş arama vizesi var.', link: 'https://studyinsweden.se/', education: { tuition: '€10k+', workRights: 'Limitsiz', postGrad: '12 Ay', topUnis: ['KTH'], note: 'Sınır yok.' },
-    checklist: [...commonChecklist, "Personnummer başvurusu", "İş arama vizesi şartlarını incele", "Konaklama sırasına gir"]
+    id: 'mc', name: 'Monako', englishName: 'Monaco', region: 'Avrupa', tier: 'Tier 3', difficulty: 99, visa: 'Wealth Visa', tags: ['Lüks', 'Vergisiz'], salary: '€70k+', desc: 'Dünyanın en zenginleri için. Mühendislikten ziyade finans ve hizmet sektörü.', strategy: 'Fransa\'da yaşayıp git-gel yapmak.', link: 'https://service-public-particuliers.gouv.mc/', education: { tuition: 'Çok Yüksek', workRights: 'Özel İzin', postGrad: 'Yok', topUnis: ['Int. Univ. of Monaco'], note: 'Yaşam maliyeti aşırı yüksek.' }, checklist: [...commonChecklist]
   },
   {
-    id: 'no', name: 'Norveç', englishName: 'Norway', region: 'Kuzey', tier: 'Tier 2', difficulty: 65, visa: 'Skilled Worker', tags: ['Enerji'], salary: '€55k+', desc: 'Mühendis maaşları çok yüksek.', strategy: 'İş teklifi şart.', link: 'https://www.udi.no/', education: { tuition: 'Ücretli', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['NTNU'], note: 'Yaşam pahalı.' },
-    checklist: [...commonChecklist, "UDI başvuru portalına kaydol", "İş teklifi al", "Konaklama garantisi"]
+    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık'], salary: '€40k+', desc: 'Airbus, Thales.', strategy: 'B1 Fransızca öğren.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243+', workRights: '964 Saat/Yıl', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuz.' }, checklist: [...commonChecklist, "Campus France prosedürü", "OFII başvurusu", "Konut sigortası"]
   },
   {
-    id: 'fi', name: 'Finlandiya', englishName: 'Finland', region: 'Kuzey', tier: 'Tier 2', difficulty: 50, visa: 'Specialist', tags: ['Telekom'], salary: '€40k+', desc: 'Nokia\'nın evi. 5G/6G.', strategy: 'Finland Works programı.', link: 'https://migri.fi/', education: { tuition: '€10k+', workRights: '30 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Aalto'], note: 'Çalışma saati arttı.' },
-    checklist: [...commonChecklist, "Migri üzerinden oturum izni başvurusu", "Finland Works profili oluştur"]
+    id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' }, checklist: [...commonChecklist, "Red-White-Red Card puan hesabı", "Almanca A1 belgesi"]
   },
   {
-    id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Positive List', tags: ['Rüzgar'], salary: '€50k+', desc: 'Vestas ve Lego burada.', strategy: 'Kopenhag çevresine odaklan.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat/Hafta', postGrad: '3 Yıl', topUnis: ['DTU'], note: 'Mezuniyette 3 yıl izin.' },
-    checklist: [...commonChecklist, "SIRI üzerinden başvuru yap", "NemID al", "CPR numarası kaydı"]
+    id: 'be', name: 'Belçika', englishName: 'Belgium', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Single Permit', tags: ['Mikroelektronik'], salary: '€40k+', desc: 'IMEC Leuven\'dedir.', strategy: 'IMEC stajlarına başvur.', link: 'https://www.international.socialsecurity.be/', education: { tuition: '€1k-4k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['KU Leuven'], note: 'KU Leuven çok iyi.' }, checklist: [...commonChecklist, "Single Permit başvurusu", "Diploma denklik (NARIC)"]
   },
   {
-    id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech'], salary: '€40k+', desc: 'Google, Meta Avrupa merkezi.', strategy: 'Critical Skills vizesi.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k+', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' },
-    checklist: [...commonChecklist, "Critical Skills Occupations List kontrolü", "GNIB/IRP kartı başvurusu"]
+    id: 'ie', name: 'İrlanda', englishName: 'Ireland', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Critical Skills', tags: ['Big Tech'], salary: '€40k+', desc: 'Google, Meta Avrupa merkezi.', strategy: 'Critical Skills vizesi.', link: 'https://enterprise.gov.ie/', education: { tuition: '€12k+', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Trinity'], note: 'Mezuniyet sonrası 2 yıl.' }, checklist: [...commonChecklist, "Critical Skills Occupations List kontrolü", "GNIB/IRP kartı başvurusu"]
+  },
+  // --- DOĞU AVRUPA & BALKANLAR ---
+  {
+    id: 'bg', name: 'Bulgaristan', englishName: 'Bulgaria', region: 'Avrupa', tier: 'Tier 2', difficulty: 30, visa: 'Blue Card', tags: ['Düşük Vergi', 'Outsourcing'], salary: '€25k - €35k', desc: 'AB üyesi, yaşam ucuz, teknoloji sektörü hızla büyüyor. Düz oranlı vergi (%10).', strategy: 'Yabancı şirketlerin Sofya ofislerini hedefle.', link: 'https://www.mfa.bg/', education: { tuition: '€3k-5k', workRights: '20 Saat', postGrad: '9 Ay', topUnis: ['Sofia Univ'], note: 'AB diploması.' }, checklist: [...commonChecklist, "D Tipi Vize başvurusu", "Konaklama kanıtı"]
   },
   {
-    id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'Passeport Talent', tags: ['Havacılık'], salary: '€40k+', desc: 'Airbus, Thales.', strategy: 'B1 Fransızca öğren.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243+', workRights: '964 Saat/Yıl', postGrad: '1 Yıl', topUnis: ['CentraleSupélec'], note: 'Devlet okulları ucuz.' },
-    checklist: [...commonChecklist, "Campus France prosedürü", "OFII başvurusu", "Konut sigortası"]
+    id: 'cz', name: 'Çekya', englishName: 'Czechia', region: 'Avrupa', tier: 'Tier 1', difficulty: 30, visa: 'Student Visa', tags: ['Teknik', 'Merkezi'], salary: '€35k', desc: 'Otomotiv güçlü.', strategy: 'CVUT Prag.', link: 'https://www.studyin.cz/', education: { tuition: '€3k-5k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['CTU Prague'], note: 'Akredite program.' }, checklist: [...commonChecklist, "Nostrifikasyon (diploma denklik)", "Çekçe dil kursu kaydı"]
   },
   {
-    id: 'at', name: 'Avusturya', englishName: 'Austria', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'RWR Card', tags: ['Yarı İletken'], salary: '€45k+', desc: 'Infineon gibi çip üreticileri.', strategy: 'B1 Almanca avantaj.', link: 'https://www.migration.gv.at/', education: { tuition: '€1.5k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['TU Wien'], note: 'Eğitim makul.' },
-    checklist: [...commonChecklist, "Red-White-Red Card puan hesabı", "Almanca A1 belgesi"]
+    id: 'hu', name: 'Macaristan', englishName: 'Hungary', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'Residence Permit', tags: ['Budapeşte', 'Otomotiv'], salary: '€25k - €35k', desc: 'Budapeşte canlı bir teknoloji merkezi. Yaşam maliyetleri uygun.', strategy: 'Stipendium Hungaricum bursuna bak.', link: 'http://www.bmbah.hu/', education: { tuition: '€3k-6k', workRights: '24 Saat', postGrad: '9 Ay', topUnis: ['BME'], note: 'Burs imkanları iyi.' }, checklist: [...commonChecklist, "Adres beyanı", "Sağlık sigortası"]
   },
   {
-    id: 'be', name: 'Belçika', englishName: 'Belgium', region: 'Avrupa', tier: 'Tier 2', difficulty: 45, visa: 'Single Permit', tags: ['Mikroelektronik'], salary: '€40k+', desc: 'IMEC Leuven\'dedir.', strategy: 'IMEC stajlarına başvur.', link: 'https://www.international.socialsecurity.be/', education: { tuition: '€1k-4k', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['KU Leuven'], note: 'KU Leuven çok iyi.' },
-    checklist: [...commonChecklist, "Single Permit başvurusu", "Diploma denklik (NARIC)"]
+    id: 'pl', name: 'Polonya', englishName: 'Poland', region: 'Avrupa', tier: 'Tier 1', difficulty: 20, visa: 'Work Permit', tags: ['Yazılım'], salary: '€25k - €40k', desc: 'Avrupa\'nın yazılım fabrikası. Vize kolay.', strategy: 'Master yaparken full-time çalışabilirsin.', link: 'https://study.gov.pl/', education: { tuition: '€2k - €4k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['Warsaw Tech'], note: 'İzin gerekmez.' }, checklist: [...commonChecklist, "Çalışma izni (Type A) başvurusu", "Konaklama belgesi", "Sağlık sigortası"]
   },
   {
-    id: 'es', name: 'İspanya', englishName: 'Spain', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Highly Qualified', tags: ['Telekom'], salary: '€30k+', desc: 'Yenilenebilir enerji.', strategy: 'Barselona ve Madrid.', link: 'https://www.exteriores.gob.es/', education: { tuition: '€2k-5k', workRights: '30 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['UPC'], note: 'Çalışma izni kolaylaştı.' },
-    checklist: [...commonChecklist, "NIE numarası al", "Empadronamiento (adres kaydı)"]
+    id: 'ro', name: 'Romanya', englishName: 'Romania', region: 'Avrupa', tier: 'Tier 2', difficulty: 30, visa: 'Work Permit', tags: ['Hızlı İnternet', 'IT'], salary: '€25k - €35k', desc: 'İnternet hızı çok yüksek, Bükreş ve Kaloşvar IT merkezleri.', strategy: 'IT çalışanları için vergi avantajları var.', link: 'https://igi.mai.gov.ro/', education: { tuition: '€2k-5k', workRights: 'Part-time', postGrad: 'Var', topUnis: ['Politehnica Bucharest'], note: 'Ucuz AB ülkesi.' }, checklist: [...commonChecklist, "Çalışma izni onayı", "Vize başvurusu"]
   },
   {
-    id: 'ee', name: 'Estonya', englishName: 'Estonia', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Startup', tags: ['Dijital'], salary: '€35k', desc: 'Yazılım odaklı.', strategy: 'TalTech başvur.', link: 'https://www.studyinestonia.ee/', education: { tuition: '€3k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['TalTech'], note: 'Sınırsız çalışma.' },
-    checklist: [...commonChecklist, "E-Residency başvurusu (opsiyonel)", "D-Visa başvurusu"]
+    id: 'sk', name: 'Slovakya', englishName: 'Slovakia', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'Blue Card', tags: ['Otomotiv', 'Üretim'], salary: '€25k - €35k', desc: 'Dünyada kişi başına en çok araba üreten ülke. Otomasyon mühendisleri için cennet.', strategy: 'Bratislava Viyana\'ya çok yakın.', link: 'https://www.mic.iom.sk/', education: { tuition: '€2k-5k', workRights: '20 Saat', postGrad: '9 Ay', topUnis: ['STU Bratislava'], note: 'Otomotiv odaklı.' }, checklist: [...commonChecklist]
   },
   {
-    id: 'cz', name: 'Çekya', englishName: 'Czechia', region: 'Avrupa', tier: 'Tier 1', difficulty: 30, visa: 'Student Visa', tags: ['Teknik'], salary: '€35k', desc: 'Otomotiv güçlü.', strategy: 'CVUT Prag.', link: 'https://www.studyin.cz/', education: { tuition: '€3k-5k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['CTU Prague'], note: 'Akredite program.' },
-    checklist: [...commonChecklist, "Nostrifikasyon (diploma denklik)", "Çekçe dil kursu kaydı"]
+    id: 'ua', name: 'Ukrayna', englishName: 'Ukraine', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Restricted', tags: ['Savaş', 'Riskli'], salary: 'Değişken', desc: 'Şu an savaş nedeniyle seyahat ve çalışma önerilmiyor. Geçmişte güçlü bir IT sektörü vardı.', strategy: 'Şu an için beklemede kalınmalı.', link: 'https://mfa.gov.ua/', education: { tuition: 'Ucuz', workRights: 'Yok', postGrad: '-', topUnis: ['Kyiv Poly'], note: 'Güvenlik riski.' }, checklist: [...commonChecklist]
   },
   {
-    id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'Job Seeker', tags: ['Ucuz'], salary: '€20k', desc: 'Kolay giriş.', strategy: 'Job Seeker vizesi.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat/Hafta', postGrad: 'Kolay', topUnis: ['Porto Univ'], note: 'SEF bildirimi.' },
-    checklist: [...commonChecklist, "NIF (Vergi Numarası) al", "Job Seeker vizesi formu"]
+    id: 'by', name: 'Beyaz Rusya', englishName: 'Belarus', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Visa Required', tags: ['Yaptırım', 'Zor'], salary: 'Düşük', desc: 'Siyasi durum ve yaptırımlar nedeniyle önerilmez.', strategy: 'Alternatif ülkelere yönel.', link: 'https://mfa.gov.by/', education: { tuition: 'Ucuz', workRights: 'Kısıtlı', postGrad: '-', topUnis: ['BSU'], note: 'Önerilmez.' }, checklist: [...commonChecklist]
   },
   {
-    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik'], salary: '¥4M+', desc: 'Teknoloji devi.', strategy: 'MEXT bursu.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Tokyo Tech'], note: 'Özel izin.' },
-    checklist: [...commonChecklist, "MEXT bursu başvuru formu", "Japonca seviye tespiti (JLPT)"]
+    id: 'md', name: 'Moldova', englishName: 'Moldova', region: 'Avrupa', tier: 'Tier 3', difficulty: 40, visa: 'E-Visa', tags: ['Gelişmekte', 'Şarap'], salary: 'Düşük', desc: 'Avrupa\'nın en fakir ülkelerinden ama IT Park\'ları gelişiyor.', strategy: 'Girişimci vizesi.', link: 'http://evisa.gov.md/', education: { tuition: 'Çok Ucuz', workRights: 'Kısıtlı', postGrad: 'Yok', topUnis: ['TUM'], note: 'AB üyesi değil.' }, checklist: [...commonChecklist]
   },
-   {
-    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7', tags: ['Samsung'], salary: '₩40M+', desc: 'Samsung, LG.', strategy: 'GKS bursu.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['KAIST'], note: '6 aydan sonra.' },
-    checklist: [...commonChecklist, "GKS bursu belgeleri", "TOPIK sınav sonucu"]
+  // --- İSKANDİNAVYA & BALTIKLAR ---
+  {
+    id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Positive List', tags: ['Rüzgar'], salary: '€50k+', desc: 'Vestas ve Lego burada.', strategy: 'Kopenhag çevresine odaklan.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat/Hafta', postGrad: '3 Yıl', topUnis: ['DTU'], note: 'Mezuniyette 3 yıl izin.' }, checklist: [...commonChecklist, "SIRI üzerinden başvuru yap", "NemID al", "CPR numarası kaydı"]
+  },
+  {
+    id: 'ee', name: 'Estonya', englishName: 'Estonia', region: 'Avrupa', tier: 'Tier 2', difficulty: 25, visa: 'Startup', tags: ['Dijital'], salary: '€35k', desc: 'Yazılım odaklı.', strategy: 'TalTech başvur.', link: 'https://www.studyinestonia.ee/', education: { tuition: '€3k', workRights: 'Limitsiz', postGrad: '9 Ay', topUnis: ['TalTech'], note: 'Sınırsız çalışma.' }, checklist: [...commonChecklist, "E-Residency başvurusu (opsiyonel)", "D-Visa başvurusu"]
+  },
+  {
+    id: 'fi', name: 'Finlandiya', englishName: 'Finland', region: 'Kuzey', tier: 'Tier 2', difficulty: 50, visa: 'Specialist', tags: ['Telekom'], salary: '€40k+', desc: 'Nokia\'nın evi. 5G/6G.', strategy: 'Finland Works programı.', link: 'https://migri.fi/', education: { tuition: '€10k+', workRights: '30 Saat/Hafta', postGrad: '2 Yıl', topUnis: ['Aalto'], note: 'Çalışma saati arttı.' }, checklist: [...commonChecklist, "Migri üzerinden oturum izni başvurusu", "Finland Works profili oluştur"]
+  },
+  {
+    id: 'se', name: 'İsveç', englishName: 'Sweden', region: 'Kuzey', tier: 'Tier 2', difficulty: 45, visa: 'Job Seeker', tags: ['İnovasyon'], salary: '40k SEK', desc: 'Ericsson ve Volvo burada.', strategy: 'İş arama vizesi var.', link: 'https://studyinsweden.se/', education: { tuition: '€10k+', workRights: 'Limitsiz', postGrad: '12 Ay', topUnis: ['KTH'], note: 'Sınır yok.' }, checklist: [...commonChecklist, "Personnummer başvurusu", "İş arama vizesi şartlarını incele", "Konaklama sırasına gir"]
+  },
+  {
+    id: 'no', name: 'Norveç', englishName: 'Norway', region: 'Kuzey', tier: 'Tier 2', difficulty: 65, visa: 'Skilled Worker', tags: ['Enerji'], salary: '€55k+', desc: 'Mühendis maaşları çok yüksek.', strategy: 'İş teklifi şart.', link: 'https://www.udi.no/', education: { tuition: 'Ücretli', workRights: '20 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['NTNU'], note: 'Yaşam pahalı.' }, checklist: [...commonChecklist, "UDI başvuru portalına kaydol", "İş teklifi al", "Konaklama garantisi"]
+  },
+  {
+    id: 'is', name: 'İzlanda', englishName: 'Iceland', region: 'Kuzey', tier: 'Tier 2', difficulty: 60, visa: 'Expert', tags: ['Enerji', 'Doğa'], salary: '€50k+', desc: 'Küçük ama zengin pazar. Jeotermal enerji ve veri merkezleri.', strategy: 'Uzaktan çalışma vizesi mevcut.', link: 'https://island.is/', education: { tuition: 'Makul', workRights: 'Kısıtlı', postGrad: '6 Ay', topUnis: ['Univ. of Iceland'], note: 'Nüfus az.' }, checklist: [...commonChecklist, "Kennitala (ID) başvurusu"]
+  },
+  {
+    id: 'lv', name: 'Letonya', englishName: 'Latvia', region: 'Avrupa', tier: 'Tier 2', difficulty: 30, visa: 'Blue Card', tags: ['Ucuz', 'Start-up'], salary: '€25k - €35k', desc: 'Baltıkların ortası. Riga güzel bir şehir. Start-up vizesi var.', strategy: 'Teknoloji şirketlerine başvur.', link: 'https://www.pmlp.gov.lv/', education: { tuition: '€2k-4k', workRights: '20 Saat', postGrad: '6 Ay', topUnis: ['RTU'], note: 'Yaşam ucuz.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'lt', name: 'Litvanya', englishName: 'Lithuania', region: 'Avrupa', tier: 'Tier 2', difficulty: 30, visa: 'Blue Card', tags: ['Fintech', 'Hızlı'], salary: '€25k - €40k', desc: 'Fintech konusunda Avrupa liderlerinden. İnternet çok hızlı.', strategy: 'Blue Card için maaş sınırı makul.', link: 'https://migracija.lrv.lt/', education: { tuition: '€2k-4k', workRights: '20 Saat', postGrad: '12 Ay', topUnis: ['KTU'], note: 'Mezuniyet sonrası 1 yıl.' }, checklist: [...commonChecklist]
+  },
+  // --- GÜNEY AVRUPA & AKDENİZ ---
+  {
+    id: 'es', name: 'İspanya', englishName: 'Spain', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Highly Qualified', tags: ['Telekom'], salary: '€30k+', desc: 'Yenilenebilir enerji.', strategy: 'Barselona ve Madrid.', link: 'https://www.exteriores.gob.es/', education: { tuition: '€2k-5k', workRights: '30 Saat/Hafta', postGrad: '1 Yıl', topUnis: ['UPC'], note: 'Çalışma izni kolaylaştı.' }, checklist: [...commonChecklist, "NIE numarası al", "Empadronamiento (adres kaydı)"]
+  },
+  {
+    id: 'it', name: 'İtalya', englishName: 'Italy', region: 'Avrupa', tier: 'Tier 1', difficulty: 25, visa: 'DSU Bursu', tags: ['Burs', 'Otomotiv'], salary: '€28k - €35k', desc: 'DSU Bursu ile bedava okuyup cep harçlığı al.', strategy: 'Torino (Fiat) ideal.', link: 'https://www.universitaly.it/', education: { tuition: 'Bursla Bedava', workRights: '20 Saat/Hafta', postGrad: '12 Ay', topUnis: ['Politecnico di Milano'], note: 'Burslar Eylülde.' }, checklist: [...commonChecklist, "CIMEA Denklik Belgesi", "Codice Fiscale al", "DSU Bursu için ISEE paritificato belgesi"]
+  },
+  {
+    id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'Job Seeker', tags: ['Ucuz'], salary: '€20k', desc: 'Kolay giriş.', strategy: 'Job Seeker vizesi.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat/Hafta', postGrad: 'Kolay', topUnis: ['Porto Univ'], note: 'SEF bildirimi.' }, checklist: [...commonChecklist, "NIF (Vergi Numarası) al", "Job Seeker vizesi formu"]
+  },
+  {
+    id: 'gr', name: 'Yunanistan', englishName: 'Greece', region: 'Avrupa', tier: 'Tier 3', difficulty: 45, visa: 'Digital Nomad', tags: ['Turizm', 'Deniz'], salary: '€20k - €30k', desc: 'Ekonomik krizden toparlanıyor. Digital Nomad vizesi popüler.', strategy: 'Uzaktan çalışarak yaşamak için ideal.', link: 'https://www.mfa.gr/', education: { tuition: '€1k-3k', workRights: 'Part-time', postGrad: 'Yok', topUnis: ['NTUA'], note: 'Yunanca gerekli olabilir.' }, checklist: [...commonChecklist, "AFM (Vergi No) al"]
+  },
+  {
+    id: 'mt', name: 'Malta', englishName: 'Malta', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Work Permit', tags: ['iGaming', 'İngilizce'], salary: '€30k - €45k', desc: 'İngilizce resmi dil. iGaming ve Blockchain sektörü çok büyük.', strategy: 'İngilizce ile rahatça iş bulabilirsin.', link: 'https://identita.gov.mt/', education: { tuition: '€5k+', workRights: '20 Saat', postGrad: '6 Ay', topUnis: ['Univ. of Malta'], note: 'İklimi harika.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'ad', name: 'Andorra', englishName: 'Andorra', region: 'Avrupa', tier: 'Tier 3', difficulty: 70, visa: 'Quota', tags: ['Mikro Devlet', 'Vergisiz'], salary: '€30k+', desc: 'İspanya ve Fransa arasında. Turizm odaklı.', strategy: 'İş teklifi şart.', link: 'https://www.immigracio.ad/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['Univ. of Andorra'], note: 'Üniversite seçeneği az.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'sm', name: 'San Marino', englishName: 'San Marino', region: 'Avrupa', tier: 'Tier 3', difficulty: 80, visa: 'Special', tags: ['Mikro Devlet', 'İtalya'], salary: '€30k+', desc: 'İtalya içinde bağımsız. İtalyanca şart.', strategy: 'İtalya üzerinden erişim.', link: 'https://www.esteri.sm/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['Univ. of San Marino'], note: 'Çok küçük.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'va', name: 'Vatikan', englishName: 'Vatican City', region: 'Avrupa', tier: 'Tier 3', difficulty: 100, visa: 'Clergy Only', tags: ['Din', 'Kapalı'], salary: '-', desc: 'Sadece din adamları ve İsviçre Muhafızları yaşar. Mühendislik işi yok.', strategy: 'Turist olarak gez.', link: 'https://www.vatican.va/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: 'Eğitim yok.' }, checklist: []
+  },
+  // --- BALKANLAR (DİĞER) ---
+  {
+    id: 'al', name: 'Arnavutluk', englishName: 'Albania', region: 'Avrupa', tier: 'Tier 3', difficulty: 25, visa: 'E-Visa', tags: ['Gelişmekte', 'Ucuz'], salary: 'Düşük', desc: 'AB adayı. Hızla gelişiyor, Tiran\'da fırsatlar artıyor.', strategy: 'Türk vatandaşlarına vizesiz (turistik).', link: 'https://e-visa.al/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Polytechnic Tirana'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'ba', name: 'Bosna-Hersek', englishName: 'Bosnia and Herzegovina', region: 'Avrupa', tier: 'Tier 3', difficulty: 35, visa: 'Work Permit', tags: ['Kültür', 'Ucuz'], salary: 'Düşük', desc: 'Saraybosna\'da IT sektörü büyüyor.', strategy: 'Vizesiz seyahat avantajı.', link: 'http://msb.gov.ba/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Univ. of Sarajevo'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'hr', name: 'Hırvatistan', englishName: 'Croatia', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Digital Nomad', tags: ['AB', 'Turizm'], salary: '€20k - €35k', desc: 'Yeni AB ve Schengen üyesi. Digital Nomad vizesi var.', strategy: 'Rimac (elektrikli araba) gibi firmalar var.', link: 'https://mvep.gov.hr/', education: { tuition: '€3k+', workRights: 'Part-time', postGrad: 'Var', topUnis: ['Univ. of Zagreb'], note: 'AB standartları.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'me', name: 'Karadağ', englishName: 'Montenegro', region: 'Avrupa', tier: 'Tier 3', difficulty: 30, visa: 'Work Permit', tags: ['Yatırım', 'Deniz'], salary: 'Düşük', desc: 'Küçük ama popüler. Şirket kurmak kolay.', strategy: 'Şirket kurarak oturum almak yaygın.', link: 'https://www.gov.me/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Univ. of Montenegro'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'mk', name: 'Kuzey Makedonya', englishName: 'North Macedonia', region: 'Avrupa', tier: 'Tier 3', difficulty: 30, visa: 'Work Permit', tags: ['Ucuz', 'Outsourcing'], salary: 'Düşük', desc: 'Üsküp\'te yazılım ofisleri var.', strategy: 'Ucuz yaşam maliyeti.', link: 'https://mfa.gov.mk/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Ss. Cyril and Methodius'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'rs', name: 'Sırbistan', englishName: 'Serbia', region: 'Avrupa', tier: 'Tier 3', difficulty: 30, visa: 'Visa Free', tags: ['Belgrad', 'IT'], salary: '€20k - €30k', desc: 'Belgrad Balkanların IT merkezi olmaya aday. Türkler için vizesiz.', strategy: 'Microsoft geliştirme merkezi burada.', link: 'https://www.mfa.gov.rs/', education: { tuition: '€2k-4k', workRights: '-', postGrad: '-', topUnis: ['Univ. of Belgrade'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'si', name: 'Slovenya', englishName: 'Slovenia', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Blue Card', tags: ['Yeşil', 'AB'], salary: '€25k - €40k', desc: 'Gizli kalmış cennet. Yaşam kalitesi yüksek, maaşlar iyi.', strategy: 'Ljubljana Üniversitesi.', link: 'https://www.gov.si/', education: { tuition: '€3k-5k', workRights: 'Öğrenci İşi', postGrad: 'Var', topUnis: ['Univ. of Ljubljana'], note: 'Güvenli.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'xk', name: 'Kosova', englishName: 'Kosovo', region: 'Avrupa', tier: 'Tier 3', difficulty: 35, visa: 'Work Permit', tags: ['Genç', 'Gelişiyor'], salary: 'Düşük', desc: 'Avrupa\'nın en genç nüfusu. Outsourcing sektörü var.', strategy: 'Girişimcilik.', link: 'https://mfa-ks.net/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Univ. of Prishtina'], note: '-' }, checklist: [...commonChecklist]
+  },
+  // --- ÖZEL BÖLGELER & ADALAR ---
+  {
+    id: 'cy_north', name: 'Kuzey Kıbrıs (KKTC)', englishName: 'Northern Cyprus', region: 'Avrupa', tier: 'Tier 3', difficulty: 10, visa: 'Identity Card', tags: ['Türk', 'Ada'], salary: 'TL/Döviz', desc: 'Sadece Türkiye tarafından tanınır. Eğitim sektörü büyük.', strategy: 'Türkiye kimliği ile giriş.', link: 'https://mfa.gov.ct.tr/', education: { tuition: 'Döviz', workRights: 'Var', postGrad: '-', topUnis: ['DAÜ', 'YDÜ'], note: 'Denklik sorunu olabilir.' }, checklist: ["Kimlik yeterli", "Diploma"]
+  },
+  {
+    id: 'gi', name: 'Cebelitarık', englishName: 'Gibraltar', region: 'Avrupa', tier: 'Tier 2', difficulty: 60, visa: 'UK Visa', tags: ['Finans', 'Bahis'], salary: '£30k+', desc: 'İngiltere\'ye bağlı. Online bahis ve finans sektörü devasa.', strategy: 'İngiltere vizesi kuralları geçerli olabilir.', link: 'https://www.gibraltar.gov.gi/', education: { tuition: '£', workRights: '-', postGrad: '-', topUnis: ['Univ. of Gibraltar'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'fo', name: 'Faroe Adaları', englishName: 'Faroe Islands', region: 'Kuzey', tier: 'Tier 3', difficulty: 60, visa: 'Special', tags: ['Balıkçılık', 'Doğa'], salary: 'Yüksek', desc: 'Danimarka\'ya bağlı ama AB dışında. Vize süreci ayrı.', strategy: 'Niş alanlar.', link: 'https://www.government.fo/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['Univ. of Faroe Islands'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'je', name: 'Jersey', englishName: 'Jersey', region: 'Avrupa', tier: 'Tier 2', difficulty: 60, visa: 'UK Related', tags: ['Finans', 'Vergi'], salary: '£40k+', desc: 'Manş Adaları\'nın en büyüğü. Finans merkezi.', strategy: 'İngiltere bağlantılı.', link: 'https://www.gov.je/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'gg', name: 'Guernsey', englishName: 'Guernsey', region: 'Avrupa', tier: 'Tier 2', difficulty: 60, visa: 'UK Related', tags: ['Finans', 'Sakin'], salary: '£40k+', desc: 'Finans ve turizm.', strategy: '-', link: 'https://www.gov.gg/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'im', name: 'Man Adası', englishName: 'Isle of Man', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'UK Related', tags: ['E-Gaming', 'Finans'], salary: '£35k+', desc: 'E-Gaming lisansları ile ünlü.', strategy: 'Teknoloji sektörü aktif.', link: 'https://www.gov.im/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'sj', name: 'Svalbard', englishName: 'Svalbard', region: 'Kuzey', tier: 'Tier 3', difficulty: 20, visa: 'Visa Free Zone', tags: ['Kutup', 'Soğuk'], salary: 'NOK', desc: 'Norveç\'e bağlı ama vizesiz bölge. İş bulursan yaşayabilirsin.', strategy: 'İş bulmak çok zor ama vize derdi yok.', link: 'https://www.sysselmesteren.no/', education: { tuition: 'Ücretsiz', workRights: 'Var', postGrad: '-', topUnis: ['UNIS'], note: 'Arktik çalışmaları.' }, checklist: ["İş teklifi (Şart)", "Konaklama (Şart)"]
+  },
+  // --- TARTIŞMALI BÖLGELER ---
+  {
+    id: 'ab', name: 'Abhazya', englishName: 'Abkhazia', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Special', tags: ['Tanınmıyor', 'Risk'], salary: 'Düşük', desc: 'Uluslararası tanınırlığı sınırlı. Kariyer için önerilmez.', strategy: '-', link: '#', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: '-' }, checklist: []
+  },
+  {
+    id: 'os', name: 'Güney Osetya', englishName: 'South Ossetia', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Special', tags: ['Tanınmıyor', 'Risk'], salary: 'Düşük', desc: 'Kariyer için uygun değil.', strategy: '-', link: '#', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: '-' }, checklist: []
+  },
+  {
+    id: 'trans', name: 'Transdinyester', englishName: 'Transnistria', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'None', tags: ['Sovyet', 'Risk'], salary: 'Düşük', desc: 'Moldova içinde de-facto bölge. Tanınmıyor.', strategy: '-', link: '#', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: '-' }, checklist: []
+  },
+  {
+    id: 'sb', name: 'Ağrotur ve Dikelya', englishName: 'Akrotiri and Dhekelia', region: 'Avrupa', tier: 'Tier 3', difficulty: 99, visa: 'Military', tags: ['Askeri Üs'], salary: '-', desc: 'Kıbrıs\'taki İngiliz askeri üsleri. Sivil yerleşim kısıtlı.', strategy: 'Sadece askeri personel veya özel izinli.', link: '#', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: '-' }, checklist: []
   }
 ];
 
