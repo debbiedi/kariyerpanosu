@@ -332,10 +332,7 @@ const KanbanColumn = ({ column, applications, deleteApplication, onDragStart, on
 
 // --- DASHBOARD BİLEŞENİ ---
 const DashboardView = ({ applications }) => {
-    // Sadece gerçek süreçleri (Planlama HARİÇ) sayıyoruz
-    const activeApps = applications.filter(a => a.status !== 'to_apply');
-    const totalApps = activeApps.length;
-    
+    const totalApps = applications.length;
     const interviewCount = applications.filter(a => a.status === 'interview').length;
     const rejectedCount = applications.filter(a => a.status === 'rejected').length;
     const offerCount = applications.filter(a => a.status === 'offer').length;
@@ -353,7 +350,7 @@ const DashboardView = ({ applications }) => {
             {/* Özet Kartlar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
-                    <div className="text-slate-400 text-xs font-bold uppercase mb-1">Aktif Başvuru</div>
+                    <div className="text-slate-400 text-xs font-bold uppercase mb-1">Toplam Başvuru</div>
                     <div className="text-3xl font-bold text-white">{totalApps}</div>
                 </div>
                 <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5 shadow-lg">
@@ -583,7 +580,7 @@ export default function CareerCommandCenterV18() {
       companyUrl: newAppCompanyUrl,
       jobUrl: newAppJobUrl,
       status: 'to_apply',
-      date: new Date().toLocaleDateString('tr-TR')
+      date: new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     };
     const updatedApps = [...userApplications, newApp];
     setUserApplications(updatedApps);
