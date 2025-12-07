@@ -839,7 +839,22 @@ export default function CareerCommandCenterV18() {
                     <input type="text" placeholder="Ülke ara..." className="w-full bg-slate-950/50 border border-white/10 rounded-xl py-2 pl-9 pr-4 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                     </div>
                 </div>
-                <div className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-slate-800/50 rounded-full border border-white/10 shadow-sm"><GraduationCap size={16} className="text-cyan-400"/><span className="text-xs font-bold text-slate-300">OCAK 2026</span></div>
+                
+                {/* YENİ EKLENEN KISIM: TARİH VE BAŞVURU SAYISI */}
+                <div className="hidden md:flex items-center gap-3">
+                    {user && !user.isAnonymous && (
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20 shadow-sm animate-in fade-in">
+                            <ClipboardList size={14} />
+                            <span className="text-xs font-bold">Toplam {userApplications.length} Başvuru</span>
+                        </div>
+                    )}
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800/50 rounded-full border border-white/10 shadow-sm">
+                        <Calendar size={14} className="text-slate-400"/>
+                        <span className="text-xs font-bold text-slate-300 uppercase">
+                            {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                        </span>
+                    </div>
+                </div>
                 </header>
 
                 <main className="flex-1 flex overflow-hidden relative">
