@@ -11,8 +11,9 @@ import {
 // --- FIREBASE ENTEGRASYONU ---
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, onSnapshot, updateDoc } from "firebase/firestore";
-import { getAuth, signInAnonymously } from "firebase/auth";
+import { getAuth, signInAnonymously, signInWithCustomToken } from "firebase/auth";
 
+// Kullanıcı tarafından sağlanan sabit Firebase yapılandırması
 const firebaseConfig = {
   apiKey: "AIzaSyDepkmn5L-OZXdT8mKf9sHDqhBoJNSI90o",
   authDomain: "kariyerpanosu.firebaseapp.com",
@@ -21,6 +22,8 @@ const firebaseConfig = {
   messagingSenderId: "24937941128",
   appId: "1:24937941128:web:ac7d3d38dccde96c97373d"
 };
+
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
 let app, db, auth;
 try {
@@ -46,7 +49,7 @@ const allCountries = [
     id: 'de', name: 'Almanya', englishName: 'Germany', region: 'Avrupa', 
     tier: 'Tier 1', difficulty: 35, visa: 'Chancenkarte', tags: ['Otomotiv', 'Sanayi 4.0'], salary: '€48k - €60k',
     desc: 'Mühendislik devi. TU9 üniversiteleri ücretsizdir.',
-    strategy: 'İş: Chancenkarte. Master: Not ortalaman 2.7 üzeriyse başvur.',
+    strategy: 'İş: Chancenkarte. Master: Not ortalaman 2.7 üzerindeyse başvur.',
     link: 'https://www.daad.de/en/',
     education: { tuition: 'Ücretsiz', workRights: '20 Saat/Hafta', postGrad: '18 Ay', topUnis: ['TU Munich', 'RWTH Aachen'], note: 'Werkstudent yaygındır.' }
   },
@@ -172,21 +175,85 @@ const projectIdeas = {
   "PLC Automation Engineer": [
     { title: "Traffic Light Logic", desc: "Trafik ışığı simülasyonunu Ladder Logic ile yap." },
     { title: "Tank Level Control", desc: "PID kontrol ile seviye otomasyonu." }
-  ],
-  "System Integration Engineer": [
-    { title: "Sensor Fusion", desc: "İvmeölçer ve Jiroskop verilerini birleştir." },
-    { title: "CAN Bus Sniffer", desc: "Araç içi verileri dinleyen donanım yap." }
   ]
 };
 
 // --- KANBAN SÜTUNLARI ---
 const kanbanColumns = [
-  { id: 'to_apply', title: 'Başvurulacak', color: 'border-slate-500' },
-  { id: 'applied', title: 'Başvuruldu', color: 'border-blue-500' },
-  { id: 'interview', title: 'Görüşme', color: 'border-yellow-500' },
-  { id: 'offer', title: 'Teklif', color: 'border-green-500' },
-  { id: 'rejected', title: 'Red', color: 'border-red-500' }
+  { id: 'to_apply', title: 'Başvurulacak', color: 'border-slate-500', bgColor: 'bg-slate-900/40' },
+  { id: 'applied', title: 'Başvuruldu', color: 'border-blue-500', bgColor: 'bg-blue-900/10' },
+  { id: 'interview', title: 'Görüşme', color: 'border-yellow-500', bgColor: 'bg-yellow-900/10' },
+  { id: 'offer', title: 'Teklif', color: 'border-green-500', bgColor: 'bg-green-900/10' },
+  { id: 'rejected', title: 'Red', color: 'border-red-500', bgColor: 'bg-red-900/10' }
 ];
+
+// --- KANBAN KART BİLEŞENİ ---
+const KanbanCard = ({ app, deleteApplication, onDragStart, isDragging }) => {
+    const opacity = isDragging ? 'opacity-40 border-dashed border-cyan-400' : 'opacity-100 border-white/5';
+    
+    return (
+        <div 
+            draggable 
+            onDragStart={(e) => onDragStart(e, app.id)}
+            className={`
+                bg-slate-800 p-3 rounded-xl border hover:border-white/20 transition-all shadow-md
+                group cursor-grab active:cursor-grabbing ${opacity}
+            `}
+        >
+            <div className="flex justify-between items-start mb-1">
+                <div className="font-bold text-white text-sm truncate">{app.company}</div>
+                <button onClick={() => deleteApplication(app.id)} className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1 -mt-1 -mr-1">
+                    <Trash2 size={12}/>
+                </button>
+            </div>
+            <div className="text-xs text-slate-400 mb-2">{app.role}</div>
+            <div className="text-[10px] text-slate-500 text-right">Başvuru: {app.date}</div>
+        </div>
+    );
+}
+
+// --- KANBAN SÜTUN BİLEŞENİ ---
+const KanbanColumn = ({ column, applications, deleteApplication, onDragStart, onDrop, onDragEnter, onDragLeave, draggingAppId, dragOverColumn }) => {
+    
+    const isTarget = column.id === dragOverColumn;
+    const isBeingDragged = applications.some(app => app.id === draggingAppId);
+
+    return (
+        <div 
+            onDragOver={(e) => { e.preventDefault(); }}
+            onDrop={(e) => onDrop(e, column.id)}
+            onDragEnter={(e) => onDragEnter(e, column.id)}
+            onDragLeave={(e) => onDragLeave(e, column.id)}
+            className={`
+                w-72 shrink-0 flex flex-col rounded-xl border-4 transition-all duration-300
+                ${column.bgColor} 
+                ${isTarget ? 'border-cyan-400 scale-[1.01] shadow-[0_0_20px_rgba(34,211,238,0.5)]' : column.color}
+            `}
+        >
+            <div className="p-3 border-b border-white/5 flex justify-between items-center bg-slate-900/70">
+                <span className="font-bold text-slate-200 text-sm">{column.title}</span>
+                <span className="text-xs text-slate-500 bg-slate-950 px-2 py-0.5 rounded-full">{applications.length}</span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-2 space-y-2">
+                {applications.map(app => (
+                    <KanbanCard 
+                        key={app.id} 
+                        app={app} 
+                        deleteApplication={deleteApplication}
+                        onDragStart={onDragStart}
+                        isDragging={app.id === draggingAppId}
+                    />
+                ))}
+                {applications.length === 0 && (
+                    <div className={`text-center py-4 text-xs italic transition-all duration-500 ${isTarget ? 'text-cyan-400' : 'text-slate-600'}`}>
+                        {isTarget ? 'Buraya Bırakın' : 'Boş'}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
 
 export default function CareerCommandCenterV18() {
   const [appMode, setAppMode] = useState('explorer'); // 'explorer' | 'kanban'
@@ -210,6 +277,11 @@ export default function CareerCommandCenterV18() {
   const [newAppCompany, setNewAppCompany] = useState('');
   const [newAppRole, setNewAppRole] = useState('');
 
+  // Drag and Drop State'leri
+  const [draggingAppId, setDraggingAppId] = useState(null);
+  const [dragOverColumn, setDragOverColumn] = useState(null);
+
+
   const diffDays = Math.ceil(Math.abs(new Date('2026-02-01') - new Date()) / (1000 * 60 * 60 * 24));
   
   // Progress Bar
@@ -221,30 +293,88 @@ export default function CareerCommandCenterV18() {
   const progress = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
 
   useEffect(() => {
-    if (!auth) return;
-    signInAnonymously(auth).then((userCredential) => {
-        setUser(userCredential.user);
-        setDbStatus('connected');
-        const unsub = onSnapshot(doc(db, "users", userCredential.user.uid), (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                if (data.notes) setUserNotes(data.notes);
-                if (data.applications) setUserApplications(data.applications);
-            }
-        });
-        return () => unsub();
-    }).catch(() => setDbStatus('error'));
-  }, []);
+    // Firebase ve Firestore nesnelerinin mevcut olduğunu kontrol edin
+    if (!auth || !db) {
+        setDbStatus('error');
+        console.error("Firebase başlatılamadı veya mevcut değil.");
+        return;
+    }
+
+    const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+    
+    // Auth denemesi için async fonksiyon
+    const attemptAuthAndSetupListener = async () => {
+      let userCredential;
+      let signedIn = false;
+
+      // 1. Custom Token ile Giriş Denemesi
+      if (token) {
+        try {
+          userCredential = await signInWithCustomToken(auth, token);
+          signedIn = true;
+          console.log("Custom Token Girişi Başarılı.");
+        } catch (customTokenError) {
+          // Hata mesajını sadece konsola yazdır (Anonim girişe geri dönüş zaten bekleniyor)
+          console.log("Custom Token Girişi Başarısız. Anonim girişe geri dönülüyor (auth/custom-token-mismatch)."); 
+          // Devam ediyoruz, signedIn false kalıyor
+        }
+      }
+
+      // 2. Custom Token başarısız veya yoksa Anonim Giriş Denemesi
+      if (!signedIn) {
+        try {
+          userCredential = await signInAnonymously(auth);
+          signedIn = true;
+          console.log("Anonim Giriş Başarılı.");
+        } catch (anonError) {
+          console.error("Anonim Giriş de Başarısız. Veritabanı bağlantısı kurulamadı.", anonError);
+          setDbStatus('error');
+          return; // Hata durumunda dinleyici kurma
+        }
+      }
+
+      // Giriş Başarılı ise Firestore dinleyicisini kurun
+      setUser(userCredential.user);
+      setDbStatus('connected');
+
+      const userDocRef = doc(db, `artifacts/${appId}/users/${userCredential.user.uid}/career_data/data`);
+      
+      const unsub = onSnapshot(userDocRef, (docSnapshot) => {
+          if (docSnapshot.exists()) {
+              const data = docSnapshot.data();
+              if (data.notes) setUserNotes(data.notes);
+              if (data.applications) setUserApplications(data.applications);
+          }
+      });
+      return unsub;
+    };
+
+    // Dinleyiciyi başlat ve temizleme fonksiyonunu yakala
+    let cleanupFunction;
+    attemptAuthAndSetupListener().then(unsub => {
+        cleanupFunction = unsub;
+    });
+
+    return () => {
+        if (cleanupFunction) cleanupFunction();
+    };
+
+  }, [auth, db]);
 
   const handleSaveNote = async () => {
-    if (!user) return;
+    if (!user || !selectedCountry) return;
     setIsSaving(true);
     const updatedNotes = { ...userNotes, [selectedCountry.id]: currentNote };
-    setUserNotes(updatedNotes); 
+    
+    const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
+    
     try {
-        await setDoc(doc(db, "users", user.uid), { notes: updatedNotes }, { merge: true });
+        await setDoc(userDocRef, { notes: updatedNotes }, { merge: true });
         setTimeout(() => { setIsSaving(false); setIsEditing(false); }, 500);
-    } catch (e) { setIsSaving(false); }
+    } catch (e) { 
+        console.error("Not Kaydetme Hatası:", e);
+        setIsSaving(false); 
+    }
   };
 
   // --- KANBAN İŞLEMLERİ ---
@@ -261,23 +391,29 @@ export default function CareerCommandCenterV18() {
     setUserApplications(updatedApps);
     setNewAppCompany('');
     setNewAppRole('');
-    await updateDoc(doc(db, "users", user.uid), { applications: updatedApps });
+    
+    const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
+    await updateDoc(userDocRef, { applications: updatedApps }).catch(e => console.error("Uygulama Ekleme Hatası:", e));
   };
 
-  const moveApplication = async (appId, newStatus) => {
+  const updateApplicationStatus = async (appId, newStatus) => {
     if (!user) return;
     const updatedApps = userApplications.map(app => 
-      app.id === appId ? { ...app, status: newStatus } : app
+      (app.id === appId || app.id.toString() === appId) ? { ...app, status: newStatus } : app
     );
     setUserApplications(updatedApps);
-    await updateDoc(doc(db, "users", user.uid), { applications: updatedApps });
+    
+    const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
+    await updateDoc(userDocRef, { applications: updatedApps }).catch(e => console.error("Durum Güncelleme Hatası:", e));
   };
 
   const deleteApplication = async (appId) => {
     if (!user) return;
     const updatedApps = userApplications.filter(app => app.id !== appId);
     setUserApplications(updatedApps);
-    await updateDoc(doc(db, "users", user.uid), { applications: updatedApps });
+    
+    const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
+    await updateDoc(userDocRef, { applications: updatedApps }).catch(e => console.error("Uygulama Silme Hatası:", e));
   };
 
   useEffect(() => {
@@ -322,6 +458,36 @@ export default function CareerCommandCenterV18() {
       if (tier === 'Tier 2') return 'from-yellow-900/50 via-slate-900 to-slate-900 border-yellow-500/30'; 
       return 'from-red-900/50 via-slate-900 to-slate-900 border-red-500/30'; 
   };
+  
+  // --- DRAG & DROP İŞLEYİCİLERİ ---
+  const handleDragStart = (e, appId) => {
+      setDraggingAppId(appId);
+      e.dataTransfer.setData("applicationId", appId.toString());
+  };
+
+  const handleDrop = (e, newStatus) => {
+      e.preventDefault();
+      setDragOverColumn(null);
+      const appId = e.dataTransfer.getData("applicationId");
+      if (appId) {
+          updateApplicationStatus(parseInt(appId), newStatus);
+      }
+      setDraggingAppId(null);
+  };
+
+  const handleDragEnter = (e, columnId) => {
+      e.preventDefault();
+      setDragOverColumn(columnId);
+  };
+
+  const handleDragLeave = (e, columnId) => {
+      e.preventDefault();
+      // Mouse gerçekten sütun alanından çıkarsa vurguyu kaldır
+      if (e.currentTarget.contains(e.relatedTarget)) {
+          return;
+      }
+      setDragOverColumn(null);
+  };
 
   return (
     <div className="flex w-full h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden flex-col md:flex-row relative">
@@ -340,6 +506,14 @@ export default function CareerCommandCenterV18() {
         
         {/* ANA NAVİGASYON */}
         <div className="p-4 space-y-2 border-b border-white/5">
+            <div className={`px-3 py-2 rounded-lg border flex items-center gap-2 text-xs font-bold transition-colors
+              ${dbStatus === 'connected' ? 'bg-emerald-900/30 border-emerald-500/30 text-emerald-400' : 
+                dbStatus === 'error' ? 'bg-red-900/30 border-red-500/30 text-red-400' : 
+                'bg-yellow-900/30 border-yellow-500/30 text-yellow-400'}`}>
+              {dbStatus === 'connected' ? <Cloud size={14}/> : dbStatus === 'error' ? <AlertTriangle size={14}/> : <Loader2 size={14} className="animate-spin"/>}
+              <span className="truncate">{dbStatus === 'connected' ? 'Bağlantı Başarılı' : dbStatus === 'error' ? 'Bağlantı Başarısız' : 'Bağlanıyor...'}</span>
+            </div>
+
             <button 
                 onClick={() => setAppMode('explorer')} 
                 className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold flex items-center gap-3 transition-all ${appMode === 'explorer' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'text-slate-400 hover:bg-white/5'}`}
@@ -503,36 +677,18 @@ export default function CareerCommandCenterV18() {
         {appMode === 'kanban' && (
             <main className="flex-1 flex overflow-x-auto overflow-y-hidden p-6 gap-4 bg-slate-950">
                 {kanbanColumns.map(col => (
-                    <div key={col.id} className={`w-72 shrink-0 flex flex-col bg-slate-900/50 rounded-xl border border-white/5 ${col.color.replace('border', 'border-t-4')}`}>
-                        <div className="p-3 border-b border-white/5 flex justify-between items-center">
-                            <span className="font-bold text-slate-200 text-sm">{col.title}</span>
-                            <span className="text-xs text-slate-500 bg-slate-950 px-2 py-0.5 rounded-full">{userApplications.filter(a => a.status === col.id).length}</span>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-2 space-y-2">
-                            {userApplications.filter(a => a.status === col.id).map(app => (
-                                <div key={app.id} className="bg-slate-800 p-3 rounded-lg border border-white/5 hover:border-white/20 transition-all group">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <div className="font-bold text-white text-sm">{app.company}</div>
-                                        <button onClick={() => deleteApplication(app.id)} className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100"><Trash2 size={12}/></button>
-                                    </div>
-                                    <div className="text-xs text-slate-400 mb-2">{app.role}</div>
-                                    
-                                    {/* Basit İlerleme Butonları */}
-                                    <div className="flex gap-1 justify-end">
-                                        {col.id !== 'to_apply' && (
-                                            <button onClick={() => moveApplication(app.id, kanbanColumns[kanbanColumns.findIndex(c => c.id === col.id) - 1].id)} className="p-1 hover:bg-slate-700 rounded text-slate-400"><ArrowRightCircle size={14} className="rotate-180"/></button>
-                                        )}
-                                        {col.id !== 'rejected' && col.id !== 'offer' && (
-                                            <button onClick={() => moveApplication(app.id, kanbanColumns[kanbanColumns.findIndex(c => c.id === col.id) + 1].id)} className="p-1 hover:bg-slate-700 rounded text-green-400"><ArrowRightCircle size={14}/></button>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                            {userApplications.filter(a => a.status === col.id).length === 0 && (
-                                <div className="text-center py-4 text-xs text-slate-600 italic">Boş</div>
-                            )}
-                        </div>
-                    </div>
+                    <KanbanColumn
+                        key={col.id}
+                        column={col}
+                        applications={userApplications.filter(a => a.status === col.id)}
+                        deleteApplication={deleteApplication}
+                        onDragStart={handleDragStart}
+                        onDrop={handleDrop}
+                        onDragEnter={handleDragEnter}
+                        onDragLeave={handleDragLeave}
+                        draggingAppId={draggingAppId}
+                        dragOverColumn={dragOverColumn}
+                    />
                 ))}
             </main>
         )}
