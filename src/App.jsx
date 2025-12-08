@@ -14,7 +14,6 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, onSnapshot } from "firebase/firestore";
 import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 
-// Kullanıcı tarafından sağlanan sabit Firebase yapılandırması
 const firebaseConfig = {
   apiKey: "AIzaSyDepkmn5L-OZXdT8mKf9sHDqhBoJNSI90o",
   authDomain: "kariyerpanosu.firebaseapp.com",
@@ -24,7 +23,6 @@ const firebaseConfig = {
   appId: "1:24937941128:web:ac7d3d38dccde96c97373d"
 };
 
-// Vercel gibi ortamlarda __app_id tanımlı olmayabilir, bu yüzden sabit bir ID kullanmak daha güvenlidir.
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'kariyer-panosu-v1';
 
 let app, db, auth;
@@ -112,6 +110,9 @@ const allCountries = [
   },
   {
     id: 'li', name: 'Lihtenştayn', englishName: 'Liechtenstein', region: 'Avrupa', tier: 'Tier 3', difficulty: 95, visa: 'Strict', tags: ['Mikro Devlet', 'Zor'], salary: 'CHF 80k+', desc: 'Üniversite seçeneği çok az. Genelde İsviçre\'den gidip gelinir.', strategy: 'İsviçre vizesi ile sınır ötesi öğrenci ol.', link: 'https://www.llv.li/', education: { tuition: 'Yüksek', workRights: 'Kısıtlı', postGrad: 'Yok', topUnis: ['Univ. of Liechtenstein'], note: 'Çalışma izni çok zor.' }, checklist: [...commonChecklist, "İsviçre oturum izni (tavsiye)"]
+  },
+  {
+    id: 'mc', name: 'Monako', englishName: 'Monaco', region: 'Avrupa', tier: 'Tier 3', difficulty: 99, visa: 'Wealth Visa', tags: ['Lüks', 'Vergisiz'], salary: '€70k+', desc: 'Dünyanın en zenginleri için. Mühendislikten ziyade finans ve hizmet sektörü.', strategy: 'Fransa\'da yaşayıp git-gel yapmak.', link: 'https://service-public-particuliers.gouv.mc/', education: { tuition: 'Çok Yüksek', workRights: 'Özel İzin', postGrad: 'Yok', topUnis: ['Int. Univ. of Monaco'], note: 'Yaşam maliyeti aşırı yüksek.' }, checklist: [...commonChecklist]
   },
   {
     id: 'fr', name: 'Fransa', englishName: 'France', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'VLS-TS', tags: ['Havacılık'], salary: '€40k+', desc: 'Master diploması (Bac+5) aldıktan sonra "APS" (Job Seeker) vizesine başvurabilirsin.', strategy: 'Alternance (hem oku hem çalış) programlarını kovala.', link: 'https://france-visas.gouv.fr/', education: { tuition: '€243 - €3770', workRights: '20 Saat/Hafta', postGrad: '1 Yıl (APS)', topUnis: ['CentraleSupélec', 'Polytechnique', 'Sorbonne', 'INSA Lyon', 'Telecom Paris', 'Univ. Paris-Saclay'], note: 'Yıllık 964 saat hakkı.' }, checklist: [...commonChecklist, "Campus France onayı", "OFII kaydı", "CVEC ödemesi"]
@@ -813,7 +814,7 @@ export default function CareerCommandCenterV18() {
         )}
         
         {appMode === 'kanban' && (
-            <div className="p-4 flex-1 overflow-y-auto">
+            <div className="p-4 flex-1 overflow-y-auto hidden md:block">
                  <div className="bg-slate-900/50 p-3 rounded-xl border border-white/5 text-center">
                     <p className="text-xs text-slate-400 mb-2">Toplam Başvuru</p>
                     {/* YENİ MANTIK: Sadece 'Planlama' dışındakileri say */}
@@ -849,7 +850,7 @@ export default function CareerCommandCenterV18() {
             </div>
         )}
 
-        <div className="p-4 border-t border-white/10 shrink-0">
+        <div className="p-4 border-t border-white/10 shrink-0 hidden md:block">
           <div className="bg-slate-800/50 rounded-xl p-3 border border-white/5 shadow-lg">
              <div className="flex justify-between items-center mb-2"><span className="text-xs font-bold text-slate-300 flex items-center gap-1.5"><Clock size={12} className="text-cyan-400" /> Mezuniyet ({new Date('2026-02-01').getFullYear()})</span><span className="text-xs text-white font-mono font-bold">{diffDays} Gün</span></div>
              <div className="w-full bg-slate-700/50 h-1.5 rounded-full overflow-hidden mb-1"><div className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 h-full rounded-full" style={{ width: `${progress}%` }}></div></div>
@@ -929,30 +930,35 @@ export default function CareerCommandCenterV18() {
                     {/* DETAIL */}
                     {selectedCountry ? (
                         <div className="flex-1 flex flex-col min-w-0 bg-slate-900/50 overflow-y-auto fixed inset-0 z-40 md:static md:z-auto">
-                            <div className="h-40 relative shrink-0 overflow-hidden">
+                            <div className="h-48 relative shrink-0 overflow-hidden">
                                 <div className={`absolute inset-0 bg-gradient-to-br ${getTierGradient(selectedCountry.tier)} z-0 border-b`}></div>
+                                
+                                {/* MOBIL GERI BUTONU - DAHA BELIRGIN VE ORTALANMIS */}
                                 <button 
                                     onClick={() => setSelectedCountry(null)} 
-                                    className="absolute top-4 left-4 z-30 p-2 bg-black/40 backdrop-blur-md rounded-full text-white md:hidden hover:bg-black/60 transition-colors"
+                                    className="absolute top-4 left-4 z-50 p-2 bg-black/60 backdrop-blur-md rounded-full text-white md:hidden hover:bg-black/80 transition-colors shadow-lg border border-white/10"
                                 >
-                                    <ChevronLeft size={20} />
+                                    <ChevronLeft size={24} />
                                 </button>
-                                <div className="absolute bottom-6 left-8 z-20 right-8 flex justify-between items-end">
-                                <div>
-                                    <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-white/5 border-white/10 inline-block mb-2 text-white`}>{selectedCountry.tier}</div>
-                                    <h2 className="text-3xl font-bold text-white tracking-tight">{selectedCountry.name}</h2>
-                                </div>
-                                <div className="flex bg-slate-950/50 rounded-lg p-1 border border-white/10">
-                                    <button onClick={() => setViewMode('career')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'career' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-white'}`}>Profesyonel</button>
-                                    <button onClick={() => setViewMode('education')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'education' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'}`}>Akademik</button>
-                                    <button onClick={() => setViewMode('checklist')} className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${viewMode === 'checklist' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}>
-                                        <div className='flex items-center gap-1'><FileCheck size={12}/> Vize & Hazırlık</div>
-                                    </button>
-                                </div>
+
+                                <div className="absolute bottom-4 left-6 z-20 right-6 flex flex-col gap-4">
+                                    <div>
+                                        <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-white/10 border-white/20 inline-block mb-2 text-white/90 backdrop-blur-sm`}>{selectedCountry.tier}</div>
+                                        <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">{selectedCountry.name}</h2>
+                                    </div>
+                                    
+                                    {/* MOBIL UYUMLU BUTON GRUBU */}
+                                    <div className="flex flex-wrap gap-2 bg-slate-950/40 backdrop-blur-md rounded-xl p-1.5 border border-white/10">
+                                        <button onClick={() => setViewMode('career')} className={`flex-1 min-w-[80px] px-3 py-2 rounded-lg text-xs font-bold transition-all text-center ${viewMode === 'career' ? 'bg-cyan-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/10'}`}>Profesyonel</button>
+                                        <button onClick={() => setViewMode('education')} className={`flex-1 min-w-[80px] px-3 py-2 rounded-lg text-xs font-bold transition-all text-center ${viewMode === 'education' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/10'}`}>Akademik</button>
+                                        <button onClick={() => setViewMode('checklist')} className={`flex-1 min-w-[100px] px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${viewMode === 'checklist' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/10'}`}>
+                                            <FileCheck size={12}/> Vize & Hazırlık
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             {/* ... Detail Content (Maaş, Zorluk, Genel Durum, Strateji, İş Arama, Notlar) ... */}
-                            <div className="p-8 space-y-8 max-w-4xl mx-auto w-full pb-20">
+                            <div className="p-6 md:p-8 space-y-8 max-w-4xl mx-auto w-full pb-24">
                                 
                                 {viewMode !== 'checklist' ? (
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1054,22 +1060,48 @@ export default function CareerCommandCenterV18() {
                     <span className="text-lg font-bold text-white">Başvurularım</span>
                   </div>
                </header>
-               <main className="flex-1 flex overflow-x-auto overflow-y-hidden p-6 gap-4 bg-slate-950">
-                  {kanbanColumns.map(col => (
-                      <KanbanColumn
-                          key={col.id}
-                          column={col}
-                          applications={userApplications.filter(a => a.status === col.id)}
-                          deleteApplication={deleteApplication}
-                          onDragStart={handleDragStart}
-                          onDrop={handleDrop}
-                          onDragEnter={handleDragEnter}
-                          onDragLeave={handleDragLeave}
-                          draggingAppId={draggingAppId}
-                          dragOverColumn={dragOverColumn}
-                      />
-                  ))}
-               </main>
+               
+               <div className="flex-1 flex flex-col overflow-hidden bg-slate-950">
+                   {/* MOBIL İÇİN HIZLI EKLE ALANI - SADECE MOBİLDE GÖZÜKÜR */}
+                   <div className="md:hidden p-4 border-b border-white/5 bg-slate-900/30">
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Hızlı Ekle</div>
+                        {user && !user.isAnonymous ? (
+                            <div className="space-y-2">
+                                <input type="text" placeholder="Şirket Adı" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppCompany} onChange={e => setNewAppCompany(e.target.value)} />
+                                <input type="text" placeholder="Pozisyon" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppRole} onChange={e => setNewAppRole(e.target.value)} />
+                                <div className="grid grid-cols-2 gap-2">
+                                    <input type="text" placeholder="Web Sitesi" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppCompanyUrl} onChange={e => setNewAppCompanyUrl(e.target.value)} />
+                                    <input type="text" placeholder="İlan Linki" className="w-full bg-slate-950 border border-white/10 rounded-lg p-2 text-xs outline-none focus:border-purple-500" value={newAppJobUrl} onChange={e => setNewAppJobUrl(e.target.value)} />
+                                </div>
+                                <button onClick={addApplication} className="w-full bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1"><Plus size={12}/> Ekle</button>
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={handleGoogleLogin}
+                                className="w-full bg-slate-800 text-slate-300 py-2 rounded-lg text-xs font-bold border border-dashed border-slate-600 flex items-center justify-center gap-2"
+                            >
+                                <LogIn size={12}/> İlan Eklemek İçin Giriş Yap
+                            </button>
+                        )}
+                   </div>
+
+                   <main className="flex-1 flex overflow-x-auto overflow-y-hidden p-4 md:p-6 gap-4">
+                      {kanbanColumns.map(col => (
+                          <KanbanColumn
+                              key={col.id}
+                              column={col}
+                              applications={userApplications.filter(a => a.status === col.id)}
+                              deleteApplication={deleteApplication}
+                              onDragStart={handleDragStart}
+                              onDrop={handleDrop}
+                              onDragEnter={handleDragEnter}
+                              onDragLeave={handleDragLeave}
+                              draggingAppId={draggingAppId}
+                              dragOverColumn={dragOverColumn}
+                          />
+                      ))}
+                   </main>
+               </div>
             </>
         )}
 
@@ -1084,7 +1116,7 @@ export default function CareerCommandCenterV18() {
                     <span className="text-lg font-bold text-white">Analiz Paneli</span>
                   </div>
                </header>
-               <main className="flex-1 overflow-hidden bg-slate-950">
+               <main className="flex-1 overflow-y-auto bg-slate-950 pb-24">
                   <DashboardView applications={userApplications} />
                </main>
             </>
