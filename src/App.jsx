@@ -941,7 +941,8 @@ export default function CareerCommandCenterV18() {
                                     <ChevronLeft size={24} />
                                 </button>
 
-                                <div className="absolute bottom-4 left-6 z-20 right-6 flex flex-col gap-4">
+                                {/* Üst kısım içeriği: Geri butonu ile çakışmayı önlemek için paddingTop ekledik */}
+                                <div className="absolute bottom-4 left-6 z-20 right-6 flex flex-col gap-4 pt-12">
                                     <div>
                                         <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-white/10 border-white/20 inline-block mb-2 text-white/90 backdrop-blur-sm`}>{selectedCountry.tier}</div>
                                         <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">{selectedCountry.name}</h2>
