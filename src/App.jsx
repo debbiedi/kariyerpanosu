@@ -104,6 +104,9 @@ const allCountries = [
     id: 'au', name: 'Avustralya', englishName: 'Australia', region: 'Okyanusya', tier: 'Tier 2', difficulty: 60, visa: 'Subclass 500', tags: ['Yüksek Yaşam'], salary: 'AUD 80k+', desc: 'Master (Coursework) sonrası 2-3 yıl, Master (Research) sonrası 3 yıl çalışma izni.', strategy: 'Regional bölgelerde okursan ekstra çalışma izni süresi alırsın.', link: 'https://immi.homeaffairs.gov.au/', education: { tuition: 'AUD 30k+', workRights: '24 Saat/Hafta', postGrad: '2-3 Yıl', topUnis: ['UNSW', 'Melbourne', 'Sydney Univ', 'ANU', 'Monash', 'Queensland'], note: 'Tatillerde limitsiz.' },
     checklist: [...commonChecklist, "CoE (Confirmation of Enrolment)", "OSHC Sağlık Sigortası", "GTE (Geçici Giriş) mektubu"]
   },
+  {
+    id: 'mx', name: 'Meksika', englishName: 'Mexico', region: 'Amerika', tier: 'Tier 3', difficulty: 55, visa: 'Student Visa', tags: ['Üretim', 'Nearshoring'], salary: 'Düşük', desc: 'ABD şirketlerinin üretim üssü. Guadalajara teknoloji merkezidir.', strategy: 'İspanyolca öğrenmek şart.', link: 'https://www.gob.mx/', education: { tuition: 'Uygun', workRights: 'Kısıtlı', postGrad: '-', topUnis: ['Tecnológico de Monterrey', 'UNAM', 'IPN'], note: 'Güvenlik bölgelerine dikkat.' }, checklist: [...commonChecklist, "Ekonomik yeterlilik kanıtı", "İspanyolca dil yeterliliği"]
+  },
   // --- BATI AVRUPA ---
   {
     id: 'lu', name: 'Lüksemburg', englishName: 'Luxembourg', region: 'Avrupa', tier: 'Tier 1', difficulty: 65, visa: 'Student Visa', tags: ['Finans', 'Yüksek Maaş'], salary: '€60k+', desc: 'Master öğrencileri için fırsatlar artıyor. Çok dilli ortam.', strategy: 'Staj yaparak sektöre giriş yap.', link: 'https://guichet.public.lu/', education: { tuition: '€400 - €800', workRights: '15 Saat/Hafta', postGrad: 'Var', topUnis: ['Univ. of Luxembourg', 'Lunex University'], note: 'Tatillerde 40 saat.' }, checklist: [...commonChecklist, "Diploma denkliği", "Konaklama sözleşmesi"]
@@ -150,6 +153,9 @@ const allCountries = [
   },
   {
     id: 'by', name: 'Beyaz Rusya', englishName: 'Belarus', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Visa Required', tags: ['Yaptırım', 'Zor'], salary: 'Düşük', desc: 'Siyasi durum ve yaptırımlar nedeniyle önerilmez.', strategy: 'Alternatif ülkelere yönel.', link: 'https://mfa.gov.by/', education: { tuition: 'Ucuz', workRights: 'Kısıtlı', postGrad: '-', topUnis: ['Belarusian State Univ. (BSU)', 'BSUIR (Radioelectronics)'], note: 'Önerilmez.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'ru', name: 'Rusya', englishName: 'Russia', region: 'Asya', tier: 'Tier 3', difficulty: 90, visa: 'Visa Required', tags: ['Yaptırım', 'Büyük Pazar'], salary: 'Düşük', desc: 'Yaptırımlar ve politik durum nedeniyle uluslararası firmalar çekildi. Yerel pazar büyük.', strategy: 'Yandex gibi yerel devler.', link: 'http://government.ru/en/', education: { tuition: 'Uygun', workRights: 'Kısıtlı', postGrad: '-', topUnis: ['Lomonosov MSU', 'MIPT', 'HSE University', 'Bauman MSTU', 'ITMO University'], note: 'Politik risk.' }, checklist: [...commonChecklist, "Davetiye mektubu"]
   },
   {
     id: 'md', name: 'Moldova', englishName: 'Moldova', region: 'Avrupa', tier: 'Tier 3', difficulty: 40, visa: 'E-Visa', tags: ['Gelişmekte', 'Şarap'], salary: 'Düşük', desc: 'Avrupa\'nın en fakir ülkelerinden ama IT Park\'ları gelişiyor.', strategy: 'Girişimci vizesi.', link: 'http://evisa.gov.md/', education: { tuition: 'Çok Ucuz', workRights: 'Kısıtlı', postGrad: 'Yok', topUnis: ['Tech. Univ. of Moldova (TUM)', 'Moldova State Univ.'], note: 'AB üyesi değil.' }, checklist: [...commonChecklist]
@@ -263,16 +269,19 @@ const allCountries = [
   },
   // --- ASYA (EKLENENLER) ---
   {
-    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik'], salary: '¥4M+', desc: 'Teknoloji devi. MEXT bursu ile gidersen her şey devletten.', strategy: 'Konsolosluk bursunu takip et.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Univ. of Tokyo', 'Tokyo Tech', 'Kyoto Univ.', 'Osaka Univ.', 'Tohoku Univ.', 'Keio Univ.'], note: 'Özel izin.' }, checklist: [...commonChecklist, "MEXT bursu başvuru formu", "Japonca seviye tespiti (JLPT)"]
+    id: 'tw', name: 'Tayvan', englishName: 'Taiwan', region: 'Asya', tier: 'Tier 1', difficulty: 60, visa: 'Gold Card', tags: ['Yarı İletken', 'TSMC'], salary: 'TWD 2M+', desc: 'Yarı iletken endüstrisinin kalbi. Mühendisler için büyük fırsatlar.', strategy: 'Gold Card vizesi ile esnek çalışma ve oturum.', link: 'https://goldcard.nat.gov.tw/', education: { tuition: 'Uygun', workRights: '20 Saat/Hafta', postGrad: '6-12 Ay', topUnis: ['National Taiwan Univ. (NTU)', 'NTHU', 'NCTU', 'NCKU'], note: 'Çince artı puan.' }, checklist: [...commonChecklist, "Sağlık raporu", "Visa başvurusu"]
+  },
+  {
+    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Student Visa', tags: ['Robotik'], salary: '¥4M+', desc: 'Haftada 28 saat çalışma izni (özel izinle).', strategy: 'MEXT bursu ile gitmek en mantıklısı.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Univ. of Tokyo', 'Tokyo Tech', 'Kyoto Univ.', 'Osaka Univ.', 'Tohoku Univ.', 'Keio Univ.'], note: 'Shikakugai katsudo kyoka izni şart.' }, checklist: [...commonChecklist, "CoE (Certificate of Eligibility)", "MEXT bursu başvurusu"]
   },
    {
-    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7', tags: ['Samsung'], salary: '₩40M+', desc: 'Samsung, LG gibi devler burada. GKS bursu çok popüler.', strategy: 'GKS bursuna başvur.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20-30 Saat/Hafta', postGrad: '2 Yıl (D-10)', topUnis: ['KAIST', 'Seoul National Univ. (SNU)', 'POSTECH', 'Yonsei Univ.', 'Korea Univ.'], note: '6 aydan sonra.' }, checklist: [...commonChecklist, "GKS bursu belgeleri", "TOPIK sınav sonucu"]
+    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'D-2 Visa', tags: ['Samsung'], salary: '₩40M+', desc: 'Master öğrencileri için çalışma izni dil seviyesine (TOPIK) bağlı olarak 30-35 saate kadar çıkabilir.', strategy: 'GKS bursuna başvur.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20-30 Saat/Hafta', postGrad: '2 Yıl (D-10)', topUnis: ['KAIST', 'Seoul National Univ. (SNU)', 'POSTECH', 'Yonsei Univ.', 'Korea Univ.'], note: 'TOPIK seviyesine göre değişir.' }, checklist: [...commonChecklist, "GKS bursu belgeleri", "TOPIK sınav sonucu"]
   },
   {
-    id: 'sg', name: 'Singapur', englishName: 'Singapore', region: 'Asya', tier: 'Tier 1', difficulty: 75, visa: 'Employment Pass', tags: ['Fintech', 'Sıcak'], salary: 'SGD 60k+', desc: 'Asya\'nın finans ve teknoloji merkezi. Vergi oranları çok düşük.', strategy: 'Employment Pass için yüksek maaşlı iş bulmak şart.', link: 'https://www.mom.gov.sg/', education: { tuition: 'Yüksek', workRights: '16 Saat', postGrad: 'LTVP', topUnis: ['NUS', 'NTU', 'SMU', 'SUTD'], note: 'Dünyanın en iyi üniversiteleri.' }, checklist: [...commonChecklist, "Employment Pass kriterlerini kontrol et"]
+    id: 'sg', name: 'Singapur', englishName: 'Singapore', region: 'Asya', tier: 'Tier 1', difficulty: 75, visa: 'Student Pass', tags: ['Fintech', 'Sıcak'], salary: 'SGD 60k+', desc: 'Belirlenen üniversitelerde okuyanlar part-time (16 saat) çalışabilir.', strategy: 'Hükümet burslarına (Tuition Grant) bak.', link: 'https://www.mom.gov.sg/', education: { tuition: 'Yüksek', workRights: '16 Saat/Hafta', postGrad: 'LTVP', topUnis: ['NUS', 'NTU', 'SMU', 'SUTD'], note: 'Sadece onaylı kurumlarda.' }, checklist: [...commonChecklist, "Student Pass başvurusu", "Tuition Grant Scheme"]
   },
   {
-    id: 'cn', name: 'Çin', englishName: 'China', region: 'Asya', tier: 'Tier 2', difficulty: 65, visa: 'Z Visa', tags: ['Üretim', 'Donanım'], salary: '¥200k+', desc: 'Donanım ve üretim merkezi (Shenzhen).', strategy: 'Çince bilmek büyük avantaj.', link: 'https://www.visaforchina.org/', education: { tuition: 'Burslu', workRights: 'Kısıtlı', postGrad: '-', topUnis: ['Tsinghua Univ.', 'Peking Univ.', 'Shanghai Jiao Tong', 'Fudan Univ.', 'Zhejiang Univ.'], note: 'Çince şart olabilir.' }, checklist: [...commonChecklist, "Sağlık raporu", "Çalışma izni davetiyesi"]
+    id: 'cn', name: 'Çin', englishName: 'China', region: 'Asya', tier: 'Tier 2', difficulty: 65, visa: 'X1 Visa', tags: ['Üretim', 'Donanım'], salary: '¥200k+', desc: 'Yasal olarak öğrenciyken çalışmak zordur, ancak staj yapılabilir.', strategy: 'Burslu Master programları çok yaygın.', link: 'https://www.visaforchina.org/', education: { tuition: 'Burslu', workRights: 'Kısıtlı (Staj)', postGrad: '-', topUnis: ['Tsinghua Univ.', 'Peking Univ.', 'Shanghai Jiao Tong', 'Fudan Univ.', 'Zhejiang Univ.'], note: 'Üniversite ve işveren onayı şart.' }, checklist: [...commonChecklist, "JW201/JW202 formu", "Sağlık raporu"]
   }
 ];
 
@@ -400,16 +409,16 @@ const KanbanCard = ({ app, deleteApplication, onDragStart, isDragging, onMove })
                 <button 
                     onClick={() => onMove(app.id, -1)} 
                     disabled={!canMoveLeft}
-                    className={`p-1 rounded bg-slate-700 text-slate-300 ${!canMoveLeft ? 'opacity-30 cursor-not-allowed' : 'active:bg-slate-600'}`}
+                    className={`p-1.5 rounded bg-slate-700 text-slate-300 ${!canMoveLeft ? 'opacity-30 cursor-not-allowed' : 'active:bg-slate-600'}`}
                 >
-                    <ChevronLeft size={14} />
+                    <ChevronLeft size={16} />
                 </button>
                 <button 
                     onClick={() => onMove(app.id, 1)} 
                     disabled={!canMoveRight}
-                    className={`p-1 rounded bg-slate-700 text-slate-300 ${!canMoveRight ? 'opacity-30 cursor-not-allowed' : 'active:bg-slate-600'}`}
+                    className={`p-1.5 rounded bg-slate-700 text-slate-300 ${!canMoveRight ? 'opacity-30 cursor-not-allowed' : 'active:bg-slate-600'}`}
                 >
-                    <ChevronRight size={14} />
+                    <ChevronRight size={16} />
                 </button>
             </div>
         </div>
