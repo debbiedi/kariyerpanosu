@@ -24,7 +24,6 @@ const firebaseConfig = {
   appId: "1:24937941128:web:ac7d3d38dccde96c97373d"
 };
 
-// Vercel gibi ortamlarda __app_id tanımlı olmayabilir, bu yüzden sabit bir ID kullanmak daha güvenlidir.
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'kariyer-panosu-v1';
 
 let app, db, auth;
