@@ -6,7 +6,7 @@ import {
   Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity,
   Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb,
   Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle, LogOut, LogIn, 
-  ListTodo, PieChart, FileCheck, Link as LinkIcon, RefreshCw, Filter
+  ListTodo, PieChart, FileCheck, Link as LinkIcon, RefreshCw, Filter, ChevronLeft
 } from 'lucide-react';
 
 // --- FIREBASE ENTEGRASYONU ---
@@ -437,7 +437,7 @@ const Target = ({size, className}) => (
 export default function CareerCommandCenterV18() {
   const [appMode, setAppMode] = useState('explorer'); // 'explorer' | 'kanban' | 'dashboard'
   const [activeTab, setActiveTab] = useState('All');
-  const [selectedCountry, setSelectedCountry] = useState(allCountries[0]); 
+  const [selectedCountry, setSelectedCountry] = useState(null); 
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState('career'); // 'career' | 'education' | 'checklist'
   const [selectedRole, setSelectedRole] = useState(engineerRoles[0].title); 
@@ -666,13 +666,14 @@ export default function CareerCommandCenterV18() {
   
   useEffect(() => {
       if (appMode === 'explorer') {
-        if (filteredData.length > 0 && (!selectedCountry || !filteredData.find(c => c.id === selectedCountry.id))) {
-            setSelectedCountry(filteredData[0]);
-        } else if (filteredData.length === 0) {
-            setSelectedCountry(null);
-        }
+          if (!selectedCountry && filteredData.length > 0 && window.innerWidth >= 768) {
+             // Sadece desktop'ta otomatik ilk ülkeyi seç, mobilde seçme
+             setSelectedCountry(filteredData[0]);
+          } else if (filteredData.length === 0) {
+             setSelectedCountry(null);
+          }
       }
-  }, [filteredData, selectedCountry, appMode]);
+  }, [filteredData, appMode]);
 
   const getTierGradient = (tier) => {
       if (tier === 'Tier 1') return 'from-emerald-900/50 via-slate-900 to-slate-900 border-emerald-500/30'; 
@@ -892,7 +893,10 @@ export default function CareerCommandCenterV18() {
 
                 <main className="flex-1 flex overflow-hidden relative">
                     {/* LIST */}
-                    <div className="w-[380px] border-r border-white/5 flex flex-col shrink-0 bg-slate-900/30 hidden lg:flex">
+                    <div className={`
+                        flex flex-col shrink-0 bg-slate-900/30 transition-all duration-300
+                        ${selectedCountry ? 'hidden md:flex md:w-[380px] border-r border-white/5' : 'w-full md:w-[380px] border-r border-white/5'}
+                    `}>
                         <div className="p-4 border-b border-white/5 text-xs font-bold text-slate-500 uppercase tracking-wider flex justify-between items-center">
                             <span>Sonuçlar ({filteredData.length})</span>
                             {/* YENİ FİLTRE BUTONLARI */}
@@ -924,9 +928,15 @@ export default function CareerCommandCenterV18() {
 
                     {/* DETAIL */}
                     {selectedCountry ? (
-                        <div className="flex-1 flex flex-col min-w-0 bg-slate-900/50 overflow-y-auto">
+                        <div className="flex-1 flex flex-col min-w-0 bg-slate-900/50 overflow-y-auto fixed inset-0 z-40 md:static md:z-auto">
                             <div className="h-40 relative shrink-0 overflow-hidden">
                                 <div className={`absolute inset-0 bg-gradient-to-br ${getTierGradient(selectedCountry.tier)} z-0 border-b`}></div>
+                                <button 
+                                    onClick={() => setSelectedCountry(null)} 
+                                    className="absolute top-4 left-4 z-30 p-2 bg-black/40 backdrop-blur-md rounded-full text-white md:hidden hover:bg-black/60 transition-colors"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
                                 <div className="absolute bottom-6 left-8 z-20 right-8 flex justify-between items-end">
                                 <div>
                                     <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-white/5 border-white/10 inline-block mb-2 text-white`}>{selectedCountry.tier}</div>
