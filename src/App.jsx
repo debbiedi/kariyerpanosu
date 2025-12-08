@@ -24,6 +24,7 @@ const firebaseConfig = {
   appId: "1:24937941128:web:ac7d3d38dccde96c97373d"
 };
 
+// Vercel gibi ortamlarda __app_id tanımlı olmayabilir, bu yüzden sabit bir ID kullanmak daha güvenlidir.
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'kariyer-panosu-v1';
 
 let app, db, auth;
@@ -1044,29 +1045,49 @@ export default function CareerCommandCenterV18() {
 
         {/* KANBAN MODE */}
         {appMode === 'kanban' && (
-            <main className="flex-1 flex overflow-x-auto overflow-y-hidden p-6 gap-4 bg-slate-950">
-                {kanbanColumns.map(col => (
-                    <KanbanColumn
-                        key={col.id}
-                        column={col}
-                        applications={userApplications.filter(a => a.status === col.id)}
-                        deleteApplication={deleteApplication}
-                        onDragStart={handleDragStart}
-                        onDrop={handleDrop}
-                        onDragEnter={handleDragEnter}
-                        onDragLeave={handleDragLeave}
-                        draggingAppId={draggingAppId}
-                        dragOverColumn={dragOverColumn}
-                    />
-                ))}
-            </main>
+            <>
+               <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setMobileMenuOpen(true)} className="md:hidden text-slate-400 p-1 rounded hover:bg-white/5">
+                        <Menu size={24} />
+                    </button>
+                    <span className="text-lg font-bold text-white">Başvurularım</span>
+                  </div>
+               </header>
+               <main className="flex-1 flex overflow-x-auto overflow-y-hidden p-6 gap-4 bg-slate-950">
+                  {kanbanColumns.map(col => (
+                      <KanbanColumn
+                          key={col.id}
+                          column={col}
+                          applications={userApplications.filter(a => a.status === col.id)}
+                          deleteApplication={deleteApplication}
+                          onDragStart={handleDragStart}
+                          onDrop={handleDrop}
+                          onDragEnter={handleDragEnter}
+                          onDragLeave={handleDragLeave}
+                          draggingAppId={draggingAppId}
+                          dragOverColumn={dragOverColumn}
+                      />
+                  ))}
+               </main>
+            </>
         )}
 
         {/* DASHBOARD MODE */}
         {appMode === 'dashboard' && (
-            <main className="flex-1 overflow-hidden bg-slate-950">
-                <DashboardView applications={userApplications} />
-            </main>
+            <>
+               <header className="h-16 border-b border-white/10 bg-slate-900/50 backdrop-blur-md flex items-center justify-between px-4 sticky top-0 z-30 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <button onClick={() => setMobileMenuOpen(true)} className="md:hidden text-slate-400 p-1 rounded hover:bg-white/5">
+                        <Menu size={24} />
+                    </button>
+                    <span className="text-lg font-bold text-white">Analiz Paneli</span>
+                  </div>
+               </header>
+               <main className="flex-1 overflow-hidden bg-slate-950">
+                  <DashboardView applications={userApplications} />
+               </main>
+            </>
         )}
 
       </div>
