@@ -6,7 +6,7 @@ import {
   Menu, X, Coins, Clock, Building, Award, Code, Cpu, Activity,
   Calendar, Settings, BarChart3, CheckCircle2, Users, Lightbulb,
   Linkedin, Cloud, Check, Loader2, Edit3, ClipboardList, Plus, Trash2, ArrowRightCircle, LogOut, LogIn, 
-  ListTodo, PieChart, FileCheck, Link as LinkIcon, RefreshCw, Filter, ChevronLeft
+  ListTodo, PieChart, FileCheck, Link as LinkIcon, RefreshCw, Filter, ChevronLeft, ChevronDown, ChevronUp, ArrowLeft,
 } from 'lucide-react';
 
 // --- FIREBASE ENTEGRASYONU ---
@@ -43,7 +43,7 @@ const commonChecklist = [
     "LinkedIn profilini hedef ülkeye göre düzenle"
 ];
 
-// --- VERİTABANI (TÜM LİSTE - MASTER ODAKLI) ---
+// --- VERİTABANI (TÜM LİSTE - 60+ ÜLKE) ---
 const allCountries = [
   // TIER 1 & POPÜLER
   {
@@ -145,6 +145,15 @@ const allCountries = [
   {
     id: 'sk', name: 'Slovakya', englishName: 'Slovakia', region: 'Avrupa', tier: 'Tier 2', difficulty: 35, visa: 'National Visa', tags: ['Otomotiv', 'Üretim'], salary: '€25k - €35k', desc: 'Master öğrencileri haftada 20 saat çalışabilir.', strategy: 'Otomotiv sektöründeki stajları kovala.', link: 'https://www.mic.iom.sk/', education: { tuition: '€2k-5k', workRights: '20 Saat/Hafta', postGrad: '9 Ay', topUnis: ['STU Bratislava', 'Comenius Univ.', 'Tech. Univ. of Kosice', 'Univ. of Zilina'], note: 'Üniversite onayı gerekebilir.' }, checklist: [...commonChecklist]
   },
+  {
+    id: 'ua', name: 'Ukrayna', englishName: 'Ukraine', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Restricted', tags: ['Savaş', 'Riskli'], salary: 'Değişken', desc: 'Şu an savaş nedeniyle seyahat ve çalışma önerilmiyor. Geçmişte güçlü bir IT sektörü vardı.', strategy: 'Şu an için beklemede kalınmalı.', link: 'https://mfa.gov.ua/', education: { tuition: 'Ucuz', workRights: 'Yok', postGrad: '-', topUnis: ['Kyiv Poly (KPI)', 'Taras Shevchenko Univ.', 'Lviv Poly', 'Kharkiv National Radio Electronics'], note: 'Güvenlik riski.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'by', name: 'Beyaz Rusya', englishName: 'Belarus', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Visa Required', tags: ['Yaptırım', 'Zor'], salary: 'Düşük', desc: 'Siyasi durum ve yaptırımlar nedeniyle önerilmez.', strategy: 'Alternatif ülkelere yönel.', link: 'https://mfa.gov.by/', education: { tuition: 'Ucuz', workRights: 'Kısıtlı', postGrad: '-', topUnis: ['Belarusian State Univ. (BSU)', 'BSUIR (Radioelectronics)'], note: 'Önerilmez.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'md', name: 'Moldova', englishName: 'Moldova', region: 'Avrupa', tier: 'Tier 3', difficulty: 40, visa: 'E-Visa', tags: ['Gelişmekte', 'Şarap'], salary: 'Düşük', desc: 'Avrupa\'nın en fakir ülkelerinden ama IT Park\'ları gelişiyor.', strategy: 'Girişimci vizesi.', link: 'http://evisa.gov.md/', education: { tuition: 'Çok Ucuz', workRights: 'Kısıtlı', postGrad: 'Yok', topUnis: ['Tech. Univ. of Moldova (TUM)', 'Moldova State Univ.'], note: 'AB üyesi değil.' }, checklist: [...commonChecklist]
+  },
   // --- İSKANDİNAVYA & BALTIKLAR ---
   {
     id: 'dk', name: 'Danimarka', englishName: 'Denmark', region: 'Kuzey', tier: 'Tier 2', difficulty: 55, visa: 'Residence Permit', tags: ['Rüzgar'], salary: '€50k+', desc: 'Master sonrası "Establishment Card" ile 3 yıla kadar kalabilirsin.', strategy: 'Danca öğrenmek iş bulmayı çok kolaylaştırır.', link: 'https://www.nyidanmark.dk/', education: { tuition: '€6k+', workRights: '20 Saat/Hafta', postGrad: '3 Yıl (Establishment Card)', topUnis: ['DTU (Technical Univ.)', 'Univ. of Copenhagen', 'Aarhus Univ.', 'Aalborg Univ.', 'ITU Copenhagen'], note: 'Yazın (Haz-Ağu) limitsiz.' }, checklist: [...commonChecklist, "ST1 formunu doldur", "Biyometrik veriler"]
@@ -177,18 +186,93 @@ const allCountries = [
   {
     id: 'pt', name: 'Portekiz', englishName: 'Portugal', region: 'Avrupa', tier: 'Tier 1', difficulty: 10, visa: 'D4 Visa', tags: ['Ucuz'], salary: '€20k', desc: 'Master öğrencileri çalışabilir, ancak SEF\'e bildirim yapılmalı.', strategy: 'Lizbon ve Porto\'daki teknoloji şirketlerine bak.', link: 'https://vistos.mne.gov.pt/', education: { tuition: '€1k-3k', workRights: '20 Saat/Hafta', postGrad: 'Kolay', topUnis: ['Univ. of Porto', 'Técnico Lisboa (IST)', 'Univ. of Coimbra', 'Nova Univ. Lisbon'], note: 'SEF onayı gerekli.' }, checklist: [...commonChecklist, "NIF (Vergi Numarası) al", "Junta de Freguesia (adres)"]
   },
-  // --- ASYA ---
   {
-    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Student Visa', tags: ['Robotik'], salary: '¥4M+', desc: 'Haftada 28 saat çalışma izni (özel izinle).', strategy: 'MEXT bursu ile gitmek en mantıklısı.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Univ. of Tokyo', 'Tokyo Tech', 'Kyoto Univ.', 'Osaka Univ.', 'Tohoku Univ.', 'Keio Univ.'], note: 'Shikakugai katsudo kyoka izni şart.' }, checklist: [...commonChecklist, "CoE (Certificate of Eligibility)", "MEXT bursu başvurusu"]
+    id: 'gr', name: 'Yunanistan', englishName: 'Greece', region: 'Avrupa', tier: 'Tier 3', difficulty: 45, visa: 'Digital Nomad', tags: ['Turizm', 'Deniz'], salary: '€20k - €30k', desc: 'Ekonomik krizden toparlanıyor. Digital Nomad vizesi popüler.', strategy: 'Uzaktan çalışarak yaşamak için ideal.', link: 'https://www.mfa.gr/', education: { tuition: '€1k-3k', workRights: 'Part-time', postGrad: 'Yok', topUnis: ['NTUA (Athens Poly)', 'Aristotle Univ. Thessaloniki', 'Univ. of Crete'], note: 'Yunanca gerekli olabilir.' }, checklist: [...commonChecklist, "AFM (Vergi No) al"]
+  },
+  {
+    id: 'mt', name: 'Malta', englishName: 'Malta', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Work Permit', tags: ['iGaming', 'İngilizce'], salary: '€30k - €45k', desc: 'İngilizce resmi dil. iGaming ve Blockchain sektörü çok büyük.', strategy: 'İngilizce ile rahatça iş bulabilirsin.', link: 'https://identita.gov.mt/', education: { tuition: '€5k+', workRights: '20 Saat', postGrad: '6 Ay', topUnis: ['Univ. of Malta', 'MCAST'], note: 'İklimi harika.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'ad', name: 'Andorra', englishName: 'Andorra', region: 'Avrupa', tier: 'Tier 3', difficulty: 70, visa: 'Quota', tags: ['Mikro Devlet', 'Vergisiz'], salary: '€30k+', desc: 'İspanya ve Fransa arasında. Turizm odaklı.', strategy: 'İş teklifi şart.', link: 'https://www.immigracio.ad/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['Univ. of Andorra'], note: 'Üniversite seçeneği az.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'sm', name: 'San Marino', englishName: 'San Marino', region: 'Avrupa', tier: 'Tier 3', difficulty: 80, visa: 'Special', tags: ['Mikro Devlet', 'İtalya'], salary: '€30k+', desc: 'İtalya içinde bağımsız. İtalyanca şart.', strategy: 'İtalya üzerinden erişim.', link: 'https://www.esteri.sm/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['Univ. of San Marino'], note: 'Çok küçük.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'va', name: 'Vatikan', englishName: 'Vatican City', region: 'Avrupa', tier: 'Tier 3', difficulty: 100, visa: 'Clergy Only', tags: ['Din', 'Kapalı'], salary: '-', desc: 'Sadece din adamları ve İsviçre Muhafızları yaşar. Mühendislik işi yok.', strategy: 'Turist olarak gez.', link: 'https://www.vatican.va/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: 'Eğitim yok.' }, checklist: []
+  },
+  // --- BALKANLAR (DİĞER) ---
+  {
+    id: 'al', name: 'Arnavutluk', englishName: 'Albania', region: 'Avrupa', tier: 'Tier 3', difficulty: 25, visa: 'E-Visa', tags: ['Gelişmekte', 'Ucuz'], salary: 'Düşük', desc: 'AB adayı. Hızla gelişiyor, Tiran\'da fırsatlar artıyor.', strategy: 'Türk vatandaşlarına vizesiz (turistik).', link: 'https://e-visa.al/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Polytechnic Univ. of Tirana', 'Epoka Univ.'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'ba', name: 'Bosna-Hersek', englishName: 'Bosnia and Herzegovina', region: 'Avrupa', tier: 'Tier 3', difficulty: 35, visa: 'Work Permit', tags: ['Kültür', 'Ucuz'], salary: 'Düşük', desc: 'Saraybosna\'da IT sektörü büyüyor.', strategy: 'Vizesiz seyahat avantajı.', link: 'http://msb.gov.ba/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Univ. of Sarajevo', 'Int. Burch Univ.'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'hr', name: 'Hırvatistan', englishName: 'Croatia', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Digital Nomad', tags: ['AB', 'Turizm'], salary: '€20k - €35k', desc: 'Yeni AB ve Schengen üyesi. Digital Nomad vizesi var.', strategy: 'Rimac (elektrikli araba) gibi firmalar var.', link: 'https://mvep.gov.hr/', education: { tuition: '€3k+', workRights: 'Part-time', postGrad: 'Var', topUnis: ['Univ. of Zagreb', 'Univ. of Split', 'RIT Croatia'], note: 'AB standartları.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'me', name: 'Karadağ', englishName: 'Montenegro', region: 'Avrupa', tier: 'Tier 3', difficulty: 30, visa: 'Work Permit', tags: ['Yatırım', 'Deniz'], salary: 'Düşük', desc: 'Küçük ama popüler. Şirket kurmak kolay.', strategy: 'Şirket kurarak oturum almak yaygın.', link: 'https://www.gov.me/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Univ. of Montenegro'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'mk', name: 'Kuzey Makedonya', englishName: 'North Macedonia', region: 'Avrupa', tier: 'Tier 3', difficulty: 30, visa: 'Work Permit', tags: ['Ucuz', 'Outsourcing'], salary: 'Düşük', desc: 'Üsküp\'te yazılım ofisleri var.', strategy: 'Ucuz yaşam maliyeti.', link: 'https://mfa.gov.mk/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Ss. Cyril and Methodius Univ.', 'South East European Univ.'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'rs', name: 'Sırbistan', englishName: 'Serbia', region: 'Avrupa', tier: 'Tier 3', difficulty: 30, visa: 'Visa Free', tags: ['Belgrad', 'IT'], salary: '€20k - €30k', desc: 'Belgrad Balkanların IT merkezi olmaya aday. Türkler için vizesiz.', strategy: 'Microsoft geliştirme merkezi burada.', link: 'https://www.mfa.gov.rs/', education: { tuition: '€2k-4k', workRights: '-', postGrad: '-', topUnis: ['Univ. of Belgrade', 'Univ. of Novi Sad', 'Univ. of Nis'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'si', name: 'Slovenya', englishName: 'Slovenia', region: 'Avrupa', tier: 'Tier 2', difficulty: 40, visa: 'Blue Card', tags: ['Yeşil', 'AB'], salary: '€25k - €40k', desc: 'Gizli kalmış cennet. Yaşam kalitesi yüksek, maaşlar iyi.', strategy: 'Ljubljana Üniversitesi.', link: 'https://www.gov.si/', education: { tuition: '€3k-5k', workRights: 'Öğrenci İşi', postGrad: 'Var', topUnis: ['Univ. of Ljubljana', 'Univ. of Maribor'], note: 'Güvenli.' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'xk', name: 'Kosova', englishName: 'Kosovo', region: 'Avrupa', tier: 'Tier 3', difficulty: 35, visa: 'Work Permit', tags: ['Genç', 'Gelişiyor'], salary: 'Düşük', desc: 'Avrupa\'nın en genç nüfusu. Outsourcing sektörü var.', strategy: 'Girişimcilik.', link: 'https://mfa-ks.net/', education: { tuition: 'Ucuz', workRights: '-', postGrad: '-', topUnis: ['Univ. of Prishtina', 'RIT Kosovo'], note: '-' }, checklist: [...commonChecklist]
+  },
+  // --- ÖZEL BÖLGELER & ADALAR ---
+  {
+    id: 'cy_north', name: 'Kuzey Kıbrıs (KKTC)', englishName: 'Northern Cyprus', region: 'Avrupa', tier: 'Tier 3', difficulty: 10, visa: 'Identity Card', tags: ['Türk', 'Ada'], salary: 'TL/Döviz', desc: 'Sadece Türkiye tarafından tanınır. Eğitim sektörü büyük.', strategy: 'Türkiye kimliği ile giriş.', link: 'https://mfa.gov.ct.tr/', education: { tuition: 'Döviz', workRights: 'Var', postGrad: '-', topUnis: ['DAÜ (EMU)', 'YDÜ (NEU)', 'ODTÜ Kalkanlı', 'Uluslararası Kıbrıs Üni.'], note: 'Denklik sorunu olabilir.' }, checklist: ["Kimlik yeterli", "Diploma"]
+  },
+  {
+    id: 'gi', name: 'Cebelitarık', englishName: 'Gibraltar', region: 'Avrupa', tier: 'Tier 2', difficulty: 60, visa: 'UK Visa', tags: ['Finans', 'Bahis'], salary: '£30k+', desc: 'İngiltere\'ye bağlı. Online bahis ve finans sektörü devasa.', strategy: 'İngiltere vizesi kuralları geçerli olabilir.', link: 'https://www.gibraltar.gov.gi/', education: { tuition: '£', workRights: '-', postGrad: '-', topUnis: ['Univ. of Gibraltar'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'fo', name: 'Faroe Adaları', englishName: 'Faroe Islands', region: 'Kuzey', tier: 'Tier 3', difficulty: 60, visa: 'Special', tags: ['Balıkçılık', 'Doğa'], salary: 'Yüksek', desc: 'Danimarka\'ya bağlı ama AB dışında. Vize süreci ayrı.', strategy: 'Niş alanlar.', link: 'https://www.government.fo/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['Univ. of the Faroe Islands'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'je', name: 'Jersey', englishName: 'Jersey', region: 'Avrupa', tier: 'Tier 2', difficulty: 60, visa: 'UK Related', tags: ['Finans', 'Vergi'], salary: '£40k+', desc: 'Manş Adaları\'nın en büyüğü. Finans merkezi.', strategy: 'İngiltere bağlantılı.', link: 'https://www.gov.je/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['University Centre Jersey'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'gg', name: 'Guernsey', englishName: 'Guernsey', region: 'Avrupa', tier: 'Tier 2', difficulty: 60, visa: 'UK Related', tags: ['Finans', 'Sakin'], salary: '£40k+', desc: 'Finans ve turizm.', strategy: '-', link: 'https://www.gov.gg/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['GTA University Centre'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'im', name: 'Man Adası', englishName: 'Isle of Man', region: 'Avrupa', tier: 'Tier 2', difficulty: 50, visa: 'UK Related', tags: ['E-Gaming', 'Finans'], salary: '£35k+', desc: 'E-Gaming lisansları ile ünlü.', strategy: 'Teknoloji sektörü aktif.', link: 'https://www.gov.im/', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['University College Isle of Man'], note: '-' }, checklist: [...commonChecklist]
+  },
+  {
+    id: 'sj', name: 'Svalbard', englishName: 'Svalbard', region: 'Kuzey', tier: 'Tier 3', difficulty: 20, visa: 'Visa Free Zone', tags: ['Kutup', 'Soğuk'], salary: 'NOK', desc: 'Norveç\'e bağlı ama vizesiz bölge. İş bulursan yaşayabilirsin.', strategy: 'İş bulmak çok zor ama vize derdi yok.', link: 'https://www.sysselmesteren.no/', education: { tuition: 'Ücretsiz', workRights: 'Var', postGrad: '-', topUnis: ['UNIS (University Centre in Svalbard)'], note: 'Arktik çalışmaları.' }, checklist: ["İş teklifi (Şart)", "Konaklama (Şart)"]
+  },
+  // --- TARTIŞMALI BÖLGELER ---
+  {
+    id: 'ab', name: 'Abhazya', englishName: 'Abkhazia', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Special', tags: ['Tanınmıyor', 'Risk'], salary: 'Düşük', desc: 'Uluslararası tanınırlığı sınırlı. Kariyer için önerilmez.', strategy: '-', link: '#', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['Abkhazian State Univ.'], note: '-' }, checklist: []
+  },
+  {
+    id: 'os', name: 'Güney Osetya', englishName: 'South Ossetia', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'Special', tags: ['Tanınmıyor', 'Risk'], salary: 'Düşük', desc: 'Kariyer için uygun değil.', strategy: '-', link: '#', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['South Ossetian State Univ.'], note: '-' }, checklist: []
+  },
+  {
+    id: 'trans', name: 'Transdinyester', englishName: 'Transnistria', region: 'Avrupa', tier: 'Tier 3', difficulty: 90, visa: 'None', tags: ['Sovyet', 'Risk'], salary: 'Düşük', desc: 'Moldova içinde de-facto bölge. Tanınmıyor.', strategy: '-', link: '#', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['Transnistrian State Univ.'], note: '-' }, checklist: []
+  },
+  {
+    id: 'sb', name: 'Ağrotur ve Dikelya', englishName: 'Akrotiri and Dhekelia', region: 'Avrupa', tier: 'Tier 3', difficulty: 99, visa: 'Military', tags: ['Askeri Üs'], salary: '-', desc: 'Kıbrıs\'taki İngiliz askeri üsleri. Sivil yerleşim kısıtlı.', strategy: 'Sadece askeri personel veya özel izinli.', link: '#', education: { tuition: '-', workRights: '-', postGrad: '-', topUnis: ['-'], note: '-' }, checklist: []
+  },
+  // --- ASYA (EKLENENLER) ---
+  {
+    id: 'jp', name: 'Japonya', englishName: 'Japan', region: 'Asya', tier: 'Tier 2', difficulty: 60, visa: 'Engineer', tags: ['Robotik'], salary: '¥4M+', desc: 'Teknoloji devi. MEXT bursu ile gidersen her şey devletten.', strategy: 'Konsolosluk bursunu takip et.', link: 'https://www.mofa.go.jp/', education: { tuition: 'MEXT Bedava', workRights: '28 Saat/Hafta', postGrad: 'İş Bulana Dek', topUnis: ['Univ. of Tokyo', 'Tokyo Tech', 'Kyoto Univ.', 'Osaka Univ.', 'Tohoku Univ.', 'Keio Univ.'], note: 'Özel izin.' }, checklist: [...commonChecklist, "MEXT bursu başvuru formu", "Japonca seviye tespiti (JLPT)"]
   },
    {
-    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'D-2 Visa', tags: ['Samsung'], salary: '₩40M+', desc: 'Master öğrencileri için çalışma izni dil seviyesine (TOPIK) bağlı olarak 30-35 saate kadar çıkabilir.', strategy: 'GKS bursuna başvur.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20-30 Saat/Hafta', postGrad: '2 Yıl (D-10)', topUnis: ['KAIST', 'Seoul National Univ. (SNU)', 'POSTECH', 'Yonsei Univ.', 'Korea Univ.'], note: 'TOPIK seviyesine göre değişir.' }, checklist: [...commonChecklist, "GKS bursu belgeleri", "TOPIK sınav sonucu"]
+    id: 'kr', name: 'Güney Kore', englishName: 'South Korea', region: 'Asya', tier: 'Tier 2', difficulty: 55, visa: 'E-7', tags: ['Samsung'], salary: '₩40M+', desc: 'Samsung, LG gibi devler burada. GKS bursu çok popüler.', strategy: 'GKS bursuna başvur.', link: 'https://www.visa.go.kr/', education: { tuition: 'GKS Bedava', workRights: '20-30 Saat/Hafta', postGrad: '2 Yıl (D-10)', topUnis: ['KAIST', 'Seoul National Univ. (SNU)', 'POSTECH', 'Yonsei Univ.', 'Korea Univ.'], note: '6 aydan sonra.' }, checklist: [...commonChecklist, "GKS bursu belgeleri", "TOPIK sınav sonucu"]
   },
   {
-    id: 'sg', name: 'Singapur', englishName: 'Singapore', region: 'Asya', tier: 'Tier 1', difficulty: 75, visa: 'Student Pass', tags: ['Fintech', 'Sıcak'], salary: 'SGD 60k+', desc: 'Belirlenen üniversitelerde okuyanlar part-time (16 saat) çalışabilir.', strategy: 'Hükümet burslarına (Tuition Grant) bak.', link: 'https://www.mom.gov.sg/', education: { tuition: 'Yüksek', workRights: '16 Saat/Hafta', postGrad: 'LTVP', topUnis: ['NUS', 'NTU', 'SMU', 'SUTD'], note: 'Sadece onaylı kurumlarda.' }, checklist: [...commonChecklist, "Student Pass başvurusu", "Tuition Grant Scheme"]
+    id: 'sg', name: 'Singapur', englishName: 'Singapore', region: 'Asya', tier: 'Tier 1', difficulty: 75, visa: 'Employment Pass', tags: ['Fintech', 'Sıcak'], salary: 'SGD 60k+', desc: 'Asya\'nın finans ve teknoloji merkezi. Vergi oranları çok düşük.', strategy: 'Employment Pass için yüksek maaşlı iş bulmak şart.', link: 'https://www.mom.gov.sg/', education: { tuition: 'Yüksek', workRights: '16 Saat', postGrad: 'LTVP', topUnis: ['NUS', 'NTU', 'SMU', 'SUTD'], note: 'Dünyanın en iyi üniversiteleri.' }, checklist: [...commonChecklist, "Employment Pass kriterlerini kontrol et"]
   },
   {
-    id: 'cn', name: 'Çin', englishName: 'China', region: 'Asya', tier: 'Tier 2', difficulty: 65, visa: 'X1 Visa', tags: ['Üretim', 'Donanım'], salary: '¥200k+', desc: 'Yasal olarak öğrenciyken çalışmak zordur, ancak staj yapılabilir.', strategy: 'Burslu Master programları çok yaygın.', link: 'https://www.visaforchina.org/', education: { tuition: 'Burslu', workRights: 'Kısıtlı (Staj)', postGrad: '-', topUnis: ['Tsinghua Univ.', 'Peking Univ.', 'Shanghai Jiao Tong', 'Fudan Univ.', 'Zhejiang Univ.'], note: 'Üniversite ve işveren onayı şart.' }, checklist: [...commonChecklist, "JW201/JW202 formu", "Sağlık raporu"]
+    id: 'cn', name: 'Çin', englishName: 'China', region: 'Asya', tier: 'Tier 2', difficulty: 65, visa: 'Z Visa', tags: ['Üretim', 'Donanım'], salary: '¥200k+', desc: 'Donanım ve üretim merkezi (Shenzhen).', strategy: 'Çince bilmek büyük avantaj.', link: 'https://www.visaforchina.org/', education: { tuition: 'Burslu', workRights: 'Kısıtlı', postGrad: '-', topUnis: ['Tsinghua Univ.', 'Peking Univ.', 'Shanghai Jiao Tong', 'Fudan Univ.', 'Zhejiang Univ.'], note: 'Çince şart olabilir.' }, checklist: [...commonChecklist, "Sağlık raporu", "Çalışma izni davetiyesi"]
   }
 ];
 
@@ -269,26 +353,33 @@ const kanbanColumns = [
 ];
 
 // --- KANBAN KART BİLEŞENİ ---
-const KanbanCard = ({ app, deleteApplication, onDragStart, isDragging }) => {
+const KanbanCard = ({ app, deleteApplication, onDragStart, isDragging, onMove }) => {
     const opacity = isDragging ? 'opacity-40 border-dashed border-cyan-400' : 'opacity-100 border-white/5';
     
+    // Status sırasını belirle
+    const statusOrder = ['to_apply', 'applied', 'interview', 'offer', 'rejected'];
+    const currentIndex = statusOrder.indexOf(app.status);
+    const canMoveLeft = currentIndex > 0;
+    const canMoveRight = currentIndex < statusOrder.length - 1;
+
     return (
         <div 
             draggable 
             onDragStart={(e) => onDragStart(e, app.id)}
             className={`
                 bg-slate-800 p-3 rounded-xl border hover:border-white/20 transition-all shadow-md
-                group cursor-grab active:cursor-grabbing ${opacity}
+                group cursor-grab active:cursor-grabbing ${opacity} relative flex flex-col gap-2
             `}
         >
-            <div className="flex justify-between items-start mb-1">
+            <div className="flex justify-between items-start">
                 <div className="font-bold text-white text-sm truncate">{app.company}</div>
                 <button onClick={() => deleteApplication(app.id)} className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1 -mt-1 -mr-1">
                     <Trash2 size={12}/>
                 </button>
             </div>
-            <div className="text-xs text-slate-400 mb-2">{app.role}</div>
-            <div className="flex justify-between items-center">
+            <div className="text-xs text-slate-400">{app.role}</div>
+            
+            <div className="flex justify-between items-center mt-1">
                 <div className="flex gap-2">
                     {app.companyUrl && (
                         <a href={app.companyUrl} target="_blank" rel="noopener noreferrer" className="text-slate-500 hover:text-cyan-400 transition-colors" title="Şirket Sitesi">
@@ -301,14 +392,32 @@ const KanbanCard = ({ app, deleteApplication, onDragStart, isDragging }) => {
                         </a>
                     )}
                 </div>
-                <div className="text-[10px] text-slate-500 text-right">Başvuru: {app.date}</div>
+                <div className="text-[10px] text-slate-500">{app.date}</div>
+            </div>
+
+            {/* SADECE MOBİLDE GÖRÜNEN YÖN TUŞLARI */}
+            <div className="md:hidden flex justify-between mt-2 pt-2 border-t border-white/5">
+                <button 
+                    onClick={() => onMove(app.id, -1)} 
+                    disabled={!canMoveLeft}
+                    className={`p-1 rounded bg-slate-700 text-slate-300 ${!canMoveLeft ? 'opacity-30 cursor-not-allowed' : 'active:bg-slate-600'}`}
+                >
+                    <ChevronLeft size={14} />
+                </button>
+                <button 
+                    onClick={() => onMove(app.id, 1)} 
+                    disabled={!canMoveRight}
+                    className={`p-1 rounded bg-slate-700 text-slate-300 ${!canMoveRight ? 'opacity-30 cursor-not-allowed' : 'active:bg-slate-600'}`}
+                >
+                    <ChevronRight size={14} />
+                </button>
             </div>
         </div>
     );
 }
 
 // --- KANBAN SÜTUN BİLEŞENİ ---
-const KanbanColumn = ({ column, applications, deleteApplication, onDragStart, onDrop, onDragEnter, onDragLeave, draggingAppId, dragOverColumn }) => {
+const KanbanColumn = ({ column, applications, deleteApplication, onDragStart, onDrop, onDragEnter, onDragLeave, draggingAppId, dragOverColumn, onMove }) => {
     
     const isTarget = column.id === dragOverColumn;
     const isBeingDragged = applications.some(app => app.id === draggingAppId);
@@ -320,7 +429,7 @@ const KanbanColumn = ({ column, applications, deleteApplication, onDragStart, on
             onDragEnter={(e) => onDragEnter(e, column.id)}
             onDragLeave={(e) => onDragLeave(e, column.id)}
             className={`
-                w-72 shrink-0 flex flex-col rounded-xl border-4 transition-all duration-300
+                min-w-[280px] w-72 shrink-0 flex flex-col rounded-xl border-4 transition-all duration-300
                 ${column.bgColor} 
                 ${isTarget ? 'border-cyan-400 scale-[1.01] shadow-[0_0_20px_rgba(34,211,238,0.5)]' : column.color}
             `}
@@ -337,6 +446,7 @@ const KanbanColumn = ({ column, applications, deleteApplication, onDragStart, on
                         deleteApplication={deleteApplication}
                         onDragStart={onDragStart}
                         isDragging={app.id === draggingAppId}
+                        onMove={onMove}
                     />
                 ))}
                 {applications.length === 0 && (
@@ -361,7 +471,7 @@ const DashboardView = ({ applications }) => {
     const successRate = totalApps > 0 ? Math.round(((interviewCount + offerCount) / (totalApps)) * 100) : 0;
 
     return (
-        <div className="p-6 md:p-8 overflow-y-auto h-full space-y-8 animate-in fade-in duration-500">
+        <div className="p-6 md:p-8 overflow-y-auto h-full space-y-8 animate-in fade-in duration-500 pb-32">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
                 <PieChart className="text-cyan-400" /> Analiz Paneli
             </h2>
@@ -623,6 +733,24 @@ export default function CareerCommandCenterV18() {
     const userDocRef = doc(db, `artifacts/${appId}/users/${user.uid}/career_data/data`);
     await setDoc(userDocRef, { applications: updatedApps }, { merge: true }).catch(e => console.error("Durum Güncelleme Hatası:", e));
   };
+
+  // KANBAN BUTONLA TAŞIMA (MOBİL İÇİN)
+  const moveApplication = (applicationId, direction) => {
+      if (!user) return;
+      
+      const app = userApplications.find(a => a.id === applicationId);
+      if (!app) return;
+
+      const statusOrder = ['to_apply', 'applied', 'interview', 'offer', 'rejected'];
+      const currentIndex = statusOrder.indexOf(app.status);
+      const newIndex = currentIndex + direction;
+
+      if (newIndex >= 0 && newIndex < statusOrder.length) {
+          const newStatus = statusOrder[newIndex];
+          updateApplicationStatus(applicationId, newStatus);
+      }
+  };
+
 
   const deleteApplication = async (applicationId) => {
     if (!user) return;
@@ -942,14 +1070,14 @@ export default function CareerCommandCenterV18() {
                                 </button>
 
                                 {/* Üst kısım içeriği: Geri butonu ile çakışmayı önlemek için paddingTop ekledik */}
-                                <div className="absolute bottom-4 left-6 z-20 right-6 flex flex-col gap-4 pt-12">
+                                <div className="absolute bottom-4 left-0 w-full px-6 z-20 flex flex-col gap-4 pt-12 items-center text-center md:items-start md:text-left">
                                     <div>
                                         <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border bg-white/10 border-white/20 inline-block mb-2 text-white/90 backdrop-blur-sm`}>{selectedCountry.tier}</div>
                                         <h2 className="text-3xl font-bold text-white tracking-tight drop-shadow-md">{selectedCountry.name}</h2>
                                     </div>
                                     
                                     {/* MOBIL UYUMLU BUTON GRUBU */}
-                                    <div className="flex flex-wrap gap-2 bg-slate-950/40 backdrop-blur-md rounded-xl p-1.5 border border-white/10">
+                                    <div className="flex flex-wrap justify-center md:justify-start gap-2 bg-slate-950/40 backdrop-blur-md rounded-xl p-1.5 border border-white/10">
                                         <button onClick={() => setViewMode('career')} className={`flex-1 min-w-[80px] px-3 py-2 rounded-lg text-xs font-bold transition-all text-center ${viewMode === 'career' ? 'bg-cyan-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/10'}`}>Profesyonel</button>
                                         <button onClick={() => setViewMode('education')} className={`flex-1 min-w-[80px] px-3 py-2 rounded-lg text-xs font-bold transition-all text-center ${viewMode === 'education' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/10'}`}>Akademik</button>
                                         <button onClick={() => setViewMode('checklist')} className={`flex-1 min-w-[100px] px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${viewMode === 'checklist' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-300 hover:bg-white/10'}`}>
@@ -1099,6 +1227,7 @@ export default function CareerCommandCenterV18() {
                               onDragLeave={handleDragLeave}
                               draggingAppId={draggingAppId}
                               dragOverColumn={dragOverColumn}
+                              onMove={moveApplication}
                           />
                       ))}
                    </main>
@@ -1117,7 +1246,7 @@ export default function CareerCommandCenterV18() {
                     <span className="text-lg font-bold text-white">Analiz Paneli</span>
                   </div>
                </header>
-               <main className="flex-1 overflow-y-auto bg-slate-950 pb-24">
+               <main className="flex-1 overflow-y-auto bg-slate-950 pb-32">
                   <DashboardView applications={userApplications} />
                </main>
             </>
